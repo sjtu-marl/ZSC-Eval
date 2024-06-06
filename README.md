@@ -2,6 +2,8 @@
 
 This repository is the official implementation of [ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination](). 
 
+**Complete by June 12th**
+
 
 ## Requirements
 
@@ -46,7 +48,6 @@ python extrace_hsp_S1_models.py {layout}
 3. evaluate hsp models
 ```shell
 bash eval_events.sh {layout}
-
 ```
 4. select bias agents and generate evaluation ymls
 ```shell
