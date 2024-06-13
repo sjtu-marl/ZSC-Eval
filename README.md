@@ -284,7 +284,7 @@ bash shell/train_e3t.sh {layout}
 
 ## 🤖 Pre-trained Models
 
-We also provide the pre-train models for these baselines, you can download pretrained models from [huggingface](https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool):
+We also provide the pre-trained models for these baselines, you can download pre-trained models from [huggingface](https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool):
 
 ```shell
 cd zsceval
