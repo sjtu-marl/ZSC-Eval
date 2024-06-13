@@ -9,6 +9,11 @@ This repository is the official implementation of [ZSC-Eval: An Evaluation Toolk
 
 ZSC-Eval is a comprehensive and convenient evaluation toolkit and benchmark for zero-shot coordination (ZSC) algorithms, including partner candidates generation via behavior-preferring rewards, partners selection via Best-Response Diversity (BR-Div), and ZSC capability measurement via Best-Response Proximity (BR-Prox).
 
+<div align=center>
+<img src="assets/table_comparison.png" width="600px">
+</div>
+
+
 This repo includes:
 - Evaluation Framework
     - Generation and Selection of Behavior-preferring Evaluation Partners
@@ -19,10 +24,10 @@ This repo includes:
     - Google Research Football ⚽️
 - ZSC Algorithms Implementation
     - [FCP: Fictitious Co-Play](https://arxiv.org/abs/2110.08176)
-    - [MEP: Maximum Entropy Population-based trainin](https://arxiv.org/abs/2112.11701)
+    - [MEP: Maximum Entropy Population-based training](https://arxiv.org/abs/2112.11701)
     - [TrajeDi: Trajectory Diversity PBT](https://proceedings.mlr.press/v139/lupu21a.html)
     - [HSP: Hidden-utility Self-Play](https://arxiv.org/abs/2302.01605)
-    - [COLE: Cooperative Open-ended Learnin](https://arxiv.org/abs/2302.04831)
+    - [COLE: Cooperative Open-ended Learning](https://arxiv.org/abs/2302.04831)
     - [E3T: Efficient End-to-End Training](https://papers.nips.cc/paper_files/paper/2023/hash/07a363fd2263091c2063998e0034999c-Abstract-Conference.html)
     - [SP: Self-play](https://github.com/marlbenchmark/on-policy)
 - A Human Study Platform
@@ -76,7 +81,7 @@ conda env create -f environment.yml
 ./install_grf.sh
 ```
 
-## 📝 How to use ZSC-Eval for Evlauating ZSC Algorithms
+## 📝 How to use ZSC-Eval for Evaluating ZSC Algorithms
 
 After installation, here is the steps to use ZSC-Eval for evaluating the ZSC algorithms. We use the Overcooked Environment as an example.
 
@@ -106,7 +111,7 @@ bash shell/train_bias_agents.sh {layout}
 2. extract agent models
 ```shell
 cd ..
-python extract_models/extrace_bias_agents_models.py {layout}
+python extract_models/extract_bias_agents_models.py {layout}
 python prep/gen_eval_bias_agent_yml.py {layout}
 cd overcooked
 ```
@@ -136,7 +141,7 @@ bash shell/train_bias_agents_br.bash {layout}
 
 ### Evaluate the ZSC Agents
 
-We using the most common baseline, FCP, as an exmample.
+We using the most common baseline, FCP, as an example.
 
 1. evaluate S2 models
 ```shell
@@ -153,7 +158,7 @@ python eval/extract_results.py -a {algo} -l {layout}
 
 ## 🏋️ Train ZSC Algorithms
 
-We re-impletement FCP, MEP, TrajeDi, HSP, COLE and E3T as the baselines in ZSC-Eval.
+We re-implement FCP, MEP, TrajeDi, HSP, COLE and E3T as the baselines in ZSC-Eval.
 To train these ZSC methods, please follow the guide below:
 
 First, replace `"your_wandb_name"` with your wandb username for convenience experiments management.
@@ -171,7 +176,7 @@ bash shell/train_sp.sh {layout}
 ```shell
 cd ..
 #! modify the exp names
-python extrace_models/extract_sp_models.py {layout} overcooked
+python extract_models/extract_sp_models.py {layout} overcooked
 ```
 **Stage 2**
 1. generate S2 ymls
@@ -192,7 +197,7 @@ cd ..
 python extract_models/extract_S2_models.py {layout} overcooked
 ```
 
-### Train MEP | TrageDi
+### Train MEP | TrajeDi
 
 **Stage 1**
 
@@ -214,7 +219,7 @@ python extrace_models/extract_pop_S1_models.py {layout} overcooked
 
 **Stage 2**
 
-1. generate S2 ymls
+1. generate S2 yamls
 ```shell
 #! modify the exp names
 python prep/gen_S2_yml.py {layout} [mep|traj]
@@ -245,7 +250,7 @@ bash shell/train_hsp_stage_2.sh {layout} {population_size}
 3. extract S2 models
 ```shell
 #! modify the exp names
-python extrace_models/extract_S2_models.py {layout} overcooked
+python extract_models/extract_S2_models.py {layout} overcooked
 ```
 
 ### Train COLE
@@ -376,3 +381,8 @@ Overall ZSC-Eval benchmark results in GRF.
 <div align=center>
 <img src="assets/grf_results.png" width="300px">
 </div>
+
+
+## Acknowledgements
+
+We implement algorithms heavily based on https://github.com/samjia2000/HSP , and human study platform based on https://github.com/liyang619/COLE-Platform. 
