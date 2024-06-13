@@ -360,7 +360,10 @@ bash zsc_eval/human_exp/human_exp_up.sh
 
 ## ⚒️ How to Extend ZSC-Eval to New Environments
 
-Firstly, the new environments should have consistent interfaces with those in [Gym](https://gymnasium.farama.org/).
+Firstly, the new environments should have consistent interfaces with those in [Gym](https://gymnasium.farama.org/). Then **2 key steps** are required for generating evaluation partners:
+
+- Design events that cover *common behaviors* in the new environment and implement event triggers for recording these events.
+- Implement reward calculation using linear combinations of event records and event weights, and design weights that cover *common preferences* in the new environment.
 
 We use GRF as an example to provide guidelines for including new environments in ZSC-Eval.
 
