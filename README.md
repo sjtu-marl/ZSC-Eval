@@ -11,9 +11,24 @@ Now we contain Overcooked 🧑‍🍳 and Google Research Football ⚽️ as the
 
 **Complete by June 12th**
 
+## 🗺️ Environments
 
+### 🧑‍🍳 Overcooked 
 
-## 📖 Requirements
+[Overcooked](https://github.com/HumanCompatibleAI/overcooked_ai) is a simulation environment for reinforcement learning derived from the Overcooked! video game and popular for coordination problems. 
+
+The Overcooked environment features a two-player collaborative game structure with shared rewards, where each player assumes the role of a chef in a kitchen, working together to prepare and serve soup for a team reward. 
+
+_todo: figure_
+
+### ⚽️ Google Research Football
+
+[Google Research Football (GRF)](https://github.com/google-research/football) is a simulation environment for reinforcement learning based on the popular football video game. 
+We choose the Football Academy 3 vs. 1 with Keeper scenario and implement it as a ZSC challenge.
+
+_todo: figure_
+
+## 📖 Installation
 
 To install requirements:
 
