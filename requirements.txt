@@ -1,0 +1,28 @@
+wandb
+icecream
+setproctitle
+gym==0.22
+seaborn
+tensorboardX
+slackweb
+psutil
+slackweb
+pyastar2d
+einops
+absl-py
+tqdm
+scipy
+pygame
+ipython
+ipywidgets
+loguru
+dppy
+openpyxl
+rich
+numpy==1.22
+numba
+# human exp
+flask
+markdown
+flask_cors
+-e .

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+
+    <title>After Game</title>
+    <link rel="Favicon" href="../static/favicon.ico" />
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+
+    <!-- <script src="static/lib/jquery-min.js" type="text/javascript"> -->
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.3.js"></script>
+    <!-- </script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+    <style>
+        .ai-box {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .ai-img {
+            width: 30px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .jq-ry-container {
+            display: inline-block !important;
+            vertical-align: middle;
+        }
+
+        .q-box-item {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Questionnaire</h2>
+        <br>
+        <h2>
+            <div style="color:crimson">Please read the following instructions before choosing the stars.</div>
+        </h2>
+        <div class="before"></div>
+        <br>
+
+        <div class="before-text"></div>
+        <hr>
+
+        <div class="q-list"></div>
+        <div>
+            <div id="submit-btn" style="color: #0056b3; cursor: pointer;">Submit</div>
+        </div>
+        <br>
+        <br>
+        <br>
+    </div>
+    <script>
+        var after_game = {
+            "Which agent cooperates more fluently?": {},
+            "Which agent did you prefer playing with?": {},
+            "Which agent did you understand with?": {},
+        }
+        var game_list = []
+        $(function () {
+            var userInfo = sessionStorage.getItem('before_game')
+            if (!userInfo) {
+                window.location.href = "/html/before_game"
+            }
+            // add eventlistener
+            $("#submit-btn").click(submit)
+            getQuestion()
+        });
+        function getQuestion() {
+            game_list = [
+                "Which agent cooperates more fluently?",
+                "Which agent did you prefer playing with?",
+                "Which agent did you understand with?",
+            ]
+            initQuestion(game_list)
+        }
+        function initQuestion(arr) {
+            var aiType = getAgentList()
+            var agent1 = '<b>agent1</b>: '
+            var agent2 = '&nbsp;&nbsp;&nbsp;&nbsp; <b>agent2</b>: '
+            var Imga1 = '<img class="ai-img" src="/static/images/chef_' + aiType[0].color + '.png" />'
+            var Imga2 = '<img class="ai-img" src="/static/images/chef_' + aiType[1].color + '.png" />'
+            $(".before").append(agent1, Imga1, agent2, Imga2)
+            var s1 = '<p>&nbsp&nbsp 1 star:&nbsp&nbsp <u><i>Strongly prefer</u></i> <b>agent1</b>.</p>'
+            var s2 = '<p>&nbsp&nbsp 2 stars:&nbsp&nbsp <u><i>Prefer</u></i> <b>agent1</b>.</p>'
+            var s3 = '<p>&nbsp&nbsp 3 stars:&nbsp&nbsp <u><i>Weakly prefer</u></i> <b>agent1</b>.</p>'
+            var s4 = '<p>&nbsp&nbsp 4 stars:&nbsp&nbsp <u><i>No preference.</u></i> </p>'
+            var s5 = '<p>&nbsp&nbsp 5 stars:&nbsp&nbsp <u><i>Weakly prefer</u></i> <b>agent2</b>.</p>'
+            var s6 = '<p>&nbsp&nbsp 6 stars:&nbsp&nbsp <u><i>Prefer</u></i> <b>agent2</b>.</p>'
+            var s7 = '<p>&nbsp&nbsp 7 stars:&nbsp&nbsp <u><i>Strongly prefer</u></i> <b>agent2</b>.</p>'
+
+            var text = '<p> For the following questions, which partner did you prefer? Please give stars \
+                corresponding to your choice. </p>'
+            var br = '<br>'
+            $(".before-text").append(s1, s2, s3, s4, s5, s6, s7, br, text)
+            for (var i = 0; i < arr.length; i++) {
+                var qText = document.createElement("p")
+                qText.innerHTML = arr[i]
+                // var qSelect = $('<select id="q-'+ i +'" name=' + i + '><select/>')
+                // for (var j = 0; j < 25; j++) {
+                //     var op = document.createElement("option");
+                //     op.setAttribute("value", j);
+                //     op.innerHTML = 'Agent ' + (j + 1)
+                //     qSelect.append(op);
+                // }
+                // var br = document.createElement("br")
+                // var hr = document.createElement("hr")
+                // $(".q-list").append(qText, qSelect, br, hr, br)
+
+                $(".q-list").append(qText)
+                // var aiType = [
+                //     {
+                //         value: 'SP',
+                //         color: 'blue'
+                //     },
+                //     {
+                //         value: 'PBT',
+                //         color: 'green'
+                //     },
+                //     {
+                //         value: 'FCP',
+                //         color: 'red'
+                //     },
+                //     {
+                //         value: 'MEP',
+                //         color: 'purple'
+                //     },
+                //     {
+                //         value: 'COLE',
+                //         color: 'orange'
+                //     },
+                // ]
+
+                console.log('aiType', aiType)
+                // for (var j = 0; j < aiType.length; j++) {
+                //     var qDiv = '<div id="q-box-' + i + j +'" class="q-box-item"><div/>'
+                //     $(".q-list").append(qDiv)
+                //     // var qSpan = '<span class="ai-box" style="background:'+ aiType[j].color +' "></span>'
+                //     var qImg = '<img class="ai-img" src="/static/images/chef_'+ aiType[j].color +'.png" />'
+                //     var qStar = '<div id="rateYo' + i + j + '" qIndex="'+ i + '" aIndex="' + j +'"><div/>'
+                //     $("#q-box-"+ i + j).append(qImg, qStar)
+                //     $("#rateYo" + i + j).rateYo({
+                //         starWidth: "30px",
+                //         fullStar: true,
+                //         onSet: function (rating, rateYoInstance) {
+                //             var nodeId = rateYoInstance.node.id
+                //             console.log('nodeId', nodeId)
+                //             var qIndex = $("#"+nodeId+"").attr('qIndex')
+                //             var aIndex = $("#"+nodeId+"").attr('aIndex')
+                //             after_game[game_list[qIndex]][aiType[aIndex].value] = rating
+                //             console.log('after_game', after_game)
+                //         }
+                //     });
+                // }
+                var qDiv = '<div id="q-box-' + i + '" class="q-box-item"><div/>'
+                $(".q-list").append(qDiv)
+                // var qSpan = '<span class="ai-box" style="background:'+ aiType[j].color +' "></span>'
+                var qImg = '<img class="ai-img" src="/static/images/chef_' + aiType[0].color + '.png" />'
+                var qStar = '<div id="rateYo' + i + '" qIndex="' + i + '" aIndex="' + 0 + '"><div/>'
+                var qImg2 = '<img class="ai-img" src="/static/images/chef_' + aiType[1].color + '.png" />'
+                $("#q-box-" + i).append(qImg, qStar, qImg2)
+                $("#rateYo" + i).rateYo({
+                    starWidth: "30px",
+                    fullStar: true,
+                    numStars: 7,
+                    maxValue: 7,
+                    onSet: function (rating, rateYoInstance) {
+                        var nodeId = rateYoInstance.node.id
+                        console.log('nodeId', nodeId)
+                        var qIndex = $("#" + nodeId + "").attr('qIndex')
+                        var aIndex = $("#" + nodeId + "").attr('aIndex')
+                        after_game[game_list[qIndex]][aiType[0].value] = rating
+                        after_game[game_list[qIndex]][aiType[1].value] = 7 - rating
+                        console.log('after_game', after_game)
+                    }
+                });
+                var br = document.createElement("br")
+                var hr = document.createElement("hr")
+                $(".q-list").append(br, hr, br)
+                var index = i
+
+            }
+        }
+        function submit() {
+            // for (var i = 0; i < game_list.length; i++) {
+            //     after_game[game_list[i]] = $("#q-"+i).get(0).selectedIndex
+            // }
+            console.log('after_game', after_game)
+            var params = getDomData()
+            // 调接口
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/update_questionnaire_after_game", false); // false for synchronous
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(params));
+            var response = JSON.parse(xhr.response);
+            console.log("response:")
+            console.log(response);
+            alert('感谢参与！现在可以关闭网页了。Thanks for your valuable feedback! You may now close the page.')
+            clearSession()
+            // saveDataToSession()
+        }
+
+        function saveDataToSession() {
+            var afterGameObj = {
+                "questionnaire": after_game
+            }
+            sessionStorage.setItem('after_game', JSON.stringify(afterGameObj))
+        }
+        function getDomData() {
+            var userInfo = JSON.parse(sessionStorage.getItem('before_game')) || {}
+            var params = {
+                name: userInfo.name,
+                phone: userInfo.phone,
+                questionnaire: after_game
+            }
+            console.log('userInfo', params, userInfo)
+            return params
+        }
+        function clearSession() {
+            var before_game = sessionStorage.getItem('before_game')
+            if (before_game) sessionStorage.removeItem('before_game')
+            var in_game = sessionStorage.getItem('in_game')
+            if (in_game) sessionStorage.removeItem('in_game')
+        }
+
+        function getAgentList() {
+            var agentList = []
+            var agentNameList = []
+            var agent_settings = JSON.parse(sessionStorage.getItem('game_setting_list')) || []
+            var colorMap = {
+                'SP': 'blue',
+                'E3T': 'green',
+                'COLE': 'orange',
+                'FCP': 'red',
+                'MEP': 'purple',
+                'TrajeDi': 'black',
+                'HSP': 'yellow',
+            }
+            for (var i = 1; i < agent_settings.length; i++) {
+                var agentName = agent_settings[i]['agents'][1] != 'human' ? agent_settings[i]['agents'][1] : agent_settings[i]['agents'][0];
+                if (!agentNameList.includes(agentName)) {
+                    agentList.push({
+                        value: agentName,
+                        color: colorMap[agentName] || 'blue'
+                    })
+                    agentNameList.push(agentName)
+                }
+            }
+            return agentList
+        }
+    </script>
+</body>
+
+</html>

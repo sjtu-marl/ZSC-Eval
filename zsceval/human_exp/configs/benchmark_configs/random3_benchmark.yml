@@ -1,0 +1,126 @@
+fcp1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/1.pt
+fcp2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/2.pt
+fcp3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/3.pt
+mep1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3/mep/s2/mep-S2-s24/1.pt
+mep2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3/mep/s2/mep-S2-s24/2.pt
+mep3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3/mep/s2/mep-S2-s24/3.pt
+traj1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: TrajeDi
+    model_path:
+        actor: random3/traj/s2/traj-S2-s24/1.pt
+traj2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: TrajeDi
+    model_path:
+        actor: random3/traj/s2/traj-S2-s24/2.pt
+traj3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: TrajeDi
+    model_path:
+        actor: random3/traj/s2/traj-S2-s24/3.pt
+hsp1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3/hsp/s2/hsp-S2-s24/1.pt
+hsp2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3/hsp/s2/hsp-S2-s24/2.pt
+hsp3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3/hsp/s2/hsp-S2-s24/3.pt
+sp1:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: SP
+    model_path:
+        actor: random3/fcp/s1/sp-S1-s15/sp1_final_actor.pt
+sp2:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: SP
+    model_path:
+        actor: random3/fcp/s1/sp-S1-s15/sp2_final_actor.pt
+sp3:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: SP
+    model_path:
+        actor: random3/fcp/s1/sp-S1-s15/sp3_final_actor.pt
+e3t1:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: E3T
+    model_path:
+        actor: random3/e3t/s1/e3t/1.pt
+e3t2:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: E3T
+    model_path:
+        actor: random3/e3t/s1/e3t/2.pt
+e3t3:
+    policy_config_path: random3/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: E3T
+    model_path:
+        actor: random3/e3t/s1/e3t/3.pt        
+cole1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: COLE
+    model_path:
+        actor: random3/cole/s2/cole-S2-s50/1.pt
+cole2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: COLE
+    model_path:
+        actor: random3/cole/s2/cole-S2-s50/2.pt
+cole3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: COLE
+    model_path:
+        actor: random3/cole/s2/cole-S2-s50/3.pt

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/instruction.css">
+
+    <title>After Game</title>
+    <link rel="Favicon" href="../static/favicon.ico" />
+
+    <!-- <script src="static/lib/jquery-min.js" type="text/javascript"> -->
+    <script src="../static/js/jquery-3.6.3.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script> -->
+    <script src="../static/js/popper.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container" id="confirmation">
+        <h2>Confirm your details</h2>
+        <br>
+        <div id="confirmation-content">
+        </div>
+        <br>
+        <div>
+            <div id="confirm-btn" style="color: #0056b3; cursor: pointer;">
+                <h3>Confirm</h3>
+            </div>
+        </div>
+        <br>
+        <div>
+            <div id="edit-btn" style="color: #0056b3; cursor: pointer;">
+                <h3>Edit</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="content" style="display: none;">
+        <h2>Before game questionnaire</h2>
+        <br>
+        <h4>Please make sure that you fill in true and accurate information.</h4>
+        <br>
+        <div id="form-content">
+        </div>
+        <br>
+        <div>
+            <div id="submit-btn" style="color: #0056b3; cursor: pointer;">
+                <h3>Submit</h3>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+    </div>
+    <script>
+        var userInfo = JSON.parse(sessionStorage.getItem('before_game')) || {}
+
+        $(function () {
+            getSettings();
+            showConfirmation();
+            $("#confirm-btn").click(confirm_final)
+            $("#edit-btn").click(edit)
+            $("#submit-btn").click(submit)
+        });
+
+        var settings;
+
+        var name = '<div> \
+            <p>What is your name?</p> \
+            <div> \
+                <input id="name" type="text" name="name" value=""> \
+            </div> \
+            </div> \
+            <hr>'
+
+        var phone = '<div> \
+            <p>For contact maybe a phone number?</p> \
+            <div> \
+                <input id="phone" type="text" name="phone" value=""> \
+            </div> \
+            </div> \
+            <hr>'
+
+        var email = '<div> \
+            <p>For contact maybe a email?</p> \
+            <div> \
+                <input id="email" type="text" name="email" value=""> \
+            </div> \
+            </div> \
+            <hr>'
+
+        var age = '<div> \
+            <p>Your age</p> \
+            <div> \
+                <input id="age" type="number" name="age" value="" required min="16" max="99"> \
+            </div> \
+            </div> \
+            <hr>'
+
+        var id = '<div> \
+            <p>Your ID</p> \
+            <div> \
+                <input id="id" type="number" name="id" value=""> \
+            </div> \
+            </div> \
+            <hr>'
+
+        var gender = '<div> \
+            <p>Your gender</p> \
+            <div> \
+                <input type="radio" name="gender" value="male">Male<br> \
+                <input type="radio" name="gender" value="female">Female \
+            </div> \
+            </div> \
+            <hr>'
+
+        var gameskill = '<div> \
+            <p>Your skill level in cooperative games?</p> \
+            <div> \
+                <input type="radio" name="skill" value="low">Low<br> \
+                <input type="radio" name="skill" value="medium">Medium<br> \
+                <input type="radio" name="skill" value="expert">Expert \
+            </div> \
+            </div> \
+            <hr>'
+
+        var isPlayed = '<div> \
+            <p>Whether you have played the game "Overcooked!2" or not?</p> \
+            <div> \
+                <input type="radio" name="isPlayed" value="y">Yes<br> \
+                <input type="radio" name="isPlayed" value="n">No \
+            </div> \
+            </div> \
+            <hr>'
+
+        var level = '<div> \
+            <p>If yes, what level do you think you are at? (If not, you may skip this question.) </p> \
+            <div> \
+                <input type="radio" name="level" value="low">Low<br> \
+                <input type="radio" name="level" value="medium">Medium<br> \
+                <input type="radio" name="level" value="expert">Expert \
+            </div> \
+            </div> \
+            <hr>'
+
+        var setting_list = [
+            'name',
+            'phone',
+            'email',
+            'id',
+            'age',
+            'gender',
+            'gameskill',
+            'isPlayed',
+            'level',
+        ]
+        var setting_dict = {
+            'name': name,
+            'phone': phone,
+            'email': email,
+            'age': age,
+            'gender': gender,
+            'gameskill': gameskill,
+            'isPlayed': isPlayed,
+            'level': level,
+            'id': id,
+        }
+
+        var id_exist = {}
+
+        function getSettings() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/beforegame", false); // false for synchronous
+            // xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send();
+            var response = JSON.parse(xhr.response);
+            settings = response;
+            for (let i in setting_list) {
+                let key = setting_list[i]
+                id_exist[key] = settings[key];
+                if (settings[key]) {
+                    $("#form-content").append(setting_dict[key]);
+                }
+            }
+        }
+
+        function showConfirmation() {
+            // Show confirmation page
+            $("#content").hide();
+            $("#submit-btn").hide();
+            $("#confirmation").show();
+
+            let confirmationContent = '';
+            for (let key in userInfo) {
+                confirmationContent += `<p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${userInfo[key]}</p>`;
+            }
+            $("#confirmation-content").html(confirmationContent);
+        }
+
+        function edit() {
+            $("#confirmation").hide();
+            $("#content").show();
+            $("#submit-btn").show();
+
+            // Fill form with previous values
+            for (let key of setting_list) {
+                if (id_exist[key]) {
+                    if (key === 'gender' || key === 'gameskill' || key === 'isPlayed' || key === 'level') {
+                        $(`input[name=${key}][value=${userInfo[key]}]`).prop('checked', true);
+                    } else {
+                        $(`#${key}`).val(userInfo[key]);
+                    }
+                }
+            }
+        }
+
+        function confirm_final() {
+            alert("Thank you for your participation! You can now close the page.")
+        }
+
+        function submit() {
+            if (id_exist['name']) {
+                userInfo.name = $('#name').val()
+                if (userInfo.name == '') {
+                    alert('Please fill your name!')
+                    return
+                }
+            } else {
+                userInfo.name = Math.random().toString(36).slice(-8)
+            }
+
+            if (id_exist['phone']) {
+                userInfo.phone = $('#phone').val()
+            } else {
+                userInfo.phone = Math.random().toString(36).slice(-8)
+            }
+
+
+            if (id_exist['email']) {
+                userInfo.email = $('#email').val()
+                if (userInfo.email == '') {
+                    alert('Please fill your email address!')
+                    return
+                }
+            }
+
+            if (id_exist['age']) {
+                userInfo.age = $('#age').val().toString()
+                if (userInfo.age == '') {
+                    alert('Please fill your age!')
+                    return
+                }
+            }
+
+            if (id_exist['id']) {
+                userInfo.id = $('#id').val().toString()
+                if (userInfo.id == '') {
+                    alert('Please fill your id!')
+                    return
+                }
+            }
+
+            if (id_exist['gender']) {
+                userInfo.gender = $("input[name='gender']:checked").val();
+                if (userInfo.gender == undefined) {
+                    alert('Please select your gender!')
+                    return
+                }
+            }
+
+            if (id_exist['gameskill']) {
+                userInfo.gameskill = $("input[name='skill']:checked").val();
+                if (userInfo.gameskill == undefined) {
+                    alert('Please select your game skill!')
+                    return
+                }
+            }
+
+            if (id_exist['isPlayed']) {
+                userInfo.isPlayed = $("input[name='isPlayed']:checked").val();
+                if (userInfo.isPlayed == undefined) {
+                    alert('Please select whether you have played "Overcooked!2!" or not')
+                    return
+                }
+            }
+
+            if (id_exist['level']) {
+                userInfo.level = $("input[name='level']:checked").val();
+                if (userInfo.isPlayed == 'y' && userInfo.level == undefined) {
+                    alert('Please select your level!')
+                    return
+                }
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/create_questionnaire_before_game", false); // false for synchronous
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            // console.log(userInfo)
+            xhr.send(JSON.stringify(userInfo));
+            var response = JSON.parse(xhr.response);
+            saveDataToSession()
+            showConfirmation()
+        }
+
+        function saveDataToSession() {
+            sessionStorage.setItem('before_game', JSON.stringify(userInfo))
+        }
+    </script>
+</body>
+
+</html>
