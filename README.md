@@ -44,7 +44,11 @@ sudo apt update
 sudo apt install bc -y
 ```
 
-## 🏋️ Training
+## 📝 How to use ZSC-Eval Evlauate ZSC Methods
+
+After installation, here is the steps to use ZSC-Eval evaluate the ZSC algorithms.
+
+### Setup the policy_config
 
 0. gen policy_config for each layout
 ```shell
@@ -84,11 +88,30 @@ python gen_hsp_template.py {layout}
 bash train_single_br.bash {layout}
 ```
 
-### Train the ZSC Methods
+###  Evaluation
 
-#### FCP
+1. evaluate S2 models
+```shell
+#! modify the pop names
+bash eval_with_bias_agents.sh {layout}
+bash eval_sp_with_bias_agents.sh {layout}
+bash eval_e3t_with_bias_agents.sh {layout}
+```
+2. compute final results
+```shell
+#! modify the exp names
+python extract_results.py -a {algo} -l {layout}
+```
 
-##### Stage 1
+
+## 🏋️ Train the ZSC Methods as Baselines
+
+We re-impletement FCP, MEP, TrajeDi, HSP, COLE and E3T as the baselines in ZSC-Eval.
+To train these ZSC methods, please follow the guide below:
+
+### Train FCP
+
+**Stage 1**
 
 1. train S1
 ```shell
@@ -99,7 +122,7 @@ bash train_overcooked_sp.sh {layout}
 #! modify the exp names first
 python extract_sp_S1_models.py {layout}
 ```
-##### Stage 2
+**Stage 2**
 1. generate S2 ymls
 ```shell
 #! modify the exp names first
@@ -117,9 +140,9 @@ python extract_S2_models.py {layout} fcp
 ```
 
 
-#### MEP | TrageDi
+### Train MEP | TrageDi
 
-##### Stage 1
+**Stage 1**
 
 1. generate population yml
 ```shell
@@ -135,7 +158,7 @@ bash train_overcooked_[mep|traj].sh {layout}
 python extract_[mep|traj]_S1_models.py {layout}
 ```
 
-##### Stage 2
+**Stage 2**
 
 1. generate S2 ymls
 ```shell
@@ -153,7 +176,7 @@ bash train_overcooked_[mep|traj]_stage_2.sh {layout}
 python extract_S2_models.py {layout} [mep|traj]
 ```
 
-#### HSP
+### Train HSP
 1. generate S2 ymls
 ```shell
 python gen_hsp_S2_ymls.py -l ${layout} -k 6 -s 5 -S 12
@@ -170,7 +193,7 @@ bash train_overcooked_hsp_stage_2.sh {layout}
 python extract_S2_models.py {layout} [hsp]
 ```
 
-#### COLE
+### Train COLE
 
 1. generate COLE ymls
 
@@ -189,31 +212,16 @@ bash train_overcooked_cole.sh {layout}
 python extract_S2_models.py {layout} cole
 ```
 
-#### E3T
+### Train E3T
 
 ```shell
 bash train_overcooked_e3t.sh {layout}
 ```
 
 
-## 📝 Evaluation
-
-1. evaluate S2 models
-```shell
-#! modify the pop names
-bash eval_with_bias_agents.sh {layout}
-bash eval_sp_with_bias_agents.sh {layout}
-bash eval_e3t_with_bias_agents.sh {layout}
-```
-2. compute final results
-```shell
-#! modify the exp names
-python extract_results.py -a {algo} -l {layout}
-```
-
 ## 🤖 Pre-trained Models
 
-You can download pretrained models here:
+We also provide the pre-train models for these baselines, you can download pretrained models here:
 
 ```shell
 cd zsc_eval
