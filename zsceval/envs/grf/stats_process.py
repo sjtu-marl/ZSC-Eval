@@ -13,15 +13,6 @@ class StatsObserver:
         self.player_ids_2_agent_ids = dict(zip(self.player_ids, range(self.num_agents)))
 
         self.ball_tracer: List[Tuple[int, int, int, int]] = []  # team, player, game_mode, my_score
-        # self.stats = {
-        #     "pass": [0 for _ in range(self.num_agents)],
-        #     "shot": [0 for _ in range(self.num_agents)],
-        #     "slide": [0 for _ in range(self.num_agents)],
-        #     "catch": [0 for _ in range(self.num_agents)],
-        #     "assist": [0 for _ in range(self.num_agents)],
-        #     "possession": [0 for _ in range(self.num_agents)],
-        #     "score": [0 for _ in range(self.num_agents)],
-        # }
         self.stats = {info: [0 for _ in range(self.num_agents)] for info in SHAPED_INFOS}
 
     def observe(

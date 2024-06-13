@@ -358,6 +358,90 @@ bash zsc_eval/human_exp/human_exp_up.sh
     - `shell/`: shell scripts for training and evaluating agents
     - `train/`: python training scripts for each algorithm
 
+## ⚒️ How to Extend ZSC-Eval to New Environments
+
+Firstly, the new environments should have consistent interfaces with those in [Gym](https://gymnasium.farama.org/).
+
+We use GRF as an example to provide guidelines for including new environments in ZSC-Eval.
+
+The GRF environment is integrated in `zsceval/envs/grf/`:
+
+- `grf_env.py`: the environment wrapper to provide consistent interface with Gym.
+- `scenarios/`: ZSC scenarios.
+- **`reward_process.py`**: event-based reward shaping. 
+- **`stats_process.py`**: pre-defined events recording.
+- `raw_feature_process.py`: observation processing for GRF, based on https://github.com/jidiai/GRF_MARL .
+- `multiagentenv.py`: abstract interface
+
+**`reward_process.py`** and **`stats_process.py`** are two key modifications to including GRF in ZSC-Eval.
+
+We argue that ZSC focuses on high-level strategies instead of low-level operations, and thus use some common statistical variables as events, including: 
+
+```python
+SHAPED_INFOS = [
+    "pass",
+    "actual_pass",
+    "shot",
+    "slide",
+    "catch",
+    "assist",
+    "possession",
+    "score",
+]
+```
+`stats_process.py` implements triggers for each event and records the occurrence of these events, which is used in `reward_process.py`. `reward_process.py` receives user designated weights of the events, and competes the rewards that indicating behavior preferences using linear combinations. An example of a weights set is:
+
+```shell
+w0="[-5:0:1],0,[-5:0:1],0,[-5:0:1],0,0,[1:5]"
+```
+
+`w0` indicates `38` event weight vectors, under the constraints that each weight vector has at most `3` preferred behaviors (`3` non-zero weight), as shown in the following:
+
+```plain
+1: [-5.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+2: [-5.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+3: [-5.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 1.0]
+4: [-5.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 5.0]
+5: [-5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+6: [-5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+7: [-5.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+8: [-5.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 5.0]
+9: [-5.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+10: [-5.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+11: [0.0, 0.0, -5.0, 0.0, -5.0, 0.0, 0.0, 1.0]
+12: [0.0, 0.0, -5.0, 0.0, -5.0, 0.0, 0.0, 5.0]
+13: [0.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+14: [0.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+15: [0.0, 0.0, -5.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+16: [0.0, 0.0, -5.0, 0.0, 1.0, 0.0, 0.0, 5.0]
+17: [0.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 1.0]
+18: [0.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 5.0]
+19: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+20: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+21: [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+22: [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 5.0]
+23: [0.0, 0.0, 1.0, 0.0, -5.0, 0.0, 0.0, 1.0]
+24: [0.0, 0.0, 1.0, 0.0, -5.0, 0.0, 0.0, 5.0]
+25: [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+26: [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+27: [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+28: [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 5.0]
+29: [1.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+30: [1.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+31: [1.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 1.0]
+32: [1.0, 0.0, 0.0, 0.0, -5.0, 0.0, 0.0, 5.0]
+33: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+34: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+35: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+36: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 5.0]
+37: [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+38: [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 5.0]
+```
+
+The `38` weight vectors cover common preferences of football players in GRF, which is essential in evaluating ZSC capability.
+
+Although the new environments may be complex, the triggers of events are relatively easy to implement and the high-level events and their weights are convenient to design. **We call for suggestions about new multi-agent ZSC environments and are happy to include them in ZSC-Eval**.
+
 
 ## Benchmark Results
 
@@ -381,7 +465,6 @@ Overall ZSC-Eval benchmark results in GRF.
 <div align=center>
 <img src="assets/grf_results.png" width="300px">
 </div>
-
 
 ## Acknowledgements
 

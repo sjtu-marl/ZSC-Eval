@@ -16,13 +16,6 @@ class Rewarder:
         """
         reward = 0
         checkpoints_reward = rew - info["score_reward"]  # checkpoints reward
-        # score_reward = info["score_reward"]
-
-        # logger.debug(
-        #     f"score_reward {score_reward} checkpoints_reward {checkpoints_reward}"
-        # )
-
-        # logger.debug(f"{self.reward_config}")
 
         sub_reward_to_func = {
             "win_reward": get_win_reward,
