@@ -95,7 +95,7 @@ bash shell/mv_policy_config.sh
 
 **An Example of policy_config**
 
-[Policy Config Example](./policy_config.example)
+[Policy Config Example](assets/policy_config.example)
 
 ### Prepare the Evaluation Partners
 
