@@ -2,10 +2,16 @@
 
 This repository is the official implementation of [ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination](). 
 
+ZSC-Eval is a comprehensive and convenient evaluation toolkit and benchmark for zero-shot coordination (ZSC) algorithms, including partner candidates generation via behavior-preferring rewards, partners selection via Best-Response Diversity (BR-Div), and ZSC capability measurement via Best-Response Proximity (BR-Prox).
+
+We also provide the human evaluation benchmark results and comprehensive benchmark results with ZSC-Eval's generated evaluation partners. Further details please refer to our paper.
+
+
 **Complete by June 12th**
 
 
-## Requirements
+
+## 📖 Requirements
 
 To install requirements:
 
@@ -21,7 +27,7 @@ sudo apt update
 sudo apt install bc -y
 ```
 
-## Training
+## 🏋️ Training
 
 0. gen policy_config for each layout
 ```shell
@@ -173,7 +179,7 @@ bash train_overcooked_e3t.sh {layout}
 ```
 
 
-## Evaluation
+## 📝 Evaluation
 
 1. evaluate S2 models
 ```shell
@@ -188,7 +194,7 @@ bash eval_e3t_with_bias_agents.sh {layout}
 python extract_results.py -a {algo} -l {layout}
 ```
 
-## Pre-trained Models
+## 🤖 Pre-trained Models
 
 You can download pretrained models here:
 
@@ -198,7 +204,7 @@ git lfs install
 git clone https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool policy_pool
 ```
 
-## Human Experiment
+## 👩🏻‍💻 Human Experiment
 
 ### Debug
 ```shell
@@ -210,3 +216,6 @@ export POLICY_POOL="zsc_eval/policy_pool"; python zsc_eval/human_exp/overcooked-
 ```shell
 bash zsc_eval/human_exp/human_exp_up.sh
 ```
+
+## 🛠️ Code Structure
+
