@@ -6,6 +6,8 @@ ZSC-Eval is a comprehensive and convenient evaluation toolkit and benchmark for 
 
 We also provide the human evaluation benchmark results and comprehensive benchmark results with ZSC-Eval's generated evaluation partners. Further details please refer to our paper.
 
+Now we contain Overcooked 🧑‍🍳 and Google Research Football ⚽️ as the ZSC evaluation environments.
+
 
 **Complete by June 12th**
 
