@@ -285,7 +285,7 @@ We use the `random3_m` layout in Overcooked as an example for all generated yaml
 
 ## 🤖 Pre-trained Models
 
-We also provide the pre-train models for these baselines, you can download pretrained models from [huggingface](https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool):
+We also provide the pre-trained models for these baselines, you can download pre-trained models from [huggingface](https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool):
 
 ```shell
 cd zsceval
