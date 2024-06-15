@@ -19,7 +19,8 @@ then
 elif [[ $2 == "mep" ]];
 then
     algorithm="mep"
-    exps=("mep-S2-s12" "mep-S2-s24" "mep-S2-s36")
+    exps=("mep-S2-s24")
+    # exps=("mep-S2-s12" "mep-S2-s24" "mep-S2-s36")
 elif [[ $2 == "traj" ]];
 then
     algorithm="traj"

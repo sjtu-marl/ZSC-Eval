@@ -112,7 +112,7 @@ bash shell/train_bias_agents.sh {layout}
 ```shell
 cd ..
 python extract_models/extract_bias_agents_models.py {layout}
-python prep/gen_eval_bias_agent_yml.py {layout}
+python prep/gen_bias_agent_eval_yml.py {layout}
 cd overcooked
 ```
 3. evaluate the agents and get policy behaviors
@@ -130,7 +130,7 @@ Copy the results in `zsceval/scripts/prep/results/{layout}` to `zsceval/utils/bi
 Generate benchmark yamls:
 
 ```shell
-python prep/gen_bias_agent_yml.py -l {layout}
+python prep/gen_bias_agent_benchmark_yml.py -l {layout}
 ```
 
 5. train BRs for mid-level biased agents
@@ -281,6 +281,7 @@ cd overcooked
 bash shell/train_e3t.sh {layout}
 ```
 
+We use the `random3_m` layout in Overcooked as an example for all generated yamls and models (.pt). The files are in [random3_m](https://huggingface.co/Leoxxxxh/ZSC-Eval-policy_pool/tree/main/random3_m).
 
 ## 🤖 Pre-trained Models
 
@@ -376,7 +377,7 @@ The GRF environment is integrated in `zsceval/envs/grf/`:
 - `raw_feature_process.py`: observation processing for GRF, based on https://github.com/jidiai/GRF_MARL .
 - `multiagentenv.py`: abstract interface
 
-**`reward_process.py`** and **`stats_process.py`** are two key modifications to including GRF in ZSC-Eval.
+**`reward_process.py`** and **`stats_process.py`** are two key modifications to include GRF in ZSC-Eval.
 
 We argue that ZSC focuses on high-level strategies instead of low-level operations, and thus use some common statistical variables as events, including: 
 

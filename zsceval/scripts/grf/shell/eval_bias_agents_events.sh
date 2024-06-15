@@ -23,6 +23,16 @@ mkdir -p ${yml_dir}
 
 eval_template="eval_template"
 
+factorial() {
+    local n=$1
+    local result=1
+    for ((i=1; i<=n; i++)); do
+        result=$((result * i))
+    done
+    echo $result
+}
+
+n_combs=$(factorial $num_agents)
 
 for i in $(seq 1 ${n});
 do
@@ -52,7 +62,7 @@ do
     
     echo "########################################"
     python eval/eval.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --num_agents ${num_agents} \
-    --seed 1 --episode_length 200 --n_eval_rollout_threads 150 --eval_episodes 300 --eval_stochastic --dummy_batch_size 1 \
+    --seed 1 --episode_length 200 --n_eval_rollout_threads $((n_combs * 20)) --eval_episodes $((n_combs * 40)) --eval_stochastic --dummy_batch_size 1 \
     --use_proper_time_limits \
     --use_wandb \
     --agent_policy_names ${pair_name} \

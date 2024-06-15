@@ -27,7 +27,6 @@ LAYOUTS_KS["small_corridor"]=10
 LAYOUTS_KS["unident_s"]=10
 LAYOUTS_KS["random0_m"]=15
 LAYOUTS_KS["random1_m"]=15
-LAYOUTS_KS["academy_3_vs_1_with_keeper"]=3
 
 path=../../policy_pool
 export POLICY_POOL=${path}
@@ -35,7 +34,7 @@ ulimit -n 65536
 
 K=$((2 * LAYOUTS_KS[${layout}]))
 bias_yml="${path}/${layout}/hsp/s1/${bias_agent_version}/benchmarks-s${K}.yml"
-yml_dir=eval/eval_policy_pool/${layout}/results/
+yml_dir=eval/eval_policy_pool/${layout}/results
 mkdir -p ${yml_dir}
 
 n=$(grep -o -E 'bias.*_(final|mid):' ${bias_yml} | wc -l)
@@ -51,7 +50,7 @@ for seed in $(seq 1 5); do
     
     pt_name="${seed}"
     
-    sed -e "s/agent_name/${agent_name}/g" -e "s/rnn_policy_config/mlp_policy_config/g" -e "s/algorithm/${algorithm}/g" -e "s/s2/s1/g" -e "s/population/${exp_name}/g" -e "s/seed/${pt_name}/g" "${bias_yml}" > "${yml}"
+    sed -e "s/agent_name/${agent_name}/g" -e "s/rnn_policy_config/mlp_policy_config/g" -e "s/algorithm/${algorithm}/g" -e "s/\/s2/\/s1/g" -e "s/population/${exp_name}/g" -e "s/seed/${pt_name}/g" "${bias_yml}" > "${yml}"
     
     python eval/eval_with_population.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${eval_exp}" --layout_name "${layout}" \
     --num_agents ${num_agents} --seed 1 --episode_length 400 --n_eval_rollout_threads $((n * 20)) --eval_episodes $((n * 40)) --eval_stochastic --dummy_batch_size 2 \

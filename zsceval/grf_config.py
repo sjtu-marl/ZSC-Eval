@@ -12,8 +12,6 @@ def get_grf_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         help="name of scenarios",
         choices=[
             "academy_3_vs_1_with_keeper",
-            "academy_3_vs_1_with_keeper_hard",
-            "academy_3_vs_1_with_keeper_superhard",
         ],
     )
     parser.add_argument(

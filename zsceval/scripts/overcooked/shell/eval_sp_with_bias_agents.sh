@@ -27,7 +27,6 @@ LAYOUTS_KS["small_corridor"]=10
 LAYOUTS_KS["unident_s"]=10
 LAYOUTS_KS["random0_m"]=15
 LAYOUTS_KS["random1_m"]=15
-LAYOUTS_KS["academy_3_vs_1_with_keeper"]=3
 
 path=../../policy_pool
 export POLICY_POOL=${path}

@@ -5,56 +5,47 @@ import json
 import os
 import os.path as osp
 import sys
+import re
 from collections import defaultdict
 from pprint import pformat, pprint
+from scipy.stats import bootstrap, trim_mean
 
 import numpy as np
 import yaml
 from loguru import logger
-from rich.pretty import pretty_repr
-from scipy.stats import bootstrap, trim_mean
-
-# 1. return
-# 2. normalized score
-# for different positions
+from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
 
 ALG_EXPS = {
-    "sp": {
-        "fcp/s1/sp",
-    },
-    "fcp": {
-        "fcp/s2/fcp-S2-s9",
-    },
-    "mep": {
-        "mep/s2/mep-S2-s9",
-    },
-    "traj": {
-        "traj/s2/traj-S2-s9",
-    },
-    "hsp": {
-        "hsp/s2/hsp-S2-s9",
-    },
-    "cole": {
-        "cole/s2/cole-S2-s15",
-    },
-    "e3t": {
-        "e3t/s1/e3t",
-    },
+    "sp": ["sp"],
+    "fcp": ["fcp-S2-s9"],
+    "mep": ["mep-S2-s9"],
+    "traj": ["traj-S2-s9"],
+    "hsp": ["hsp-S2-s9"],
+    "cole": ["cole-S2-s15"],
+    "e3t": ["e3t"],
 }
 
-LAYOUT_2_N = {"academy_3_vs_1_with_keeper": 3}
 
-BR_YML_PATH = "../../policy_pool/{layout}/hsp"
+BIAS_YML_PATH = "../../policy_pool/{layout}/hsp/s1/hsp/benchmarks-s{N}.yml"
 BIAS_RESULT_DIR = "eval/results/{layout}/bias"
+
 EVAL_RESULT_DIR = "eval/results/{layout}/{algo}"
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--layout", type=str, required=True)
+    parser.add_argument("-s", "--scenario", type=str, required=True)
     parser.add_argument("-a", "--algorithm", type=str, action="append", required=True)
+    parser.add_argument("--n_repeat", type=int, default=3)
+    parser.add_argument("--eval_result_dir", type=str, default="eval/results")
+    parser.add_argument("--policy_pool_path", type=str, default="../policy_pool")
+    parser.add_argument("--bias_agent_version", type=str, default="hsp")
     args = parser.parse_args()
     return args
+
+
+def scipy_iqm(data):
+    return trim_mean(data, 0.25)
 
 
 def get_agent_pairs(population: list, agent_name: str, num_agents: int):
@@ -77,119 +68,99 @@ def get_agent_pairs(population: list, agent_name: str, num_agents: int):
     return all_agent_pairs
 
 
-def extract_one_exp(layout, algo, exp, seed):
-    ego_name = f"{exp}-{seed}"
-    file_name = f"eval-{ego_name}.json"
-    file_path = osp.join(EVAL_RESULT_DIR.format(layout=layout, algo=algo if algo != "sp" else "fcp"), file_name)
-    exp_dict = json.load(open(file_path, "r", encoding="utf-8"))
-    return ego_name, exp_dict
-
-
-def scipy_iqm(data):
-    return trim_mean(data, 0.25)
-
-
 if __name__ == "__main__":
+    args = get_args()
+    layout = args.scenario
+    algos = args.algorithm
     logger.remove()
     logger.add(sys.stdout, level="INFO")
-    args = get_args()
-    layout = args.layout
-    algos = args.algorithm
-    num_agents = LAYOUT_2_N[layout]
-    logger.success(args)
+    # logger.add(sys.stdout, level="DEBUG")
+    logger.info(args)
+    num_agents = LAYOUTS_NS[layout]
 
-    br_yml_dir = BR_YML_PATH.format(layout=layout)
-    br_yml_pattern = osp.join(br_yml_dir, "train_br_*.yml")
-    eval_result = defaultdict(dict)
-    agent_pair_results = {}
-    for br_yml_path in glob.glob(br_yml_pattern):
-        logger.debug(br_yml_path)
-        yml_dict = yaml.load(open(br_yml_path, "r", encoding="utf-8"), Loader=yaml.FullLoader)
-        yml_name = os.path.basename(br_yml_path)
+    bias_yml_path = BIAS_YML_PATH.format(layout=layout, N=LAYOUTS_KS[layout] * 2)
+    yml_dict = yaml.load(open(bias_yml_path, "r", encoding="utf-8"), Loader=yaml.FullLoader)
+    bias_agent_names = yml_dict.keys()
+    bias_agent_names = [name for name in bias_agent_names if name != "agent_name"]
+    logger.debug(f"bias agents\n{bias_agent_names}")
+    bias_result_dir = BIAS_RESULT_DIR.format(layout=layout)
+    bias_agent_comb_results = {}
+    # {comb: result}
+    agent_name = "ego_name"
 
-        br_result_path = os.path.join(BIAS_RESULT_DIR.format(layout=layout), f"{yml_name}.json")
-        logger.info(f"br_result_path {br_result_path}")
-        br_result = json.load(open(br_result_path, "r", encoding="utf-8"))
-        br_agent_ep_sparse_r = br_result["either-br_agent-eval_ep_sparse_r"]
-        logger.info(f"br_agent_ep_sparse_r: {br_agent_ep_sparse_r}")
+    for a_n in bias_agent_names:
+        agent_name = "ego_name"
 
-        bias_agent_names = list(yml_dict.keys())
-        bias_agent_names.remove("br_agent")
-        agent_pair = "-".join(sorted(bias_agent_names))
-        agent_pair_results[agent_pair] = br_agent_ep_sparse_r
-        logger.info(f"bias agents: {bias_agent_names}")
+        if "final" in a_n:
+            version_name = a_n.replace("bias", "hsp")
+            eval_file_path = osp.join(bias_result_dir, f"eval-{version_name.split('_')[0]}.json")
+            eval_result = json.load(open(eval_file_path, "r", encoding="utf-8"))
 
-    final_result = defaultdict(lambda: [[], []])
-    for algo in algos:
-        eval_result[algo] = defaultdict(dict)
-        if isinstance(ALG_EXPS[algo], dict):
-            for exp, pop_list in ALG_EXPS[algo].items():
-                for pop_name in pop_list:
-                    eval_result[algo][exp][pop_name] = defaultdict(dict)
-                    for seed in range(1, 4):
-                        eval_result[algo][exp][pop_name][seed] = defaultdict(lambda: [[], []])
-                        agent_name, exp_dict = extract_one_exp(algo, exp, pop_name, seed)
-                        for agent_pair, agent_pair_res in agent_pair_results.items():
-                            bias_agent_names = agent_pair.split("-")
-                            combs = get_agent_pairs(bias_agent_names, agent_name, num_agents)
-                            logger.debug(f"combs: {pretty_repr(combs)}")
-                            for comb in combs:
-                                res_name = "-".join(comb) + "-eval_ep_sparse_r"
-                                eval_result[algo][exp][pop_name][seed][agent_pair][0].append(exp_dict[res_name])
-                                eval_result[algo][exp][pop_name][seed][agent_pair][1].append(
-                                    exp_dict[res_name] / agent_pair_results[agent_pair]
-                                )
-                            for i in range(2):
-                                eval_result[algo][exp][pop_name][seed][agent_pair][i] = np.mean(
-                                    eval_result[algo][exp][pop_name][seed][agent_pair][i]
-                                )
-                        pop_res_list = [[], []]
-                        for v in eval_result[algo][exp][pop_name][seed].values():
-                            pop_res_list[0].append(v[0])
-                            pop_res_list[1].append(v[1])
-                        eval_result[algo][exp][pop_name][seed]["iqm"] = [list(map(IQM, pop_res_list))]
-                        eval_result[algo][exp][pop_name][seed]["iqm"] += [
-                            bootstrap([pop_res_list[i]], scipy_iqm).confidence_interval for i in range(2)
-                        ]
-                    final_result[(algo, exp, pop_name)] = np.mean(
-                        [eval_result[algo][exp][pop_name][seed]["iqm"] for seed in range(1, 4)],
-                        axis=0,
-                    )
+            agents = (f"{version_name}_w{i}" for i in range(num_agents))
+            combs = itertools.permutations(agents, num_agents)
+            # logger.debug(f"{a_n} {combs}")
+
+            for comb in combs:
+                data_name = "-".join(comb)
+                actual_agent_name = f"{version_name}_w1"
+                data_name = f"{data_name}-eval_ep_sparse_r"
+                _comb = []
+                for c in comb:
+                    if c == f"{version_name}_w0":
+                        _comb.append(a_n)
+                    else:
+                        _comb.append(agent_name)
+                _comb = tuple(_comb)
+                bias_agent_comb_results[tuple(_comb)] = eval_result[data_name]
+        elif "mid" in a_n:
+            pass
         else:
-            for exp in ALG_EXPS[algo]:
-                eval_result[algo][exp][""] = defaultdict(dict)
-                for seed in range(1, 4):
-                    eval_result[algo][exp][""][seed] = defaultdict(lambda: [[], []])
-                    agent_name, exp_dict = extract_one_exp(algo, exp, "", seed)
-                    for agent_pair, agent_pair_res in agent_pair_results.items():
-                        bias_agent_names = agent_pair.split("-")
-                        combs = get_agent_pairs(bias_agent_names, agent_name, num_agents)
-                        logger.debug(f"combs: {pretty_repr(combs)}")
-                        for comb in combs:
-                            res_name = "-".join(comb) + "-eval_ep_sparse_r"
-                            eval_result[algo][exp][""][seed][agent_pair][0].append(exp_dict[res_name])
-                            eval_result[algo][exp][""][seed][agent_pair][1].append(
-                                exp_dict[res_name] / agent_pair_results[agent_pair]
-                            )
-                        for i in range(2):
-                            eval_result[algo][exp][""][seed][agent_pair][i] = np.mean(
-                                eval_result[algo][exp][""][seed][agent_pair][i]
-                            )
-                    exp_res_list = [[], []]
-                    for v in eval_result[algo][exp][""][seed].values():
-                        exp_res_list[0].append(v[0])
-                        exp_res_list[1].append(v[1])
-                    eval_result[algo][exp][""][seed]["iqm"] = [list(map(IQM, exp_res_list))]
-                    eval_result[algo][exp][""][seed]["iqm"] += [
-                        bootstrap([exp_res_list[i]], scipy_iqm).confidence_interval for i in range(2)
-                    ]
-                final_result[(algo, exp, "")] = np.mean(
-                    [eval_result[algo][exp][""][seed]["iqm"] for seed in range(1, 4)], axis=0
-                )
+            raise ValueError(f"Unknown bias agent name {a_n}")
 
-        os.makedirs(f"eval/results/{layout}/{algo}", exist_ok=True)
-        with open(f"eval/results/{layout}/{algo}/eval_results.json", "w", encoding="utf-8") as f:
-            json.dump(eval_result[algo], f)
-        logger.success(f'results save in {f"eval/results/{layout}/{algo}/eval_results.json"}')
+    result_file_paths = glob.glob(f"{bias_result_dir}/eval-br_*.json")
+    logger.debug(result_file_paths)
+    results = {}
+    actual_agent_name = "br_agent"
+    pattern = r"^(?!either).+eval_ep_sparse_r$"
+    for f_p in result_file_paths:
+        eval_result = json.load(open(f_p, "r", encoding="utf-8"))
+        for k, v in eval_result.items():
+            if re.match(pattern, k):
+                data_name = k.replace("-eval_ep_sparse_r", "").replace(actual_agent_name, agent_name)
+                comb = tuple(data_name.split("-"))
+                results[comb] = v
+    # logger.debug(pformat(results))
+    combs = get_agent_pairs(bias_agent_names, agent_name, num_agents)
+    for comb in combs:
+        bias_agent_comb_results[tuple(comb)] = results[tuple(comb)]
 
-    logger.success(f"eval_result:\n{pretty_repr(dict(final_result), max_depth=300)}")
+    logger.info(pformat(bias_agent_comb_results))
+    logger.info(f"Layout: {layout}")
+
+    for alg in algos:
+        alg_result = {}
+        # exp: score
+        for exp_name in ALG_EXPS[alg]:
+            eval_result_dir = EVAL_RESULT_DIR.format(layout=layout, algo=alg)
+            pos_results = []
+            for seed in range(1, args.n_repeat + 1):
+                actual_agent_name = f"{exp_name}-{seed}"
+                eval_result = json.load(open(f"{eval_result_dir}/eval-{actual_agent_name}.json", "r", encoding="utf-8"))
+                # logger.debug(pformat(eval_result))
+                combs = get_agent_pairs(bias_agent_names, f"{actual_agent_name}", num_agents)
+                # logger.info(f"{len(combs)} combs")
+
+                for comb in combs:
+                    data_name = "-".join(comb)
+                    data_name = f"{data_name}-eval_ep_sparse_r"
+                    br_comb = tuple(
+                        [agent_name if comb[i] == actual_agent_name else comb[i] for i in range(num_agents)]
+                    )
+                    if bias_agent_comb_results[br_comb] > 0:
+                        pos_results.append(min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb]))
+                    else:
+                        pos_results.append(1)
+            overall_score = scipy_iqm(pos_results)
+            alg_result[exp_name] = overall_score
+
+        logger.info(f"Algorithm: {alg}\n{pformat(alg_result)}")

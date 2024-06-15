@@ -94,7 +94,7 @@ if __name__ == "__main__":
     np.random.seed(0)
     random.seed(0)
 
-    if args.env == "Overcooked":
+    if args.env.lower() == "overcooked":
         if overcooked_version == "old":
             event_types = [
                 "put_onion_on_X",
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     logger.info(f"exp num {len(events.keys())}")
     for e in exclude:
         for k in list(events.keys()):
-            if e in k:
+            if e == k:
                 events.pop(k)
     logger.info(f"filtered exp num {len(events.keys())}")
 

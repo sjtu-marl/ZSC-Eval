@@ -70,5 +70,5 @@ do
     --population_yaml_path ${path}/${layout}/fcp/s2/train-s${population_size}-${pop}-${seed}.yml \
     --population_size ${population_size} --adaptive_agent_name fcp_adaptive --use_agent_policy_id \
     --use_proper_time_limits \
-    --use_wandb
+    --wandb_name "your_wandb_name"
 done

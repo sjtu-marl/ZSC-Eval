@@ -40,10 +40,10 @@ def compute_metric(events: dict, event_types: list, num_agents: int):
         for k in event_types_bi:
             ec[exp_i][k] += exp_ec.get(k, 0)
     exps = sorted(ec.keys())
-    logger.info(f"exps: {exps}")
+    # logger.info(f"exps: {exps}")
     event_np = np.array([[ec[i][k] for k in event_types_bi] for i in exps])
     df = pd.DataFrame(event_np, index=exps, columns=event_types_bi)
-    logger.info(f"event df shape {df.shape}")
+    # logger.info(f"event df shape {df.shape}")
     event_ratio_np = event_np / (event_np.max(axis=0) + 1e-3).reshape(1, -1)
 
     return exps, event_ratio_np, df
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     events = dict()
     eval_result_dir = os.path.join(args.env, args.eval_result_dir, layout, "bias")
-    logfiles = glob.glob(f"{eval_result_dir}/eval*.json")
+    logfiles = glob.glob(f"{eval_result_dir}/eval-hsp*.json")
     logfiles = [l_f for l_f in logfiles if "mid" not in l_f]
 
     # logger.info(logfiles)
@@ -221,9 +221,10 @@ if __name__ == "__main__":
             events[exp_name] = event_dict
     logger.info(f"{exclude}")
     logger.info(f"exp num {len(events.keys())}")
+    logger.info(f"{list(events.keys())}")
     for e in exclude:
         for k in list(events.keys()):
-            if e in k:
+            if e == k:
                 events.pop(k)
     # logger.debug(pformat(events))
     exps, metric_np, df = compute_metric(events, event_types, num_agents)

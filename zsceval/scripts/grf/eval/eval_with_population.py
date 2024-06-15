@@ -196,10 +196,13 @@ def main(args):
     # load population
     logger.info(f"population_yaml_path: {all_args.population_yaml_path}")
     runner.policy.load_population(all_args.population_yaml_path, evaluation=True)
+    population_agents = [name for name, _, _, _ in runner.policy.all_policies() if all_args.agent_name not in name]
+    combs = runner.get_agent_pairs(population_agents, all_args.agent_name)
 
-    combs = runner.get_agent_pairs(list(runner.policy.policy_pool.keys()), all_args.agent_name)
-
+    logger.debug(f"population {population_agents}")
+    # logger.info(f"{len(combs)} pairs:\n{combs}")
     logger.info(f"{len(combs)} pairs")
+    
     if all_args.n_eval_rollout_threads % len(combs) != 0:
         logger.warning(f"n_eval_rollout_threads should be multiples of {len(combs)}")
     assert all_args.eval_episodes % all_args.n_eval_rollout_threads == 0

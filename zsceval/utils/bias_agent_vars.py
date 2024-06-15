@@ -7,6 +7,7 @@ LAYOUTS_EXPS = {
     "unident_s": [21, 25, 46, 74, 80, 108, 127, 147, 156, 157],
     "random0_m": [2, 5, 7, 26, 28, 32, 33, 39, 46, 49, 51, 58, 60, 65, 70],
     "random1_m": [4, 5, 9, 13, 18, 22, 24, 40, 42, 44, 47, 51, 54, 56, 69],
+    "random3_m": [6, 8, 11, 12, 21, 26, 28, 36, 37, 39, 42, 46, 56, 64, 65],
     "academy_3_vs_1_with_keeper": [4, 9, 37],
 }
 
@@ -19,6 +20,7 @@ LAYOUTS_KS = {
     "unident_s": 10,
     "random0_m": 15,
     "random1_m": 15,
+    "random3_m": 15,
     "academy_3_vs_1_with_keeper": 3,
 }
 
@@ -31,5 +33,6 @@ LAYOUTS_NS = {
     "unident_s": 2,
     "random0_m": 2,
     "random1_m": 2,
+    "random3_m": 2,
     "academy_3_vs_1_with_keeper": 3,
 }

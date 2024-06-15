@@ -25,10 +25,7 @@ n=$(find ${yml_dir} -name "train_br_*.yml" | wc -l)
 
 echo "Train $n BR agents"
 
-# for (( i=1; i<=n; i++ ))
-for (( i=(n/4 + 1)+1; i<=n/2; i++ ))
-# for (( i=(n/4 + 1) * 3; i<=n; i++ ))
-# for (( i=n/2+1; i<=n; i++ ))
+for (( i=1; i<=n; i++ ))
 do
     exp="br"
     yml=${yml_dir}/train_${exp}_${i}.yml
