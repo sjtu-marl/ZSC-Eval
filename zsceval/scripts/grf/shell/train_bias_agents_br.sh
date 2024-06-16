@@ -45,5 +45,5 @@ do
     --population_size ${population_size} --adaptive_agent_name "br_agent" --use_agent_policy_id \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 20 --eval_episodes 50 --eval_stochastic \
     --eval_result_path eval/results/${scenario}/bias/eval-${exp}_${i}.json \
-    --wandb_name "xhwang"
+    --wandb_name "your wandb name"
 done

@@ -37,5 +37,5 @@ do
     --use_proper_time_limits \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 10 \
     --epsilon 0.25 --weights_copy_factor 0.1 \
-    --wandb_name "xhwang"
+    --wandb_name "your wandb name"
 done

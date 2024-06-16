@@ -7,7 +7,7 @@ import sys
 import numpy as np
 import wandb
 
-wandb_name = "xhwang"
+wandb_name = "your wandb name"
 POLICY_POOL_PATH = "../policy_pool"
 
 from loguru import logger

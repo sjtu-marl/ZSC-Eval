@@ -36,5 +36,5 @@ do
     --cnn_layers_params "32,3,1,1 64,3,1,1 32,3,1,1" --use_recurrent_policy \
     --use_proper_time_limits \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 10 \
-    --wandb_name "xhwang"
+    --wandb_name "your wandb name"
 done
