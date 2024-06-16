@@ -80,5 +80,5 @@ do
     --use_proper_time_limits  \
     --num_generation $((population_size * 2)) --generation_interval ${generation_interval} --prioritized_alpha ${prioritized_alpha} \
     --algorithm_type evolution \
-    --wandb_name "your_wandb_name"
+    --wandb_name "xhwang"
 done

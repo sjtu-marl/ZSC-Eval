@@ -73,5 +73,5 @@ do
     --population_yaml_path ${path}/${layout}/hsp/s2/train-s${population_size}-${pop}_${mep_exp}-${seed}.yml \
     --population_size ${population_size} --adaptive_agent_name hsp_adaptive --use_agent_policy_id \
     --use_proper_time_limits \
-    --wandb_name "your_wandb_name"
+    --wandb_name "xhwang"
 done

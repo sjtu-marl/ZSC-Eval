@@ -44,4 +44,4 @@ python train/train_traj.py --env_name ${env} --algorithm_name ${algo} --experime
 --population_yaml_path ${path}/${layout}/traj/s1/train-s${population_size}.yml \
 --population_size ${population_size} --adaptive_agent_name traj_adaptive \
 --use_proper_time_limits \
---wandb_name "your_wandb_name"
+--wandb_name "xhwang"

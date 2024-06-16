@@ -49,6 +49,6 @@ do
     --population_yaml_path ${yml} \
     --population_size ${population_size} --adaptive_agent_name "br_agent" \
     --use_proper_time_limits \
-    --wandb_name "your_wandb_name" \
+    --wandb_name "xhwang" \
     --eval_result_path eval/results/${layout}/bias/eval-${exp}_${i}.json
 done

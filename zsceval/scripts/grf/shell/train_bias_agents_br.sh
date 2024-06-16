@@ -25,7 +25,10 @@ n=$(find ${yml_dir} -name "train_br_*.yml" | wc -l)
 
 echo "Train $n BR agents"
 
-for (( i=1; i<=n; i++ ))
+# for (( i=1; i<=n/4; i++ ))
+# for (( i=n/4+1; i<=n/2; i++ ))
+# for (( i=n/2+1; i<=(n/4)*3 + 2; i++ ))
+for (( i=(n/4)*3 + 3; i<=n; i++ ))
 do
     exp="br"
     yml=${yml_dir}/train_${exp}_${i}.yml
@@ -42,5 +45,5 @@ do
     --population_size ${population_size} --adaptive_agent_name "br_agent" --use_agent_policy_id \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 20 --eval_episodes 50 --eval_stochastic \
     --eval_result_path eval/results/${scenario}/bias/eval-${exp}_${i}.json \
-    --wandb_name "your_wandb_name"
+    --wandb_name "xhwang"
 done

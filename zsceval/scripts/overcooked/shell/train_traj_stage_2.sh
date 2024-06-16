@@ -47,7 +47,7 @@ num_agents=2
 algo="traj"
 stage="S2"
 exp="traj-${stage}-s${population_size}"
-seed_begin=1
+seed_begin=3
 seed_max=5
 path=../../policy_pool
 
@@ -70,5 +70,5 @@ do
     --population_yaml_path ${path}/${layout}/traj/s2/train-s${population_size}-${pop}-${seed}.yml \
     --population_size ${population_size} --adaptive_agent_name traj_adaptive --use_agent_policy_id \
     --use_proper_time_limits \
-    --wandb_name "your_wandb_name"
+    --wandb_name "xhwang"
 done

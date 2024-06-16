@@ -142,7 +142,8 @@ if __name__ == "__main__":
         # exp: score
         for exp_name in ALG_EXPS[alg]:
             eval_result_dir = EVAL_RESULT_DIR.format(layout=layout, algo=alg)
-            pos_results = []
+            pos_results = [[], []] 
+            # BR-Prox, goal
             for seed in range(1, args.n_repeat + 1):
                 actual_agent_name = f"{exp_name}-{seed}"
                 eval_result = json.load(open(f"{eval_result_dir}/eval-{actual_agent_name}.json", "r", encoding="utf-8"))
@@ -157,10 +158,13 @@ if __name__ == "__main__":
                         [agent_name if comb[i] == actual_agent_name else comb[i] for i in range(num_agents)]
                     )
                     if bias_agent_comb_results[br_comb] > 0:
-                        pos_results.append(min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb]))
+                        pos_results[0].append(min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb]))
+                        pos_results[1].append(eval_result[f"{data_name}"])
                     else:
-                        pos_results.append(1)
-            overall_score = scipy_iqm(pos_results)
-            alg_result[exp_name] = overall_score
+                        pos_results[0].append(1)
+                        pos_results[1].append(eval_result[f"{data_name}"])
+            overall_score = scipy_iqm(pos_results[0])
+            overall_goal = scipy_iqm(pos_results[1])
+            alg_result[exp_name] = [overall_score, overall_goal]
 
         logger.info(f"Algorithm: {alg}\n{pformat(alg_result)}")

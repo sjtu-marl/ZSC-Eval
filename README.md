@@ -161,7 +161,7 @@ python eval/extract_results.py -a {algo} -l {layout}
 We re-implement FCP, MEP, TrajeDi, HSP, COLE and E3T as the baselines in ZSC-Eval.
 To train these ZSC methods, please follow the guide below:
 
-First, replace `"your_wandb_name"` with your wandb username for convenience experiments management.
+First, replace `"xhwang"` with your wandb username for convenience experiments management.
 
 ### Train FCP
 
