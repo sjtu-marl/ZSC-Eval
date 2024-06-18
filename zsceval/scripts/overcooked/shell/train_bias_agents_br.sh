@@ -34,7 +34,7 @@ echo "Train $n BR agents"
 n_training_threads=125
 population_size=1
 
-for (( i=10; i<=10; i++ ))
+for (( i=1; i<=$n; i++ ))
 do
     exp="br"
     yml=${yml_dir}/train_${exp}_${i}.yml
@@ -49,6 +49,6 @@ do
     --population_yaml_path ${yml} \
     --population_size ${population_size} --adaptive_agent_name "br_agent" \
     --use_proper_time_limits \
-    --wandb_name "xhwang" \
+    --wandb_name "your wandb name" \
     --eval_result_path eval/results/${layout}/bias/eval-${exp}_${i}.json
 done

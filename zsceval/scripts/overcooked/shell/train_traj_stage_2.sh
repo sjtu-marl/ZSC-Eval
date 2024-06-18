@@ -70,5 +70,5 @@ do
     --population_yaml_path ${path}/${layout}/traj/s2/train-s${population_size}-${pop}-${seed}.yml \
     --population_size ${population_size} --adaptive_agent_name traj_adaptive --use_agent_policy_id \
     --use_proper_time_limits \
-    --wandb_name "xhwang"
+    --wandb_name "your wandb name"
 done
