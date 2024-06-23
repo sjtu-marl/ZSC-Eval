@@ -470,6 +470,16 @@ Overall ZSC-Eval benchmark results in GRF.
 <img src="assets/grf_results.png" width="300px">
 </div>
 
+## Citation
+```
+@misc{wang2024zsceval,
+      title={ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination}, 
+      author={Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
+      year={2024},
+      eprint={2310.05208},
+      archivePrefix={arXiv}
+```
+
 ## Acknowledgements
 
 We implement algorithms heavily based on https://github.com/samjia2000/HSP , and human study platform based on https://github.com/liyang619/COLE-Platform. 
