@@ -141,22 +141,26 @@ if __name__ == "__main__":
     assert all([algo in ["traj", "mep", "fcp", "cole", "hsp"] for algo in algorithms])
     ALG_EXPS = {
         "fcp": [
+            "fcp-S2-s12",
             "fcp-S2-s24",
             "fcp-S2-s36",
         ],
         "mep": [
+            "mep-S2-s12",
             "mep-S2-s24",
             "mep-S2-s36",
         ],
         "hsp": [
+            "hsp-S2-s12",
             "hsp-S2-s24",
             "hsp-S2-s36",
         ],
         "traj": [
+            "traj-S2-s12",
             "traj-S2-s24",
             "traj-S2-s36",
         ],
-        "cole": ["cole-S2-s50", "cole-S2-s75"],
+        "cole": ["cole-S2-s25", "cole-S2-s50", "cole-S2-s75"],
     }
 
     hostname = socket.gethostname()

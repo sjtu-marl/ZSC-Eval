@@ -60,7 +60,7 @@ export POLICY_POOL=${path}
 
 K=$((2 * LAYOUTS_KS[${layout}]))
 bias_yml="${path}/${layout}/hsp/s1/${bias_agent_version}/benchmarks-s${K}.yml"
-yml_dir=eval/eval_policy_pool/${layout}/results/
+yml_dir=eval/eval_policy_pool/${layout}/results
 mkdir -p ${yml_dir}
 
 n=$(grep -o -E 'bias.*_(final|mid):' ${bias_yml} | wc -l)
@@ -84,7 +84,7 @@ for (( i=0; i<$len; i++ )); do
         
         sed -e "s/agent_name/${agent_name}/g" -e "s/algorithm/${algorithm}/g" -e "s/population/${exp_name}/g" -e "s/seed/${seed}/g" "${bias_yml}" > "${yml}"
         
-        if [[ $exp == *"mlp" ]]; then
+        if [[ ${layout} == "random3_m" || $exp == *"mlp" ]]; then
             sed -i -e "s/rnn_policy_config/mlp_policy_config/g" "${yml}"
         fi
 
