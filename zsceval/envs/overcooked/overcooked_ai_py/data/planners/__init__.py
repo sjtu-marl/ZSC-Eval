@@ -1,7 +1,6 @@
 import os
 import pickle
 
-
 PLANNERS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 

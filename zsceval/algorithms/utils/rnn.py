@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 
-
 class RNNLayer(nn.Module):
     def __init__(self, inputs_dim, outputs_dim, recurrent_N, use_orthogonal):
         super(RNNLayer, self).__init__()

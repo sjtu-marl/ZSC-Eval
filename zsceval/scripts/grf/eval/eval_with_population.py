@@ -11,10 +11,7 @@ from loguru import logger
 from rich.pretty import pretty_repr
 
 from zsceval.config import get_config
-from zsceval.envs.env_wrappers import (
-    ShareDummyVecEnv,
-    ShareSubprocDummyBatchVecEnv,
-)
+from zsceval.envs.env_wrappers import ShareDummyVecEnv, ShareSubprocDummyBatchVecEnv
 from zsceval.envs.grf.grf_env import FootballEnv
 from zsceval.grf_config import get_grf_args
 from zsceval.utils.train_util import setup_seed

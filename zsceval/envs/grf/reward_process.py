@@ -1,7 +1,6 @@
 from typing import Dict
 
 
-
 class Rewarder:
     def __init__(self, reward_config: Dict = {}) -> None:
         self.reward_config = reward_config

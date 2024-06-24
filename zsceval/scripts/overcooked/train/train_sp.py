@@ -12,10 +12,7 @@ import wandb
 from loguru import logger
 
 from zsceval.config import get_config
-from zsceval.envs.env_wrappers import (
-    ShareDummyVecEnv,
-    ShareSubprocDummyBatchVecEnv,
-)
+from zsceval.envs.env_wrappers import ShareDummyVecEnv, ShareSubprocDummyBatchVecEnv
 from zsceval.envs.overcooked.Overcooked_Env import Overcooked
 from zsceval.envs.overcooked_new.Overcooked_Env import Overcooked as Overcooked_new
 from zsceval.overcooked_config import get_overcooked_args

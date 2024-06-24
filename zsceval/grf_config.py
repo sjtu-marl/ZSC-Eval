@@ -2,7 +2,6 @@ import argparse
 import json
 
 
-
 def get_grf_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--scenario_name",

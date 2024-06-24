@@ -13,10 +13,7 @@ import yaml
 from loguru import logger
 
 from zsceval.config import get_config
-from zsceval.envs.env_wrappers import (
-    ShareDummyVecEnv,
-    ShareSubprocDummyBatchVecEnv,
-)
+from zsceval.envs.env_wrappers import ShareDummyVecEnv, ShareSubprocDummyBatchVecEnv
 from zsceval.envs.grf.grf_env import FootballEnv
 from zsceval.envs.wrappers.env_policy import PartialPolicyEnv
 from zsceval.grf_config import get_grf_args

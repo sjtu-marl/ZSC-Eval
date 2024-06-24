@@ -1,6 +1,5 @@
 import random
 
-
 import zsceval.envs.overcooked_new.script_agent.utils as utils
 from zsceval.envs.overcooked_new.script_agent.base import BaseScriptPeriod
 
