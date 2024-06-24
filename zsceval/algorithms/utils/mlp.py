@@ -1,8 +1,5 @@
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from loguru import logger
 
 from .attention import Encoder
 from .util import get_clones, init

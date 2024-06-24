@@ -34,7 +34,8 @@ echo "Train $n BR agents"
 n_training_threads=125
 population_size=1
 
-for (( i=10; i<=10; i++ ))
+# for (( i=1; i<=$n/2; i++ ))
+for (( i=$n/2+1; i<=$n; i++ ))
 do
     exp="br"
     yml=${yml_dir}/train_${exp}_${i}.yml

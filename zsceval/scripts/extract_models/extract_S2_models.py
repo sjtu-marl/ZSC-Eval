@@ -1,8 +1,6 @@
 import argparse
-import glob
 import os
 import socket
-import sys
 
 import numpy as np
 import wandb
@@ -44,59 +42,42 @@ def find_target_index(array, percentile: float):
         return len(array) - 1, np.nanmax(array)
 
 
-def extract_S2_models(layout, algorithm, exp, population: str):
-    population = population.split("-", 1)[1]
-    if algorithm == "fcp":
-        exp_name = f"{exp}-pop{population}-S2"
-    elif algorithm == "mep":
-        if len(exp.split("-")) == 2:
-            exp_name = f"{exp.split('-')[0]}-{exp.split('-')[1]}-pop{population}-S2"
-        else:
-            exp_name = f"{exp}-pop{population}-S2"
-
-    elif algorithm == "traj":
-        exp_name = f"{exp}-pop{population}-S2"
-    elif algorithm == "hsp":
-        exp_name = f"{exp}-pop{population}-S2"
-    elif algorithm == "cole":
-        exp_name = f"{exp}-{population}"
+def extract_pop_S2_models(layout, algo, exp, env, percentile=0.8):
+    logger.info(f"exp {exp}")
+    api = wandb.Api(timeout=60)
+    if "overcooked" in env.lower():
+        layout_config = "config.layout_name"
     else:
-        raise NotImplementedError
-
-    logger.info(f"exp {exp_name}")
-    api = wandb.Api()
+        layout_config = "config.scenario_name"
+    filters = {
+        "$and": [
+            {"config.experiment_name": exp},
+            {layout_config: layout},
+            {"state": "finished"},
+            {"tags": {"$nin": ["hidden", "unused"]}},
+        ]
+    }
+    logger.info(f"{wandb_name}/{env}")
+    logger.info(f"filters {filters}")
     runs = api.runs(
-        f"{wandb_name}/GRF",
-        # f"{wandb_name}/Overcooked-new",
-        filters={
-            "$and": [
-                {"config.experiment_name": exp_name},
-                {"config.scenario_name": layout},
-                # {"config.layout_name": layout},
-                {"state": "finished"},
-                {"tags": {"$nin": ["hidden", "unused"]}},
-            ]
-        },
+        f"{wandb_name}/{env}",
+        filters=filters,
         order="+config.seed",
     )
-    if not exp_name.endswith("-S2"):
-        exp_name += "-S2"
-        exp_name = exp + "-pop_" + exp_name.split(exp + "-", 1)[1]
     runs = list(runs)
     run_ids = [r.id for r in runs]
     logger.info(f"num of runs: {len(runs)}")
-    seeds = set()
-    global percentile
     for i, run_id in enumerate(run_ids):
         run = runs[i]
+        seed = run.config["seed"]
         if run.state == "finished":
-            policy_name = f"{algorithm}_adaptive"
+            logger.info(f"Run: {run_id} Seed: {seed}")
+            files = run.files()
+            policy_name = f"{algo}_adaptive"
             history = run.history()
-            # history = history[["_step", f"train/{algorithm}_adaptive-average_episode_rewards"]]
-            history = history[["_step", f"either-{algorithm}_adaptive-ep_sparse_r"]]
+            history = history[["_step", f"either-{algo}_adaptive-ep_sparse_r"]]
             steps = history["_step"].to_numpy().astype(int)
-            # ep_sparse_r = history[f"train/{algorithm}_adaptive-average_episode_rewards"].to_numpy()
-            ep_sparse_r = history[f"either-{algorithm}_adaptive-ep_sparse_r"].to_numpy()
+            ep_sparse_r = history[f"either-{algo}_adaptive-ep_sparse_r"].to_numpy()
             i_max_ep_sparse_r, max_ep_sparse_r = find_target_index(ep_sparse_r, percentile)
             max_ep_sparse_r_step = steps[i_max_ep_sparse_r]
             files = run.files()
@@ -108,65 +89,89 @@ def extract_S2_models(layout, algorithm, exp, population: str):
                 f"actor version {version} / {actor_versions[-1]}, sparse_r {max_ep_sparse_r:.3f}/{np.nanmax(ep_sparse_r):.3f}"
             )
             ckpt = run.file(f"{policy_name}/actor_periodic_{version}.pt")
-            tmp_dir = f"tmp/{layout}/{exp_name}"
+            tmp_dir = f"tmp/{layout}/{exp}"
             logger.info(f"Fetch {tmp_dir}/{policy_name}/actor_periodic_{version}.pt")
             ckpt.download(f"{tmp_dir}", replace=True)
-            algo_s2_dir = f"{POLICY_POOL_PATH}/{layout}/{algorithm}/s2"
-            seed = run.config["seed"]
-            os.makedirs(f"{algo_s2_dir}/{exp_name}", exist_ok=True)
-            os.system(f"mv {tmp_dir}/{policy_name}/actor_periodic_{version}.pt {algo_s2_dir}/{exp_name}/{seed}.pt")
-            seeds.add(seed)
-            logger.success(f"{layout} {algorithm} {exp_name} {seed}")
+            algo_s2_dir = f"{POLICY_POOL_PATH}/{layout}/{algo}/s2"
+            os.makedirs(f"{algo_s2_dir}/{exp}", exist_ok=True)
+            os.system(f"mv {tmp_dir}/{policy_name}/actor_periodic_{version}.pt {algo_s2_dir}/{exp}/{seed}.pt")
+            logger.success(f"{layout} {algo} {exp} {seed}")
 
 
 if __name__ == "__main__":
-    layout = sys.argv[1]
+    parser = argparse.ArgumentParser("Extract S2 models")
+    parser.add_argument("--layout", type=str, help="layout name")
+    parser.add_argument("--env", type=str, help="env name")
+    parser.add_argument("-a", "--algo", "--algorithm", type=str, action="append", required=True)
+    parser.add_argument("-p", type=float, help="percentile", default=0.8)
+
+    args = parser.parse_args()
+    layout = args.layout
     assert layout in [
-        "academy_3_vs_1_with_keeper",
+        "random0",
+        "random0_medium",
+        "random1",
+        "random3",
+        "small_corridor",
+        "unident_s",
         "random0_m",
         "random1_m",
         "random3_m",
+        "academy_3_vs_1_with_keeper",
         "all",
     ]
     if layout == "all":
-        layout = ["academy_3_vs_1_with_keeper"]
+        layout = [
+            "random0",
+            "random0_medium",
+            "random1",
+            "random3",
+            "small_corridor",
+            "unident_s",
+            "random0_m",
+            "random1_m",
+            "random3_m",
+            "academy_3_vs_1_with_keeper",
+        ]
     else:
         layout = [layout]
-    algorithm = sys.argv[2]
-    if len(sys.argv) > 3:
-        percentile = float(sys.argv[3])
-    else:
-        percentile = 0.8
-    assert algorithm in ["traj", "mep", "fcp", "cole", "hsp"]
-    algorithm = [algorithm]
+    algorithms = args.algo
+    percentile = args.p
+
+    assert all([algo in ["traj", "mep", "fcp", "cole", "hsp"] for algo in algorithms])
     ALG_EXPS = {
-        "fcp": {
-            "fcp": ["-_s9"],
-        },
-        "mep": {
-            "mep": [
-                "-_s9_s5-S1",
-            ],
-        },
-        "traj": {
-            "traj": ["-_s9_s5-S1"],
-        },
-        "hsp": {
-            "hsp": [
-                "-_s9",
-            ],
-        },
-        "cole": {
-            "cole": ["-s15"],
-        },
+        "fcp": [
+            "fcp-S2-s24",
+            "fcp-S2-s36",
+        ],
+        "mep": [
+            "mep-S2-s24",
+            "mep-S2-s36",
+        ],
+        "hsp": [
+            "hsp-S2-s24",
+            "hsp-S2-s36",
+        ],
+        "traj": [
+            "traj-S2-s24",
+            "traj-S2-s36",
+        ],
+        "cole": ["cole-S2-s50", "cole-S2-s75"],
     }
 
     hostname = socket.gethostname()
-    logger.add(f"./extract_log/extract_{layout}_{algorithm}_S2_models.log")
     logger.info(f"hostname: {hostname}")
     for l in layout:
-        for algo in algorithm:
+        for algo in algorithms:
             logger.info(f"for layout {l}")
-            for exp, pop_list in ALG_EXPS[algo].items():
-                for pop in pop_list:
-                    extract_S2_models(l, algo, exp, pop)
+            i = 0
+            # for exp in ALG_EXPS[algo]:
+            #     extract_pop_S2_models(l, algo, exp, args.env, percentile)
+            while i < len(ALG_EXPS[algo]):
+                exp = ALG_EXPS[algo][i]
+                try:
+                    extract_pop_S2_models(l, algo, exp, args.env, percentile)
+                except:
+                    continue
+                else:
+                    i += 1

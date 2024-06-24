@@ -1,7 +1,6 @@
 import argparse
 import json
 
-from zsceval.config import scientific_notation
 
 
 def get_grf_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:

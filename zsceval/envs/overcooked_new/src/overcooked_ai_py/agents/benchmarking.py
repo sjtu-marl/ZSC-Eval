@@ -14,7 +14,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_env import 
     OvercookedEnv,
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_mdp import (
-    Action,
     OvercookedGridworld,
     OvercookedState,
 )
@@ -25,7 +24,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.planning.planners import (
     NO_COUNTERS_PARAMS,
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.utils import (
-    cumulative_rewards_from_rew_list,
     is_iterable,
     load_from_json,
     load_pickle,

@@ -23,7 +23,6 @@ class BaseScriptAgent:
 
     def reset(self, mdp, state, player_idx):
         """reset state"""
-        pass
 
     def step(self, mdp, state, player_idx):
         raise NotImplementedError

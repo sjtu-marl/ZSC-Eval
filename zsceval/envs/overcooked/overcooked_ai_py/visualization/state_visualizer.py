@@ -16,7 +16,6 @@ from zsceval.envs.overcooked.overcooked_ai_py.mdp.layout_generator import (
 )
 from zsceval.envs.overcooked.overcooked_ai_py.static import FONTS_DIR, GRAPHICS_DIR
 from zsceval.envs.overcooked.overcooked_ai_py.utils import (
-    classproperty,
     cumulative_rewards_from_rew_list,
     generate_temporary_file_path,
 )

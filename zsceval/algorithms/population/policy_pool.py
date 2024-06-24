@@ -1,13 +1,11 @@
 import os
 import pickle
 import warnings
-from pprint import pformat
 from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
 import yaml
-from loguru import logger
 
 from zsceval.algorithms.population.utils import EvalPolicy
 from zsceval.runner.shared.base_runner import make_trainer_policy_cls

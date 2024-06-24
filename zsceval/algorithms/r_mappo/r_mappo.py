@@ -1,13 +1,8 @@
-import math
-import time
 from collections import defaultdict
-from pprint import pformat
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from loguru import logger
 
 from zsceval.algorithms.utils.util import check
@@ -264,9 +259,9 @@ class R_MAPPO:
 
     def update_actor(self):
         if self._use_max_grad_norm:
-            actor_grad_norm = nn.utils.clip_grad_norm_(self.policy.actor.parameters(), self.max_grad_norm)
+            nn.utils.clip_grad_norm_(self.policy.actor.parameters(), self.max_grad_norm)
         else:
-            actor_grad_norm = get_gard_norm(self.policy.actor.parameters())
+            get_gard_norm(self.policy.actor.parameters())
 
         self.policy.actor_optimizer.step()
 

@@ -15,24 +15,28 @@ algo="population"
 if [[ $2 == "fcp" ]];
 then
     algorithm="fcp"
-    exps=("fcp-S2-s12" "fcp-S2-s24" "fcp-S2-s36")
+    # exps=("fcp-S2-s12" "fcp-S2-s24" "fcp-S2-s36")
+    exps=("fcp-S2-s24" "fcp-S2-s36")
 elif [[ $2 == "mep" ]];
 then
     algorithm="mep"
-    exps=("mep-S2-s24")
     # exps=("mep-S2-s12" "mep-S2-s24" "mep-S2-s36")
+    exps=("mep-S2-s24" "mep-S2-s36")
 elif [[ $2 == "traj" ]];
 then
     algorithm="traj"
-    exps=("traj-S2-s12" "traj-S2-s24" "traj-S2-s36")
+    # exps=("traj-S2-s12" "traj-S2-s24" "traj-S2-s36")
+    exps=("traj-S2-s24" "traj-S2-s36")
 elif [[ $2 == "hsp" ]];
 then
     algorithm="hsp"
-    exps=("hsp-S2-s12" "hsp-S2-s24" "hsp-S2-s36")
+    # exps=("hsp-S2-s12" "hsp-S2-s24" "hsp-S2-s36")
+    exps=("hsp-S2-s24" "hsp-S2-s36")
 elif [[ $2 == "cole" ]];
 then
     algorithm="cole"
-    exps=("cole-S2-s25" "cole-S2-s50" "cole-S2-s75")
+    # exps=("cole-S2-s25" "cole-S2-s50" "cole-S2-s75")
+    exps=("cole-S2-s50" "cole-S2-s75")
 else
     echo "bash eval_with_bias_agents.sh {layout} {algo}"
     exit 0
@@ -49,6 +53,7 @@ LAYOUTS_KS["small_corridor"]=10
 LAYOUTS_KS["unident_s"]=10
 LAYOUTS_KS["random0_m"]=15
 LAYOUTS_KS["random1_m"]=15
+LAYOUTS_KS["random3_m"]=15
 
 path=../../policy_pool
 export POLICY_POOL=${path}

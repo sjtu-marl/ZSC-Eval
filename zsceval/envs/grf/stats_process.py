@@ -1,7 +1,6 @@
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
-from loguru import logger
 
 from .grf_env import SHAPED_INFOS
 
@@ -35,7 +34,7 @@ class StatsObserver:
 
         next_ball_own_team = next_obs_dict_list[0]["ball_owned_team"]
         next_ball_own_player = next_obs_dict_list[0]["ball_owned_player"]
-        next_game_mode = next_obs_dict_list[0]["game_mode"]
+        next_obs_dict_list[0]["game_mode"]
         next_my_score, next_opp_score = next_obs_dict_list[0]["score"]
 
         if ball_own_team != BALL_NO_OWNER:

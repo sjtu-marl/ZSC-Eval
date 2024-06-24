@@ -1,8 +1,6 @@
 import os
 import pickle
 import pprint
-from collections import deque
-from functools import partial
 
 import gym
 import imageio
@@ -19,7 +17,6 @@ from zsceval.envs.overcooked.overcooked_ai_py.mdp.overcooked_mdp import (
 )
 from zsceval.envs.overcooked.overcooked_ai_py.mdp.overcooked_trajectory import (
     DEFAULT_TRAJ_KEYS,
-    EPISODE_TRAJ_KEYS,
     TIMESTEP_TRAJ_KEYS,
 )
 from zsceval.envs.overcooked.overcooked_ai_py.planning.planners import (
@@ -31,7 +28,7 @@ from zsceval.envs.overcooked.overcooked_ai_py.visualization.state_visualizer imp
     StateVisualizer,
 )
 from zsceval.envs.overcooked.script_agent import SCRIPT_AGENTS
-from zsceval.utils.train_util import get_base_run_dir, setup_seed
+from zsceval.utils.train_util import setup_seed
 
 DEFAULT_ENV_PARAMS = {"horizon": 400}
 

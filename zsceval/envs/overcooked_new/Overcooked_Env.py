@@ -2,11 +2,10 @@ import os
 import pickle
 import pprint
 import time
-from collections import defaultdict, deque
+from collections import defaultdict
 
 import gym
 import imageio
-import matplotlib.pyplot as plt
 import numpy as np
 import tqdm
 from loguru import logger
@@ -19,11 +18,9 @@ from .src.overcooked_ai_py.mdp.overcooked_mdp import (
     EVENT_TYPES,
     SHAPED_INFOS,
     OvercookedGridworld,
-    Recipe,
 )
 from .src.overcooked_ai_py.mdp.overcooked_trajectory import (
     DEFAULT_TRAJ_KEYS,
-    EPISODE_TRAJ_KEYS,
     TIMESTEP_TRAJ_KEYS,
 )
 from .src.overcooked_ai_py.planning.planners import (

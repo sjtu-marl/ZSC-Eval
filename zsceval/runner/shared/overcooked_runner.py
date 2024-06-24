@@ -1,18 +1,15 @@
 import copy
 import itertools
 import json
-import os
 import pprint
 import time
-import warnings
 from collections import defaultdict
 from os import path as osp
-from typing import Dict, Tuple
+from typing import Dict
 
 import numpy as np
 import torch
 import wandb
-from icecream import ic
 from loguru import logger
 from scipy.stats import rankdata
 from tqdm import tqdm

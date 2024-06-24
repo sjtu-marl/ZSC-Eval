@@ -22,7 +22,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.static import (
     GRAPHICS_DIR,
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.utils import (
-    classproperty,
     cumulative_rewards_from_rew_list,
     generate_temporary_file_path,
 )

@@ -2,18 +2,16 @@ import argparse
 import glob
 import itertools
 import json
-import os
 import os.path as osp
-import sys
 import re
-from collections import defaultdict
-from pprint import pformat, pprint
-from scipy.stats import bootstrap, trim_mean
+import sys
+from pprint import pformat
 
-import numpy as np
 import yaml
 from loguru import logger
-from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
+from scipy.stats import trim_mean
+
+from zsceval.utils.bias_agent_vars import LAYOUTS_KS, LAYOUTS_NS
 
 ALG_EXPS = {
     "sp": ["sp"],
@@ -181,7 +179,9 @@ if __name__ == "__main__":
                             data_name = f"{data_name}-eval_ep_sparse_r"
                             br_comb = (*comb[:pos], agent_name, *comb[pos + 1 :])
                             if bias_agent_comb_results[br_comb] > 0:
-                                pos_results.append(min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb]))
+                                pos_results.append(
+                                    min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb])
+                                )
                             else:
                                 pos_results[pos].append(1)
             overall_score = scipy_iqm(sum(pos_results, []))

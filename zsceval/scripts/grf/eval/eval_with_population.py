@@ -2,10 +2,7 @@
 import os
 import socket
 import sys
-from itertools import product
-from math import factorial
 from pathlib import Path
-from pprint import pformat, pprint
 
 import setproctitle
 import torch
@@ -13,15 +10,14 @@ import wandb
 from loguru import logger
 from rich.pretty import pretty_repr
 
-from zsceval.config import get_config, scientific_notation
+from zsceval.config import get_config
 from zsceval.envs.env_wrappers import (
     ShareDummyVecEnv,
     ShareSubprocDummyBatchVecEnv,
-    ShareSubprocVecEnv,
 )
 from zsceval.envs.grf.grf_env import FootballEnv
 from zsceval.grf_config import get_grf_args
-from zsceval.utils.train_util import get_base_run_dir, setup_seed
+from zsceval.utils.train_util import setup_seed
 
 
 def make_eval_env(all_args):
@@ -202,7 +198,7 @@ def main(args):
     logger.debug(f"population {population_agents}")
     # logger.info(f"{len(combs)} pairs:\n{combs}")
     logger.info(f"{len(combs)} pairs")
-    
+
     if all_args.n_eval_rollout_threads % len(combs) != 0:
         logger.warning(f"n_eval_rollout_threads should be multiples of {len(combs)}")
     assert all_args.eval_episodes % all_args.n_eval_rollout_threads == 0

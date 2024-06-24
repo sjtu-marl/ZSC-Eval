@@ -11,7 +11,6 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import numpy as np
-from numpy import nan
 
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.static import LAYOUTS_DIR
 

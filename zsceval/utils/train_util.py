@@ -1,4 +1,3 @@
-import getpass
 import random
 import socket
 from os import path as osp
@@ -17,6 +16,6 @@ def setup_seed(seed: int):
 
 
 def get_base_run_dir() -> str:
-    hostname = socket.gethostname()
+    socket.gethostname()
     base = osp.join(osp.expanduser("~"), "ZSC/results")
     return base

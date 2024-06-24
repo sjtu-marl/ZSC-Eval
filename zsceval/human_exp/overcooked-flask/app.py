@@ -1,14 +1,12 @@
 import argparse
-import copy
 import json
 import os
 import random
 import time
-from collections import defaultdict, namedtuple
-from pprint import pformat, pprint
-from typing import Callable, Dict, List, Tuple
+from collections import defaultdict
+from pprint import pformat
+from typing import Callable, Dict
 
-import numpy as np
 import yaml
 from flask import Flask, jsonify, request
 from flask_cors import CORS

@@ -1,13 +1,8 @@
 import random
 
-import numpy as np
 
 import zsceval.envs.overcooked_new.script_agent.utils as utils
 from zsceval.envs.overcooked_new.script_agent.base import BaseScriptPeriod
-from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.actions import (
-    Action,
-    Direction,
-)
 
 
 class Pickup_Object(BaseScriptPeriod):
@@ -638,7 +633,7 @@ class Pickup_Dish_and_Place_Random(BaseScriptPeriod):
         )
 
     def step(self, mdp, state, player_idx):
-        player = state.players[player_idx]
+        state.players[player_idx]
 
         if self.__stage == 1:
             if self.__current_period.done(mdp, state, player_idx):
@@ -684,7 +679,7 @@ class Put_Dish_Everywhere(BaseScriptPeriod):
         )
 
     def step(self, mdp, state, player_idx):
-        player = state.players[player_idx]
+        state.players[player_idx]
 
         if self.__stage == 1:
             if self.__current_period.done(mdp, state, player_idx):
@@ -782,7 +777,7 @@ class Pickup_Soup_and_Deliver(BaseScriptPeriod):
         return self.__current_period.step(mdp, state, player_idx)
 
     def done(self, mdp, state, player_idx):
-        player = state.players[player_idx]
+        state.players[player_idx]
         return self.__stage == 2 and self.__current_period.done(mdp, state, player_idx)
 
 
@@ -814,7 +809,7 @@ class Pickup_Soup_and_Place_Random(BaseScriptPeriod):
         return self.__current_period.step(mdp, state, player_idx)
 
     def done(self, mdp, state, player_idx):
-        player = state.players[player_idx]
+        state.players[player_idx]
         return self.__stage == 2 and self.__current_period.done(mdp, state, player_idx)
 
 

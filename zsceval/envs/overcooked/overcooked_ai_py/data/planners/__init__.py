@@ -1,7 +1,6 @@
 import os
 import pickle
 
-from zsceval.envs.overcooked.overcooked_ai_py.utils import load_dict_from_file
 
 PLANNERS_DIR = os.path.dirname(os.path.abspath(__file__))
 
