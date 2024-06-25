@@ -17,28 +17,28 @@ ALG_EXPS = {
     "sp": ["sp"],
     "fcp": [
         "fcp-S2-s12",
-        # "fcp-S2-s24",
-        # "fcp-S2-s36",
+        "fcp-S2-s24",
+        "fcp-S2-s36",
     ],
     "mep": [
         "mep-S2-s12",
-        # "mep-S2-s24",
-        # "mep-S2-s36",
+        "mep-S2-s24",
+        "mep-S2-s36",
     ],
     "traj": [
         "traj-S2-s12",
-        # "traj-S2-s24",
-        # "traj-S2-s36",
+        "traj-S2-s24",
+        "traj-S2-s36",
     ],
     "hsp": [
         "hsp-S2-s12",
-        # "hsp-S2-s24",
-        # "hsp-S2-s36",
+        "hsp-S2-s24",
+        "hsp-S2-s36",
     ],
     "cole": [
         "cole-S2-s25",
-        # "cole-S2-s50",
-        # "cole-S2-s75",
+        "cole-S2-s50",
+        "cole-S2-s75",
     ],
     "e3t": [
         "e3t",
@@ -179,7 +179,7 @@ if __name__ == "__main__":
                             data_name = f"{data_name}-eval_ep_sparse_r"
                             br_comb = (*comb[:pos], agent_name, *comb[pos + 1 :])
                             if bias_agent_comb_results[br_comb] > 0:
-                                pos_results.append(
+                                pos_results[pos].append(
                                     min(1, eval_result[f"{data_name}"] / bias_agent_comb_results[br_comb])
                                 )
                             else:

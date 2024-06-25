@@ -141,8 +141,8 @@ if __name__ == "__main__":
     assert all([algo in ["traj", "mep", "fcp", "cole", "hsp"] for algo in algorithms])
     ALG_EXPS = {
         "fcp": [
-            "fcp-S2-s12",
-            "fcp-S2-s24",
+            # "fcp-S2-s12",
+            # "fcp-S2-s24",
             "fcp-S2-s36",
         ],
         "mep": [
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 exp = ALG_EXPS[algo][i]
                 try:
                     extract_pop_S2_models(l, algo, exp, args.env, percentile)
-                except:
-                    continue
+                except Exception as e:
+                    logger.error(e)
                 else:
                     i += 1

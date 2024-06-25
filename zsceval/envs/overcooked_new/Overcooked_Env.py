@@ -10,7 +10,7 @@ import numpy as np
 import tqdm
 from loguru import logger
 
-from zsceval.envs.overcooked_new.script_agent import SCRIPT_AGENTS
+from zsceval.envs.overcooked_new.script_agent.script_agent import SCRIPT_AGENTS
 from zsceval.utils.train_util import setup_seed
 
 from .src.overcooked_ai_py.mdp.actions import Action, Direction

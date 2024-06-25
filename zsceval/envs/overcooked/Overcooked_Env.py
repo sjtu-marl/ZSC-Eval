@@ -27,7 +27,7 @@ from zsceval.envs.overcooked.overcooked_ai_py.utils import mean_and_std_err
 from zsceval.envs.overcooked.overcooked_ai_py.visualization.state_visualizer import (
     StateVisualizer,
 )
-from zsceval.envs.overcooked.script_agent import SCRIPT_AGENTS
+from zsceval.envs.overcooked.script_agent.script_agent import SCRIPT_AGENTS
 from zsceval.utils.train_util import setup_seed
 
 DEFAULT_ENV_PARAMS = {"horizon": 400}
