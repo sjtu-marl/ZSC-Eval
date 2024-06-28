@@ -170,3 +170,4 @@ package-lock.json
 
 **/*.fuse*
 print_dir.sh
+delete_yml.sh
