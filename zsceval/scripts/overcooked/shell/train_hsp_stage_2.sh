@@ -62,8 +62,9 @@ ulimit -n 65536
 
 echo "env is ${env}, layout is ${layout}, algo is ${algo}, pop is ${pop}, exp is ${exp}, seed from ${seed_begin} to ${seed_max}, stage is ${stage}"
 for seed in $(seq ${seed_begin} ${seed_max});
+# for seed in 1 2 5;
 do
-    python train/train_adaptive.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${exp}-pop_${pop}-${stage}" --layout_name ${layout} --num_agents ${num_agents} \
+    python train/train_adaptive.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${exp}" --layout_name ${layout} --num_agents ${num_agents} \
     --seed ${seed} --n_training_threads 1 --num_mini_batch 1 --episode_length 400 --num_env_steps ${num_env_steps} --reward_shaping_horizon ${reward_shaping_horizon} \
     --overcooked_version ${version} \
     --n_rollout_threads ${n_training_threads} --dummy_batch_size 2 \

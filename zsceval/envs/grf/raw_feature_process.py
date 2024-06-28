@@ -99,8 +99,8 @@ class FeatureEncoder:
             obs_dict = obs_dict_list[a_i]
             if "custom" in self.representation:
                 state = []
-                # n1 * 2 - (x,y) coordinates of other left team players
-                # n1 * 2 - (x,y) direction of other left team players
+                # n1 * 2 - (x,y) coordinates of left team players
+                # n1 * 2 - (x,y) direction of left team players
                 # n2 * 2 - (x,y) coordinates of right team players
                 # n2 * 2 - (x,y) direction of right team players
 

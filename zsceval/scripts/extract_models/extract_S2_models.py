@@ -46,7 +46,7 @@ def find_target_index(array, percentile: float):
 
 def extract_pop_S2_models(layout, algo, exp, env, percentile=0.8):
     logger.info(f"exp {exp}")
-    api = wandb.Api()
+    api = wandb.Api(timeout=60)
     if "overcooked" in env.lower():
         layout_config = "config.layout_name"
     else:
@@ -142,11 +142,24 @@ if __name__ == "__main__":
 
     assert all([algo in ["traj", "mep", "fcp", "cole", "hsp"] for algo in algorithms])
     ALG_EXPS = {
-        "fcp": ["fcp-S2-s12"],
-        "mep": ["mep-S2-s12"],
-        "hsp": ["hsp-S2-s12-pop_hsp-S2"],
-        "traj": ["traj-S2-s12"],
-        "cole": ["cole-S2-s25"],
+        "fcp": [
+            "fcp-S2-s24",
+            "fcp-S2-s36",
+        ],
+        "mep": [
+            "mep-S2-s24",
+            "mep-S2-s36",
+        ],
+        "hsp": [
+            "hsp-S2-s12",
+            "hsp-S2-s24",
+            "hsp-S2-s36",
+        ],
+        "traj": [
+            "traj-S2-s24",
+            "traj-S2-s36",
+        ],
+        "cole": ["cole-S2-s50", "cole-S2-s75"],
     }
 
     hostname = socket.gethostname()
@@ -154,5 +167,14 @@ if __name__ == "__main__":
     for l in layout:
         for algo in algorithms:
             logger.info(f"for layout {l}")
-            for exp in ALG_EXPS[algo]:
-                extract_pop_S2_models(l, algo, exp, args.env, percentile)
+            i = 0
+            # for exp in ALG_EXPS[algo]:
+            #     extract_pop_S2_models(l, algo, exp, args.env, percentile)
+            while i < len(ALG_EXPS[algo]):
+                exp = ALG_EXPS[algo][i]
+                try:
+                    extract_pop_S2_models(l, algo, exp, args.env, percentile)
+                except Exception as e:
+                    logger.error(e)
+                else:
+                    i += 1

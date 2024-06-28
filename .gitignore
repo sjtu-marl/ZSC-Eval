@@ -167,3 +167,6 @@ format.sh
 package-lock.json
 
 .vscode
+
+**/*.fuse*
+print_dir.sh

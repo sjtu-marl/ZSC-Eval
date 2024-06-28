@@ -4,15 +4,16 @@ import itertools
 import json
 import os
 import os.path as osp
-import sys
 import re
+import sys
 from collections import defaultdict
 from pprint import pformat, pprint
-from scipy.stats import bootstrap, trim_mean
 
 import numpy as np
 import yaml
 from loguru import logger
+from scipy.stats import bootstrap, trim_mean
+
 from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
 
 ALG_EXPS = {
@@ -142,7 +143,7 @@ if __name__ == "__main__":
         # exp: score
         for exp_name in ALG_EXPS[alg]:
             eval_result_dir = EVAL_RESULT_DIR.format(layout=layout, algo=alg)
-            pos_results = [[], []] 
+            pos_results = [[], []]
             # BR-Prox, goal
             for seed in range(1, args.n_repeat + 1):
                 actual_agent_name = f"{exp_name}-{seed}"

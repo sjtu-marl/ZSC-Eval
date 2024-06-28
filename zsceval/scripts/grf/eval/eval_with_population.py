@@ -202,7 +202,7 @@ def main(args):
     logger.debug(f"population {population_agents}")
     # logger.info(f"{len(combs)} pairs:\n{combs}")
     logger.info(f"{len(combs)} pairs")
-    
+
     if all_args.n_eval_rollout_threads % len(combs) != 0:
         logger.warning(f"n_eval_rollout_threads should be multiples of {len(combs)}")
     assert all_args.eval_episodes % all_args.n_eval_rollout_threads == 0

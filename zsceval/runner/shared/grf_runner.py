@@ -1030,7 +1030,6 @@ class GRFRunner(Runner):
 
                 n_selected = self.n_rollout_threads // self.all_args.train_env_batch
 
-
                 pair_idx = np.random.choice(len(all_unique_agent_pairs), size=(n_selected,), p=sampling_prob_np)
                 pairs = [random.choice(list(itertools.permutations(all_unique_agent_pairs[p]))) for p in pair_idx]
                 map_ea2t = {
