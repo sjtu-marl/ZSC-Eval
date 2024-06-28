@@ -1,14 +1,11 @@
 import time
 from collections import defaultdict
-from typing import Dict, Tuple
 
 import numpy as np
 import torch
 import wandb
 from icecream import ic
 from loguru import logger
-from scipy.stats import rankdata
-from tqdm import tqdm
 
 from zsceval.envs.grf.grf_env import SHAPED_INFOS
 from zsceval.runner.separated.base_runner import Runner
@@ -376,9 +373,8 @@ class GRFRunner(Runner):
             masks = np.ones((self.n_rollout_threads, self.num_agents, 1), dtype=np.float32)
 
             episode_rewards = []
-            trajectory = []
             for step in range(self.episode_length):
-                calc_start = time.time()
+                time.time()
 
                 self.trainer.prep_rollout()
                 action, rnn_states = self.trainer.policy.act(

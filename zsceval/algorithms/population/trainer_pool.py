@@ -2,7 +2,7 @@ import copy
 import os
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
 import torch
@@ -232,7 +232,7 @@ class TrainerPool:
             if self.skip(trainer_name):
                 continue
 
-            trainer = self.trainer_pool[trainer_name]
+            self.trainer_pool[trainer_name]
             buffer = self.buffer_pool[trainer_name]
 
             (

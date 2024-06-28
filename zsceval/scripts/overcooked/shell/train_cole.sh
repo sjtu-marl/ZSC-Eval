@@ -54,7 +54,7 @@ num_agents=2
 algo="cole"
 exp="cole-S2-s${population_size}"
 
-seed_begin=4
+seed_begin=1
 seed_max=5
 path="../../policy_pool"
 

@@ -18,17 +18,20 @@ then
     # exps=("fcp-S2-s12")
     exps=("fcp-S2-s24" "fcp-S2-s36")
     # exps=("fcp-S2-s12" "fcp-S2-s24" "fcp-S2-s36")
+    exps=("fcp-S2-s24" "fcp-S2-s36")
 elif [[ $2 == "mep" ]];
 then
     algorithm="mep"
     # exps=("mep-S2-s12")
     exps=("mep-S2-s24" "mep-S2-s36")
     # exps=("mep-S2-s12" "mep-S2-s24" "mep-S2-s36")
+    exps=("mep-S2-s24" "mep-S2-s36")
 elif [[ $2 == "traj" ]];
 then
     algorithm="traj"
     exps=("traj-S2-s24" "traj-S2-s36")
     # exps=("traj-S2-s12" "traj-S2-s24" "traj-S2-s36")
+    exps=("traj-S2-s24" "traj-S2-s36")
 elif [[ $2 == "hsp" ]];
 then
     algorithm="hsp"
@@ -39,6 +42,7 @@ then
     algorithm="cole"
     exps=("cole-S2-s50" "cole-S2-s75")
     # exps=("cole-S2-s25" "cole-S2-s50" "cole-S2-s75")
+    exps=("cole-S2-s50" "cole-S2-s75")
 else
     echo "bash eval_with_bias_agents.sh {layout} {algo}"
     exit 0

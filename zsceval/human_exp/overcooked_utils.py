@@ -1,5 +1,4 @@
-import itertools
-from collections import Counter, defaultdict
+from collections import defaultdict
 from typing import List
 
 from loguru import logger

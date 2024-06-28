@@ -9,12 +9,12 @@ import torch
 import wandb
 from loguru import logger
 
-from zsceval.config import get_config, scientific_notation
-from zsceval.envs.env_wrappers import ChooseSubprocVecEnv, ShareSubprocDummyBatchVecEnv
+from zsceval.config import get_config
+from zsceval.envs.env_wrappers import ShareSubprocDummyBatchVecEnv
 from zsceval.envs.overcooked.Overcooked_Env import Overcooked
 from zsceval.envs.overcooked_new.Overcooked_Env import Overcooked as Overcooked_new
 from zsceval.overcooked_config import get_overcooked_args
-from zsceval.utils.train_util import get_base_run_dir, setup_seed
+from zsceval.utils.train_util import setup_seed
 
 
 def make_eval_env(all_args, run_dir):

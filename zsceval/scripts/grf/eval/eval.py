@@ -6,22 +6,16 @@ import sys
 from itertools import permutations
 from pathlib import Path
 
-import numpy as np
 import setproctitle
 import torch
 import wandb
 from loguru import logger
 
-from zsceval.config import get_config, scientific_notation
-from zsceval.envs.env_wrappers import (
-    ShareDummyVecEnv,
-    ShareSubprocDummyBatchVecEnv,
-    ShareSubprocVecEnv,
-)
+from zsceval.config import get_config
+from zsceval.envs.env_wrappers import ShareDummyVecEnv, ShareSubprocVecEnv
 from zsceval.envs.grf.grf_env import FootballEnv
-from zsceval.envs.overcooked.Overcooked_Env import Overcooked
 from zsceval.grf_config import get_grf_args
-from zsceval.utils.train_util import get_base_run_dir, setup_seed
+from zsceval.utils.train_util import setup_seed
 
 
 def make_eval_env(all_args):

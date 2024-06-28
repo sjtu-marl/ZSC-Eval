@@ -11,7 +11,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.agents.benchmarking import
     AgentEvaluator,
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_mdp import (
-    OvercookedGridworld,
     OvercookedState,
     Recipe,
 )

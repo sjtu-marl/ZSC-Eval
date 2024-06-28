@@ -11,8 +11,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_mdp import 
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_trajectory import (
     DEFAULT_TRAJ_KEYS,
-    EPISODE_TRAJ_KEYS,
-    TIMESTEP_TRAJ_KEYS,
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.planning.planners import (
     NO_COUNTERS_PARAMS,

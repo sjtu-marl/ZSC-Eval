@@ -1,13 +1,11 @@
 import copy
 import itertools
-import os
 import random
 from collections import defaultdict
 from functools import reduce
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import List, Tuple
 
 import numpy as np
-from loguru import logger
 
 from zsceval.envs.overcooked.overcooked_ai_py.data.layouts import read_layout_dict
 from zsceval.envs.overcooked.overcooked_ai_py.mdp.actions import Action, Direction

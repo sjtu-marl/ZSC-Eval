@@ -2,7 +2,6 @@ import os
 import pickle
 
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.static import PLANNERS_DIR
-from zsceval.envs.overcooked_new.src.overcooked_ai_py.utils import load_dict_from_file
 
 
 def load_saved_action_manager(filename):

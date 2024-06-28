@@ -1,26 +1,14 @@
-import copy
-import functools
-import itertools
-import os
 import time
-import warnings
-from collections import defaultdict, deque
-from itertools import chain
-from pathlib import Path
-from typing import Dict
+from collections import defaultdict
 
-import imageio
 import numpy as np
 import torch
 import wandb
 from icecream import ic
 from loguru import logger
-from scipy.stats import rankdata
-from tqdm import tqdm
 
 from zsceval.runner.separated.base_runner import Runner
 from zsceval.utils.log_util import eta
-from zsceval.utils.util import update_linear_schedule
 
 
 def _t2n(x):
@@ -39,7 +27,7 @@ class OvercookedRunner(Runner):
         total_num_steps = 0
 
         for episode in range(episodes):
-            s_time = time.time()
+            time.time()
             if self.use_linear_lr_decay:
                 for agent_id in range(self.num_agents):
                     self.trainer[agent_id].policy.lr_decay(episode, episodes)
@@ -362,7 +350,6 @@ class OvercookedRunner(Runner):
 
         for episode in range(self.all_args.render_episodes):
             episode_rewards = []
-            trajectory = []
 
             rnn_states = np.zeros(
                 (
@@ -376,7 +363,7 @@ class OvercookedRunner(Runner):
             masks = np.ones((self.n_rollout_threads, self.num_agents, 1), dtype=np.float32)
 
             for step in range(self.episode_length):
-                calc_start = time.time()
+                time.time()
                 actions = []
                 for agent_id in range(self.num_agents):
                     if not self.use_centralized_V:

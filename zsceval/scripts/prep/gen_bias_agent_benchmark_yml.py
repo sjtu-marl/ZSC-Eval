@@ -1,9 +1,8 @@
 import argparse
-import sys
 
 from loguru import logger
 
-from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
+from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS
 
 
 def parse_args():

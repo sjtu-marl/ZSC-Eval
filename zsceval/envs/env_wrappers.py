@@ -3,16 +3,13 @@ Modified from OpenAI Baselines code to work with multi-agent envs
 """
 
 import multiprocessing as mp
-import os
 from abc import ABC, abstractmethod
 from multiprocessing import Pipe, Process
-from typing import Callable, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import cloudpickle
 import numpy as np
 import psutil
-import torch
-from loguru import logger
 
 from zsceval.utils.util import tile_images
 
@@ -61,7 +58,6 @@ class ShareVecEnv(ABC):
         be cancelled and step_wait() should not be called
         until step_async() is invoked again.
         """
-        pass
 
     @abstractmethod
     def step_async(self, actions):
@@ -73,7 +69,6 @@ class ShareVecEnv(ABC):
         You should not call this if a step_async run is
         already pending.
         """
-        pass
 
     @abstractmethod
     def step_wait(self):
@@ -87,14 +82,12 @@ class ShareVecEnv(ABC):
          - dones: an array of "episode done" booleans
          - infos: a sequence of info objects
         """
-        pass
 
     def close_extras(self):
         """
         Clean up the  extra resources, beyond what's in this base class.
         Only runs when not self.closed.
         """
-        pass
 
     def close(self):
         if self.closed:

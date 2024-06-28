@@ -1,10 +1,8 @@
-from collections import defaultdict
-
 import numpy as np
 import torch
 from loguru import logger
 
-from zsceval.utils.util import check, get_shape_from_act_space, get_shape_from_obs_space
+from zsceval.utils.util import get_shape_from_act_space, get_shape_from_obs_space
 
 
 def _flatten(T, N, x):

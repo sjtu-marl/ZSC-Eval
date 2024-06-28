@@ -1,15 +1,12 @@
 import copy
 import itertools
 import json
-import os
-import pprint
 import random
 import time
-import warnings
 from collections import defaultdict
 from os import path as osp
 from pprint import pformat
-from typing import Dict, Tuple
+from typing import Dict
 
 import numpy as np
 import torch
@@ -394,9 +391,8 @@ class GRFRunner(Runner):
             masks = np.ones((self.n_rollout_threads, self.num_agents, 1), dtype=np.float32)
 
             episode_rewards = []
-            trajectory = []
             for step in range(self.episode_length):
-                calc_start = time.time()
+                time.time()
 
                 self.trainer.prep_rollout()
                 action, rnn_states = self.trainer.policy.act(

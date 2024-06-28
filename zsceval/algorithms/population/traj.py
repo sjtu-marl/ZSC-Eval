@@ -1,22 +1,13 @@
 import copy
-import itertools
-import logging
-import os
 import random
-from collections import defaultdict
 from typing import Dict, List
 
 import numpy as np
 import torch
-from loguru import logger
 
 from zsceval.algorithms.population.policy_pool import PolicyPool
 from zsceval.algorithms.population.trainer_pool import TrainerPool
-from zsceval.algorithms.population.utils import _t2n
 from zsceval.algorithms.r_mappo.r_mappo import R_MAPPO
-from zsceval.runner.shared.base_runner import make_trainer_policy_cls
-from zsceval.utils.shared_buffer import SharedReplayBuffer
-from zsceval.utils.util import get_shape_from_obs_space
 
 
 class Traj_Trainer(TrainerPool):

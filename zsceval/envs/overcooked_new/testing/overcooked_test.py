@@ -1,4 +1,3 @@
-import copy
 import glob
 import json
 import os
@@ -7,7 +6,6 @@ import unittest
 from math import factorial
 
 import numpy as np
-from utils import generate_serialized_trajectory
 
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.agents.agent import (
     AgentGroup,
@@ -56,7 +54,6 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.planning.planners import (
 )
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.static import TESTING_DATA_DIR
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.utils import (
-    iterate_over_json_files_in_dir,
     load_from_json,
     load_pickle,
     save_as_json,
@@ -274,7 +271,7 @@ class TestSoupState(unittest.TestCase):
         try:
             self.s1.recipe
             self.fail("Expected ValueError to be raised")
-        except ValueError as e:
+        except ValueError:
             pass
         except Exception as e:
             self.fail("Expected ValueError to be raised, {} raised instead".format(e))
@@ -282,7 +279,7 @@ class TestSoupState(unittest.TestCase):
         try:
             self.s2.recipe
             self.fail("Expected ValueError to be raised")
-        except ValueError as e:
+        except ValueError:
             pass
         except Exception as e:
             self.fail("Expected ValueError to be raised, {} raised instead".format(e))
@@ -351,28 +348,28 @@ class TestGridworld(unittest.TestCase):
     def test_constructor_invalid_inputs(self):
         # Height and width must be at least 3.
         with self.assertRaises(AssertionError):
-            mdp = OvercookedGridworld.from_grid(["X", "X", "X"])
+            OvercookedGridworld.from_grid(["X", "X", "X"])
         with self.assertRaises(AssertionError):
-            mdp = OvercookedGridworld.from_grid([["X", "X", "X"]])
+            OvercookedGridworld.from_grid([["X", "X", "X"]])
         with self.assertRaises(AssertionError):
             # Borders must be present.
-            mdp = OvercookedGridworld.from_grid(["XOSX", "P  D", " 21 "])
+            OvercookedGridworld.from_grid(["XOSX", "P  D", " 21 "])
 
         with self.assertRaises(AssertionError):
             # The grid can't be ragged.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  2XX", "X1 3 X", "XDXSXX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  2XX", "X1 3 X", "XDXSXX"])
 
         with self.assertRaises(AssertionError):
             # The agents must be numbered 1 and 2.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  3O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  3O", "X1  X", "XDXSX"])
 
         with self.assertRaises(AssertionError):
             # The agents must be numbered 1 and 2.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  1O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  1O", "X1  X", "XDXSX"])
 
         with self.assertRaises(AssertionError):
             # B is not a valid element.
-            mdp = OvercookedGridworld.from_grid(["XBPXX", "O  2O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XBPXX", "O  2O", "X1  X", "XDXSX"])
 
     def test_start_positions(self):
         actual_start_state = self.base_mdp.get_standard_start_state()
@@ -430,7 +427,7 @@ class TestGridworld(unittest.TestCase):
             "objects": [{"name": "onion", "position": [1, 0], "state": None}],
             "order_list": None,
         }
-        state = OvercookedState.from_dict(state_dict)
+        OvercookedState.from_dict(state_dict)
 
     def test_transitions_and_environment(self):
         bad_state = OvercookedState([P((0, 0), s), P((3, 1), s)], {})

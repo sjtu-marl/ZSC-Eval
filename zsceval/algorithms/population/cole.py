@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 
 import torch
-from loguru import logger
 
 from zsceval.algorithms.population.policy_pool import PolicyPool
 from zsceval.algorithms.population.trainer_pool import TrainerPool

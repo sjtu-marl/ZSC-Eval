@@ -2,10 +2,7 @@
 import os
 import socket
 import sys
-from itertools import product
-from math import factorial
 from pathlib import Path
-from pprint import pformat, pprint
 
 import setproctitle
 import torch
@@ -13,15 +10,11 @@ import wandb
 from loguru import logger
 from rich.pretty import pretty_repr
 
-from zsceval.config import get_config, scientific_notation
-from zsceval.envs.env_wrappers import (
-    ShareDummyVecEnv,
-    ShareSubprocDummyBatchVecEnv,
-    ShareSubprocVecEnv,
-)
+from zsceval.config import get_config
+from zsceval.envs.env_wrappers import ShareDummyVecEnv, ShareSubprocDummyBatchVecEnv
 from zsceval.envs.grf.grf_env import FootballEnv
 from zsceval.grf_config import get_grf_args
-from zsceval.utils.train_util import get_base_run_dir, setup_seed
+from zsceval.utils.train_util import setup_seed
 
 
 def make_eval_env(all_args):

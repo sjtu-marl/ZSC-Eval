@@ -1,12 +1,8 @@
-import random
-from os import stat
-from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 import gfootball.env as football_env
 import numpy as np
 from gym import spaces
-from loguru import logger
 
 SHAPED_INFOS = [
     "pass",

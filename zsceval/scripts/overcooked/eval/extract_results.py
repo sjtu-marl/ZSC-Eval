@@ -2,14 +2,12 @@ import argparse
 import glob
 import itertools
 import json
-import os
 import os.path as osp
 import re
 import sys
 from collections import defaultdict
 from pprint import pformat, pprint
 
-import numpy as np
 import yaml
 from loguru import logger
 from scipy.stats import bootstrap, trim_mean

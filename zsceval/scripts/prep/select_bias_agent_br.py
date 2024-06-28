@@ -5,7 +5,6 @@ import json
 import math
 import os
 import random
-import sys
 from collections import defaultdict
 from itertools import permutations
 
@@ -104,9 +103,7 @@ if __name__ == "__main__":
 
     if args.env == "overcooked":
         if overcooked_version == "old":
-            from zsceval.envs.overcooked.overcooked_ai_py.mdp.overcooked_mdp import (
-                SHAPED_INFOS,
-            )
+            pass
 
             # event_types = SHAPED_INFOS + ["sparse_r"]
             event_types = [
