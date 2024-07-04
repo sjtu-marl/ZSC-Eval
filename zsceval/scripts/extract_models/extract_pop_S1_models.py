@@ -7,7 +7,7 @@ import numpy as np
 import wandb
 from loguru import logger
 
-wandb_name = "your wandb name"
+wandb_name = "hogebein"
 POLICY_POOL_PATH = "../policy_pool"
 
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         layout = [layout]
     hostname = socket.gethostname()
     algo_exp_names = [
-        ("mep", "mep-S1-s5"),
+        ("mep", "mep-S1-s10"),
         ("traj", "traj-S1-s5"),
     ]
 

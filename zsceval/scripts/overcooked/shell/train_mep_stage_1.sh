@@ -25,7 +25,7 @@ stage="S1"
 exp="mep-${stage}-s${population_size}"
 seed=1
 
-train_batch=125
+train_batch=100
 
 ulimit -n 65536
 path=../../policy_pool
@@ -44,4 +44,4 @@ python train/train_mep.py --env_name ${env} --algorithm_name ${algo} --experimen
 --population_yaml_path ${path}/${layout}/mep/s1/train-s${population_size}.yml \
 --population_size ${population_size} --adaptive_agent_name mep_adaptive \
 --use_proper_time_limits \
---wandb_name "your wandb name"
+--wandb_name "hogebein"

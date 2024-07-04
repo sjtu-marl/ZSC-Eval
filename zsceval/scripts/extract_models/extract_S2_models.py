@@ -44,7 +44,7 @@ def find_target_index(array, percentile: float):
         return len(array) - 1, np.nanmax(array)
 
 
-def extract_S2_models(layout, algorithm, exp, population: str):
+def extract_S2_models(layout, algorithm, exp, env, population: str):
     population = population.split("-", 1)[1]
     if algorithm == "fcp":
         exp_name = f"{exp}-pop{population}-S2"
@@ -52,7 +52,7 @@ def extract_S2_models(layout, algorithm, exp, population: str):
         if len(exp.split("-")) == 2:
             exp_name = f"{exp.split('-')[0]}-{exp.split('-')[1]}-pop{population}-S2"
         else:
-            exp_name = f"{exp}-pop{population}-S2"
+            exp_name = f"{exp}_mep-S2-{population}_seed1"
 
     elif algorithm == "traj":
         exp_name = f"{exp}-pop{population}-S2"
@@ -65,23 +65,27 @@ def extract_S2_models(layout, algorithm, exp, population: str):
 
     logger.info(f"exp {exp_name}")
     api = wandb.Api()
+    if "overcooked" in env.lower():
+        layout_config = "config.layout_name"
+    else:
+        layout_config = "config.scenario_name"
     runs = api.runs(
-        f"{wandb_name}/GRF",
+        f"{wandb_name}/{env}",
         # f"{wandb_name}/Overcooked-new",
         filters={
             "$and": [
                 {"config.experiment_name": exp_name},
-                {"config.scenario_name": layout},
-                # {"config.layout_name": layout},
+                #{"config.scenario_name": layout},
+                #{"config.layout_name": layout},
                 {"state": "finished"},
                 {"tags": {"$nin": ["hidden", "unused"]}},
             ]
         },
         order="+config.seed",
     )
-    if not exp_name.endswith("-S2"):
-        exp_name += "-S2"
-        exp_name = exp + "-pop_" + exp_name.split(exp + "-", 1)[1]
+    #if not exp_name.endswith("-S2"):
+    #    exp_name += "-S2"
+    #    exp_name = exp + "-pop_" + exp_name.split(exp + "-", 1)[1]
     runs = list(runs)
     run_ids = [r.id for r in runs]
     logger.info(f"num of runs: {len(runs)}")
@@ -122,6 +126,7 @@ def extract_S2_models(layout, algorithm, exp, population: str):
 if __name__ == "__main__":
     layout = sys.argv[1]
     assert layout in [
+        "random0",
         "academy_3_vs_1_with_keeper",
         "random0_m",
         "random1_m",
@@ -133,8 +138,9 @@ if __name__ == "__main__":
     else:
         layout = [layout]
     algorithm = sys.argv[2]
-    if len(sys.argv) > 3:
-        percentile = float(sys.argv[3])
+    env = sys.argv[3]
+    if len(sys.argv) > 4:
+        percentile = float(sys.argv[4])
     else:
         percentile = 0.8
     assert algorithm in ["traj", "mep", "fcp", "cole", "hsp"]
@@ -145,7 +151,7 @@ if __name__ == "__main__":
         },
         "mep": {
             "mep": [
-                "-_s9_s5-S1",
+                "-s24",
             ],
         },
         "traj": {
@@ -169,4 +175,4 @@ if __name__ == "__main__":
             logger.info(f"for layout {l}")
             for exp, pop_list in ALG_EXPS[algo].items():
                 for pop in pop_list:
-                    extract_S2_models(l, algo, exp, pop)
+                    extract_S2_models(l, algo, exp, env, pop)

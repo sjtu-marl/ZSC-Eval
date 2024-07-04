@@ -7,7 +7,7 @@ import numpy as np
 import wandb
 from loguru import logger
 
-wandb_name = "your wandb name"
+wandb_name = "hogebein"
 POLICY_POOL_PATH = "../policy_pool"
 
 
@@ -24,7 +24,7 @@ def extract_sp_S1_models(layout, exp, env):
                 {"config.experiment_name": exp},
                 {layout_config: layout},
                 {"state": "finished"},
-                {"tags": {"$nin": ["hidden", "unused"]}},
+                
             ]
         },
         order="+config.seed",
@@ -43,6 +43,7 @@ def extract_sp_S1_models(layout, exp, env):
             final_ep_sparse_r = np.mean(ep_sparse_r[-5:])
             if run.config["seed"] in seeds:
                 continue
+            print(run.config)
             i = run.config["seed"]
             logger.info(f"sp{i} Run: {run_id} Seed: {run.config['seed']} Return {final_ep_sparse_r}")
             seeds.add(run.config["seed"])
@@ -106,6 +107,8 @@ if __name__ == "__main__":
         "random1_m",
         "random3_m",
         "academy_3_vs_1_with_keeper",
+        "forced_coordination_tomato",
+        "cramped_room",
         "all",
     ], layout
     if layout == "all":
@@ -125,7 +128,10 @@ if __name__ == "__main__":
         layout = [layout]
     hostname = socket.gethostname()
     exp_names = {
+        "forced_coordination_tomato":"sp",
         "random3_m": "sp",
+        "random0":"sp",
+        "cramped_room":"sp",
     }
 
     logger.info(f"hostname: {hostname}")

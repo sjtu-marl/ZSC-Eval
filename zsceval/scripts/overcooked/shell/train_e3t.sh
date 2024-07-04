@@ -28,8 +28,8 @@ echo "env is ${env}, layout is ${layout}, algo is ${algo}, exp is ${exp}, seed f
 for seed in $(seq ${seed_begin} ${seed_max});
 do
     echo "seed is ${seed}:"
-    python train/train_e3t.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --layout_name ${layout} --num_agents ${num_agents} \
-    --seed ${seed} --n_training_threads 1 --n_rollout_threads 100 --dummy_batch_size 2 --num_mini_batch 1 --episode_length 400 --num_env_steps ${num_env_steps} --reward_shaping_horizon ${reward_shaping_horizon} \
+    python train/train_e3t.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${exp}_${layout}" --layout_name ${layout} --num_agents ${num_agents} \
+    --seed ${seed} --n_training_threads 1 --n_rollout_threads 30 --dummy_batch_size 2 --num_mini_batch 1 --episode_length 400 --num_env_steps ${num_env_steps} --reward_shaping_horizon ${reward_shaping_horizon} \
     --overcooked_version ${version} \
     --ppo_epoch 15 --entropy_coefs ${entropy_coefs} --entropy_coef_horizons ${entropy_coef_horizons} \
     --share_policy --random_index \
@@ -37,5 +37,5 @@ do
     --use_proper_time_limits \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 10 \
     --epsilon 0.25 --weights_copy_factor 0.1 \
-    --wandb_name "your wandb name"
+    --wandb_name "hogebein"
 done

@@ -16,6 +16,7 @@ NAME_TRANSLATION = {
     "asymmetric_advantages": "unident_s",
     "coordination_ring": "random1",
     "counter_circuit": "random3",
+    "forced_coordination" : "random0",
 }
 
 

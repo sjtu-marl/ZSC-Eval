@@ -6612,7 +6612,7 @@ var rtrimCSS = new RegExp(
 		// some versions of this test; make sure not to make it pass there!
 		//
 		// Support: Firefox 70+
-		// Only Firefox includes border widths
+		// Only  includes border widths
 		// in computed dimensions. (gh-4529)
 		reliableTrDimensions: function() {
 			var table, tr, trChild, trStyle;
@@ -6660,7 +6660,7 @@ function curCSS( elem, name, computed ) {
 	var width, minWidth, maxWidth, ret,
 		isCustomProp = rcustomProp.test( name ),
 
-		// Support: Firefox 51+
+		// Support:  51+
 		// Retrieving style before computed somehow
 		// fixes an issue with getting wrong values
 		// on detached elements
