@@ -5,7 +5,7 @@ import socket
 import numpy as np
 import wandb
 
-wandb_name = "your wandb name"
+wandb_name = "hogebein"
 POLICY_POOL_PATH = "../policy_pool"
 
 from loguru import logger

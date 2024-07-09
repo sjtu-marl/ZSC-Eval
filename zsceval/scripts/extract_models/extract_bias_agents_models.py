@@ -6,7 +6,7 @@ import numpy as np
 import wandb
 from loguru import logger
 
-wandb_name = "your wandb name"
+wandb_name = "hogebein"
 POLICY_POOL_PATH = "../policy_pool"
 
 
@@ -138,6 +138,7 @@ if __name__ == "__main__":
     exp_names = {
         "random3_m": "hsp-S1",
         "small_corridor": "hsp-S1",
+        "random0" : "hsp-S1",
     }
 
     # logger.add(f"./extract_log/extract_{layout}_hsp_S1_models.log")

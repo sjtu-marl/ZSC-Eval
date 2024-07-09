@@ -1,6 +1,7 @@
 import os
 import pickle
 import pprint
+import re
 
 import gym
 import imageio
@@ -728,7 +729,7 @@ class Overcooked(gym.Env):
                 shaped_reward_p1 = sparse_reward + self.reward_shaping_factor * dense_reward[1]
         # TODO: log returned reward
         if self.store_traj:
-            self.traj_to_store.append(info["shaped_info_by_agnet"])
+            self.traj_to_store.append(info["shaped_info_by_agent"])
             self.traj_to_store.append(self.base_env.state.to_dict())
 
         reward = [[shaped_reward_p0], [shaped_reward_p1]]
@@ -782,7 +783,7 @@ class Overcooked(gym.Env):
                 self.traj["ep_returns"].append(info["episode"]["ep_sparse_r"])
                 self.traj["mdp_params"].append(self.base_mdp.mdp_params)
                 self.traj["env_params"].append(self.base_env.env_params)
-                self.render()
+                #self.render()
             # self.fake_render()
 
         if done:
@@ -889,18 +890,27 @@ class Overcooked(gym.Env):
     def render(self):
         # raise NotImplementedError
         # try:
-        save_dir = f"{self.run_dir}/gifs/{self.layout_name}/traj_num_{self.traj_num}"
+        save_dir = f"{self.run_dir}/gifs/{self.layout_name}/traj_{self.rank}_{self.traj_num}"
         save_dir = os.path.expanduser(save_dir)
         StateVisualizer().display_rendered_trajectory(self.traj, img_directory_path=save_dir, ipython_display=False)
         for img_path in os.listdir(save_dir):
             img_path = save_dir + "/" + img_path
         imgs = []
         imgs_dir = os.listdir(save_dir)
+        #irregulars = [s for s in imgs_dir if re.match("reward.*", s)]
+        #for i in irregulars:
+        #    imgs_dir.remove(i)
         imgs_dir = sorted(imgs_dir, key=lambda x: int(x.split(".")[0]))
+        
+        image_shape = None
         for img_path in imgs_dir:
             img_path = save_dir + "/" + img_path
-            imgs.append(imageio.imread(img_path))
-        imageio.mimsave(save_dir + f'/reward_{self.traj["ep_returns"][0]}.gif', imgs, duration=0.05)
+            img = imageio.imread(img_path)
+            if (image_shape == None) or (img.shape == image_shape):
+                imgs.append(img)
+                image_shape = img.shape
+            
+        imageio.mimsave(save_dir + f'/reward_{self.traj["ep_returns"][0]}.gif', imgs, duration=0.1)
         imgs_dir = os.listdir(save_dir)
         for img_path in imgs_dir:
             img_path = save_dir + "/" + img_path
@@ -1002,10 +1012,15 @@ class Overcooked(gym.Env):
         return grid_string
 
     def _store_trajectory(self):
-        if not os.path.exists(f"{self.run_dir}/trajs/{self.layout_name}/"):
-            os.makedirs(f"{self.run_dir}/trajs/{self.layout_name}/")
-        save_dir = f"{self.run_dir}/trajs/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
+        if not os.path.exists(f"{self.run_dir}/trajs_store/{self.layout_name}/"):
+            os.makedirs(f"{self.run_dir}/trajs_store/{self.layout_name}/", exist_ok=True)
+        save_dir = f"{self.run_dir}/trajs_store/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
         pickle.dump(self.traj_to_store, open(save_dir, "wb"))
+        
+        if not os.path.exists(f"{self.run_dir}/trajs/{self.layout_name}/"):
+            os.makedirs(f"{self.run_dir}/trajs/{self.layout_name}/", exist_ok=True)
+        save_dir = f"{self.run_dir}/trajs/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
+        pickle.dump(self.traj, open(save_dir, "wb"))
 
     def seed(self, seed):
         setup_seed(seed)
