@@ -125,10 +125,12 @@ if __name__ == "__main__":
         layout = [layout]
     hostname = socket.gethostname()
     algo_exp_names = [
+
         #("mep", "mep-S1-s510"),
         ("mep", "mep-S1-s10"),
         # ("traj", "traj-S1-s10"),
         #("traj", "traj-S1-s15"),
+
     ]
 
     logger.info(f"hostname: {hostname}")

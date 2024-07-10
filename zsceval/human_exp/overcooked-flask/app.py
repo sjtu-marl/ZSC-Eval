@@ -16,17 +16,17 @@ from markdown import markdown
 from zsceval.human_exp.agent_pool import ZSCEvalAgentPool
 from zsceval.human_exp.overcooked_utils import (
     NAME_TRANSLATION,
+    LAYOUT_LIST,
     generate_balanced_permutation,
 )
 
 app = Flask(__name__)
 cors = CORS()
 cors.init_app(app, resources={r"/*": {"origins": "*"}})
-
 NAME_TRANSLATION_REVERSE = {v: k for k, v in NAME_TRANSLATION.items()}
 
-ALL_LAYOUTS = ["random1", "random3"]
-# ALL_LAYOUTS = ["random1"]
+#ALL_LAYOUTS = ["forced_coordination_tomato"]
+ALL_LAYOUTS = ["random3"]
 USER_AGENTS = {}
 """ 
 {
@@ -123,7 +123,7 @@ def init_game_settings(
         for g_setting in g_settings:
             if g_setting["algo"] == "dummy":
                 continue
-            _layout_game_algos[g_setting["layout"]].append(CODE_2_ALGO[g_setting["algo"]])
+            #_layout_game_algos[g_setting["layout"]].append(CODE_2_ALGO[g_setting["algo"]])
         for k, v in _layout_game_algos.items():
             layout_game_algo_lists[k].append(v)
 
@@ -156,6 +156,10 @@ def init_game_settings(
                 human_algo_pair = [HUMAN_NAME, algo_control]
             else:
                 human_algo_pair = [algo_control, HUMAN_NAME]
+
+            #layout_alias = NAME_TRANSLATION_REVERSE[layout] if layout in NAME_TRANSLATION_REVERSE.values() else layout
+            layout_alias = layout 
+
             game_settings.append(
                 {
                     "agents": human_algo_pair,
@@ -163,7 +167,7 @@ def init_game_settings(
                     "layout": layout,
                     "run_id": algo_i + 1,
                     "n_runs": len(algo_list),
-                    "layout_alias": NAME_TRANSLATION_REVERSE[layout],
+                    "layout_alias": layout_alias,
                     "url": f"http://{ARGS.access_ip}:{ARGS.port}/{algo_control}/predict/",
                 }
             )
@@ -230,6 +234,7 @@ def changemodel():
         game_setting = data_json["game_settings"][agent_type]
         logger.info(f"{user_id} with {game_setting['agents']}")
         if game_setting["algo"] != "dummy":
+            #agent_call = AGENT_POOLS[game_setting["layout"]].get_agent(game_setting["algo"])
             agent_call = AGENT_POOLS[game_setting["layout"]].get_agent(CODE_2_ALGO[game_setting["algo"]])
             USER_AGENTS[user_id] = agent_call
 
@@ -313,7 +318,7 @@ def create_questionnaire_in_game():
     else:
         human_pos = 1
     agent_count = 0
-    agent = CODE_2_ALGO[agent]
+    #agent = CODE_2_ALGO[agent]
     for in_game_item in in_game:
         if in_game_item.get("teammate") == agent:
             agent_count += 1
@@ -321,7 +326,8 @@ def create_questionnaire_in_game():
     in_game.append(
         {
             "traj_path": os.path.normpath(os.path.join(save_path, filename)).replace("\\", "/"),
-            "questionnaire": {CODE_2_ALGO[k]: v for k, v in data_json["questionnaire"].items()},
+            #"questionnaire": {CODE_2_ALGO[k]: v for k, v in data_json["questionnaire"].items()},
+            "questionnaire": {k: v for k, v in data_json["questionnaire"].items()},
             "teammate": agent,
             "human_pos": human_pos,
             "run_id": agent_settings_list[agent_type_idx]["run_id"],
@@ -368,7 +374,7 @@ def predict(algo):
     assert request.method == "POST"
     if algo == "dummy":
         return jsonify({"action": 4})
-    algo = CODE_2_ALGO[algo]
+    #algo = CODE_2_ALGO[algo]
     data_json = json.loads(request.data)
     state_dict, player_id = (
         data_json["state"],

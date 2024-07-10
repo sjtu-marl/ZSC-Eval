@@ -75,4 +75,6 @@ do
     --population_size ${population_size} --adaptive_agent_name hsp_adaptive --use_agent_policy_id \
     --use_proper_time_limits \
     --wandb_name "hogebein"
+
 done
+

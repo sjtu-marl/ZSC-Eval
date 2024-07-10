@@ -81,4 +81,6 @@ do
     --num_generation $((population_size * 2)) --generation_interval ${generation_interval} --prioritized_alpha ${prioritized_alpha} \
     --algorithm_type evolution \
     --wandb_name "hogebein"
+
 done
+
