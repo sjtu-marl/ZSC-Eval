@@ -1,11 +1,8 @@
-import pickle
-import time
 import unittest
 
 import numpy as np
 
 from zsceval.envs.overcooked.overcooked_ai_py.agents.agent import (
-    Agent,
     AgentPair,
     CoupledPlanningAgent,
     CoupledPlanningPair,

@@ -1,5 +1,3 @@
-import pickle
-import time
 import unittest
 
 from zsceval.envs.overcooked.overcooked_ai_py.mdp.actions import Action, Direction

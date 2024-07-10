@@ -26,7 +26,8 @@ exp="traj-${stage}-s${population_size}"
 seed=1
 
 
-train_batch=100
+
+train_batch=250
 
 ulimit -n 65536
 path=../../policy_pool

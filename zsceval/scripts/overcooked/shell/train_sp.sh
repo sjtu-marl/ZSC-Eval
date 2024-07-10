@@ -21,8 +21,8 @@ num_env_steps="1e7"
 num_agents=2
 algo="mappo"
 exp="sp"
-seed_begin=1
-seed_max=5
+seed_begin=5
+seed_max=15
 ulimit -n 65536
 
 echo "env is ${env}, layout is ${layout}, algo is ${algo}, exp is ${exp}, seed from ${seed_begin} to ${seed_max}"

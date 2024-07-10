@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 import zsceval.envs.overcooked.script_agent.utils as utils
-from zsceval.envs.overcooked.overcooked_ai_py.mdp.actions import Action, Direction
+from zsceval.envs.overcooked.overcooked_ai_py.mdp.actions import Direction
 from zsceval.envs.overcooked.script_agent.base import BaseScriptAgent
 from zsceval.envs.overcooked.script_agent.script_period import SCRIPT_PERIODS_CLASSES
 

@@ -1,9 +1,7 @@
 import importlib
 import os
 import pickle
-import time
 from collections import Iterable
-from itertools import chain
 
 import numpy as np
 import torch
@@ -12,7 +10,6 @@ from loguru import logger
 from tensorboardX import SummaryWriter
 
 from zsceval.utils.shared_buffer import SharedReplayBuffer
-from zsceval.utils.util import update_linear_schedule
 
 webhook_url = "slack hook url"
 

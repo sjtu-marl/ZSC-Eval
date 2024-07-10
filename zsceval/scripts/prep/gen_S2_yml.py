@@ -13,9 +13,9 @@ S1_POP_EXPS = {
         5: "sp",
     },
     "mep": {
-        15: "mep-s15-S1",
+        15: "mep-S1-s15",
         10: "mep-S1-s10",
-        5: "mep-S1-s5",
+        5: "mep-S1-s510",
     },
     "traj": {
         15: "traj-S1-s15",
@@ -25,12 +25,14 @@ S1_POP_EXPS = {
 }
 
 # Overcooked
-# TOTAL_SIZE_LIST = [15, 10, 5]
-# POP_SIZE_LIST = [12, 8, 4]
+TOTAL_SIZE_LIST = [5]
+POP_SIZE_LIST = [12, 8, 4]
 # TOTAL_SIZE_LIST = [10, 5]
 # POP_SIZE_LIST = [8, 4]
-TOTAL_SIZE_LIST = [10]
-POP_SIZE_LIST = [8]
+
+# TOTAL_SIZE_LIST = [5]
+# POP_SIZE_LIST = [4]
+
 
 # GRF
 # TOTAL_SIZE_LIST = [5]

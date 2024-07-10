@@ -1,6 +1,5 @@
 import functools
 import random
-from tokenize import Single
 
 import numpy as np
 
@@ -184,7 +183,6 @@ class StochasticScriptAgent(BaseScriptAgent):
 
     def reset(self, mdp, state, player_idx):
         """reset state"""
-        pass
 
     def step(self, mdp, state, player_idx):
         action = np.random.choice(Action.ALL_ACTIONS)

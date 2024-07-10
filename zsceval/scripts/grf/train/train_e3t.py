@@ -6,13 +6,12 @@ import socket
 import sys
 from pathlib import Path
 
-import numpy as np
 import setproctitle
 import torch
 import wandb
 from loguru import logger
 
-from zsceval.config import get_config, scientific_notation
+from zsceval.config import get_config
 from zsceval.envs.env_wrappers import (
     ShareDummyVecEnv,
     ShareSubprocDummyBatchVecEnv,

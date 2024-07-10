@@ -240,7 +240,7 @@ def interact(
 def random_move(mdp, state, player_idx, pre_goal, move_mask=None):
     player = state.players[player_idx]
     pos, o = player.position, player.orientation
-    i_pos = Action.move_in_direction(pos, o)
+    Action.move_in_direction(pos, o)
 
     dist, path = bfs(mdp, state, player_idx, move_mask=move_mask)
 
@@ -275,7 +275,7 @@ def random_move(mdp, state, player_idx, pre_goal, move_mask=None):
 def exists(mdp, state, player_idx, terrain_type, obj):
     player = state.players[player_idx]
     pos, o = player.position, player.orientation
-    i_pos = Action.move_in_direction(pos, o)
+    Action.move_in_direction(pos, o)
 
     valid_map = compute_valid_map(mdp, state, player_idx, terrain_type, obj)
 

@@ -30,7 +30,6 @@ from zsceval.envs.overcooked.overcooked_ai_py.planning.planners import (
 from zsceval.envs.overcooked.overcooked_ai_py.utils import (
     iterate_over_files_in_dir,
     load_pickle,
-    save_pickle,
 )
 
 START_ORDER_LIST = ["any"]
@@ -70,28 +69,28 @@ class TestGridworld(unittest.TestCase):
     def test_constructor_invalid_inputs(self):
         # Height and width must be at least 3.
         with self.assertRaises(AssertionError):
-            mdp = OvercookedGridworld.from_grid(["X", "X", "X"])
+            OvercookedGridworld.from_grid(["X", "X", "X"])
         with self.assertRaises(AssertionError):
-            mdp = OvercookedGridworld.from_grid([["X", "X", "X"]])
+            OvercookedGridworld.from_grid([["X", "X", "X"]])
         with self.assertRaises(AssertionError):
             # Borders must be present.
-            mdp = OvercookedGridworld.from_grid(["XOSX", "P  D", " 21 "])
+            OvercookedGridworld.from_grid(["XOSX", "P  D", " 21 "])
 
         with self.assertRaises(AssertionError):
             # The grid can't be ragged.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  2XX", "X1 3 X", "XDXSXX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  2XX", "X1 3 X", "XDXSXX"])
 
         with self.assertRaises(AssertionError):
             # The agents must be numbered 1 and 2.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  3O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  3O", "X1  X", "XDXSX"])
 
         with self.assertRaises(AssertionError):
             # The agents must be numbered 1 and 2.
-            mdp = OvercookedGridworld.from_grid(["XXPXX", "O  1O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XXPXX", "O  1O", "X1  X", "XDXSX"])
 
         with self.assertRaises(AssertionError):
             # B is not a valid element.
-            mdp = OvercookedGridworld.from_grid(["XBPXX", "O  2O", "X1  X", "XDXSX"])
+            OvercookedGridworld.from_grid(["XBPXX", "O  2O", "X1  X", "XDXSX"])
 
     def test_start_positions(self):
         expected_start_state = OvercookedState(

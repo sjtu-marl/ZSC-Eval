@@ -1,7 +1,5 @@
 import argparse
 import itertools
-import sys
-from pprint import pformat
 
 import yaml
 from loguru import logger

@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 from gym.spaces import Box
@@ -99,8 +99,8 @@ class FeatureEncoder:
             obs_dict = obs_dict_list[a_i]
             if "custom" in self.representation:
                 state = []
-                # n1 * 2 - (x,y) coordinates of other left team players
-                # n1 * 2 - (x,y) direction of other left team players
+                # n1 * 2 - (x,y) coordinates of left team players
+                # n1 * 2 - (x,y) direction of left team players
                 # n2 * 2 - (x,y) coordinates of right team players
                 # n2 * 2 - (x,y) direction of right team players
 
@@ -273,7 +273,7 @@ class FeatureEncoder:
         ) = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
 
         if self.action_n == 20:
-            BUILTIN_AI = 19
+            pass
 
         # if obs_dict["ball_owned_team"] == 1:  # opponents owning ball
         #     (

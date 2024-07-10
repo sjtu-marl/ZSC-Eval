@@ -3,16 +3,14 @@ import glob
 import json
 import os
 import random
-import sys
 from collections import defaultdict
 from itertools import permutations
-from pprint import pformat, pprint
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 
-from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
+from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS
 
 
 def compute_metric(events: dict, event_types: list, num_agents: int):

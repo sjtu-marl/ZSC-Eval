@@ -1,4 +1,3 @@
-import glob
 import os
 import socket
 import sys
@@ -139,6 +138,7 @@ if __name__ == "__main__":
     exp_names = {
         "random3_m": "hsp-S1",
         "small_corridor": "hsp-S1",
+        "random0" : "hsp-S1",
     }
 
     # logger.add(f"./extract_log/extract_{layout}_hsp_S1_models.log")
