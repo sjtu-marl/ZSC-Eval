@@ -992,7 +992,7 @@ class Overcooked(gym.Env):
             self.history_sa[-1][1] = joint_action
 
         if self.store_traj:
-            self.traj_to_store.append(info["shaped_info_by_agnet"])
+            #self.traj_to_store.append(info["shaped_info_by_agent"])
             self.traj_to_store.append(joint_action)
 
         if self.use_phi:
@@ -1037,7 +1037,7 @@ class Overcooked(gym.Env):
         info["shaped_info_by_agent"] = self.cumulative_shaped_info
 
         if self.store_traj:
-            self.traj_to_store.append(info["shaped_info_by_agnet"])
+            #self.traj_to_store.append(info["shaped_info_by_agent"])
             self.traj_to_store.append(self.base_env.state.to_dict())
 
         reward = [[shaped_reward_p0], [shaped_reward_p1]]
@@ -1073,7 +1073,8 @@ class Overcooked(gym.Env):
                 self.traj["ep_returns"].append(info["episode"]["ep_sparse_r"])
                 self.traj["mdp_params"].append(self.base_mdp.mdp_params)
                 self.traj["env_params"].append(self.base_env.env_params)
-                self.render()
+                if self.rank <= 10:
+                    self.render()
         if done:
             if self.store_traj:
                 self._store_trajectory()
@@ -1176,7 +1177,7 @@ class Overcooked(gym.Env):
 
     def render(self):
         try:
-            save_dir = f"{self.run_dir}/gifs/{self.layout_name}/traj_num_{self.traj_num}"
+            save_dir = f"{self.run_dir}/gifs/{self.layout_name}/traj_{self.rank}_{self.traj_num}"
             save_dir = os.path.expanduser(save_dir)
             StateVisualizer().display_rendered_trajectory(self.traj, img_directory_path=save_dir, ipython_display=False)
             for img_path in os.listdir(save_dir):
@@ -1203,10 +1204,15 @@ class Overcooked(gym.Env):
             print("failed to render traj: ", e)
 
     def _store_trajectory(self):
-        if not os.path.exists(f"{self.run_dir}/trajs/{self.layout_name}/"):
-            os.makedirs(f"{self.run_dir}/trajs/{self.layout_name}/")
-        save_dir = f"{self.run_dir}/trajs/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
+        if not os.path.exists(f"{self.run_dir}/trajs_store/{self.layout_name}/"):
+            os.makedirs(f"{self.run_dir}/trajs_store/{self.layout_name}/", exist_ok=True)
+        save_dir = f"{self.run_dir}/trajs_store/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
         pickle.dump(self.traj_to_store, open(save_dir, "wb"))
+        
+        #if not os.path.exists(f"{self.run_dir}/trajs/{self.layout_name}/"):
+        #    os.makedirs(f"{self.run_dir}/trajs/{self.layout_name}/", exist_ok=True)
+        #save_dir = f"{self.run_dir}/trajs/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
+        #pickle.dump(self.traj, open(save_dir, "wb"))
 
     def seed(self, seed):
         setup_seed(seed)
