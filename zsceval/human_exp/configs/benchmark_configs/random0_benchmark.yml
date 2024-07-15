@@ -1,0 +1,6 @@
+sp1:
+    policy_config_path: random0/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: SP
+    model_path:
+        actor: random0/fcp/s1/sp/sp1_final_actor.pt

@@ -1,0 +1,6 @@
+sp1:
+    policy_config_path: cramped_room/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: SP
+    model_path:
+        actor: cramped_room/fcp/s1/sp/sp1_final_actor.pt
