@@ -164,6 +164,8 @@ if __name__ == "__main__":
         "random1_m",
         "random3_m",
         "academy_3_vs_1_with_keeper",
+        "inverse_marshmallow_experiment",
+        "subobjective",
         "all",
     ]
     if layout == "all":
@@ -191,6 +193,7 @@ if __name__ == "__main__":
             "fcp-S2-s36",
         ],
         "mep": [
+            "mep-S2-s12",
             "mep-S2-s24",
             "mep-S2-s36",
         ],
@@ -212,10 +215,6 @@ if __name__ == "__main__":
         for algo in algorithms:
             logger.info(f"for layout {l}")
 
-            for exp, pop_list in ALG_EXPS[algo].items():
-                for pop in pop_list:
-                    extract_S2_models(l, algo, exp, env, pop)
-
             i = 0
             # for exp in ALG_EXPS[algo]:
             #     extract_pop_S2_models(l, algo, exp, args.env, percentile)
@@ -226,4 +225,4 @@ if __name__ == "__main__":
                 except Exception as e:
                     logger.error(e)
                 else:
-
+                    i += 1
