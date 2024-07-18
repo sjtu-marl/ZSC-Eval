@@ -696,11 +696,11 @@ class OvercookedRunner(Runner):
                         episode_env_infos[f"{log_name}-ep_sparse_r"].append(info["episode"]["ep_sparse_r"])
                         episode_env_infos[f"{log_name}-ep_shaped_r"].append(info["episode"]["ep_shaped_r"])
                         for a in range(self.num_agents):
-                            if getattr(self.all_args, "stage", 1) == 1 or not self.all_args.use_wandb:
-                                for i, k in enumerate(shaped_info_keys):
-                                    episode_env_infos[f"{log_name}-ep_{k}_by_agent{a}"].append(
-                                        info["episode"]["ep_category_r_by_agent"][a][i]
-                                    )
+                            # if getattr(self.all_args, "stage", 1) == 1 or not self.all_args.use_wandb:
+                            for i, k in enumerate(shaped_info_keys):
+                                episode_env_infos[f"{log_name}-ep_{k}_by_agent{a}"].append(
+                                    info["episode"]["ep_category_r_by_agent"][a][i]
+                                )
                             episode_env_infos[f"{log_name}-ep_sparse_r_by_agent{a}"].append(
                                 info["episode"]["ep_sparse_r_by_agent"][a]
                             )
