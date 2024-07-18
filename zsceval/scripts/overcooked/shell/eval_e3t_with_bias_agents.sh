@@ -45,14 +45,14 @@ population_size=$((n + 1))
 for seed in $(seq 1 5); do
     exp_name="${exp}"
     agent_name="${exp_name}-${seed}"
-    
+
     eval_exp="eval-${agent_name}"
     yml=${yml_dir}/${eval_exp}.yml
-    
+
     pt_name="${seed}"
-    
+
     sed -e "s/agent_name/${agent_name}/g" -e "s/rnn_policy_config/mlp_policy_config/g" -e "s/algorithm/${algorithm}/g" -e "s/\/s2/\/s1/g" -e "s/population/${exp_name}/g" -e "s/seed/${pt_name}/g" "${bias_yml}" > "${yml}"
-    
+
     python eval/eval_with_population.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${eval_exp}" --layout_name "${layout}" \
     --num_agents ${num_agents} --seed 1 --episode_length 400 --n_eval_rollout_threads $((n * 20)) --eval_episodes $((n * 40)) --eval_stochastic --dummy_batch_size 2 \
     --use_proper_time_limits \

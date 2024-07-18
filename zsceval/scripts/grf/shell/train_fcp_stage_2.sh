@@ -16,7 +16,7 @@ stage="S2"
 population_size=9
 exp="fcp-${stage}-s${population_size}"
 pop="s${population_size}"
-seed_begin=1    
+seed_begin=1
 seed_max=3
 path=../../policy_pool
 

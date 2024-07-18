@@ -3,14 +3,14 @@ let OvercookedGame = Overcooked.OvercookedGame.OvercookedGame;
 let OvercookedMDP = Overcooked.OvercookedMDP;
 let Direction = OvercookedMDP.Direction;
 let Action = OvercookedMDP.Action;
-let PlayerState = OvercookedMDP.PlayerState; 
-let OvercookedState = OvercookedMDP.OvercookedState; 
+let PlayerState = OvercookedMDP.PlayerState;
+let OvercookedState = OvercookedMDP.OvercookedState;
 let ObjectState = OvercookedMDP.ObjectState;
 
 let [NORTH, SOUTH, EAST, WEST] = Direction.CARDINAL;
 let [STAY, INTERACT] = [Direction.STAY, Action.INTERACT];
 
-let lookupActions = OvercookedMDP.lookupActions; 
+let lookupActions = OvercookedMDP.lookupActions;
 let dictToState = OvercookedMDP.dictToState;
 
 export default class OvercookedTrajectoryReplay{
@@ -29,7 +29,7 @@ export default class OvercookedTrajectoryReplay{
         completion_callback = () => {console.log("Time up")},
         timestep_callback = (data) => {},
         DELIVERY_REWARD = 20
-    }) 
+    })
     {
 
     	let player_colors = {};
@@ -95,11 +95,11 @@ export default class OvercookedTrajectoryReplay{
             let state_dict = this.observations[this.cur_gameloop];
             this.state = dictToState(state_dict);
             this.game.drawState(this.state);
-            
+
             let actions_arr = this.actions[this.cur_gameloop];
             let step_score = this.scores[this.cur_gameloop];
             this.joint_action = lookupActions(actions_arr);
-            // read the two player actions out of the trajectory 
+            // read the two player actions out of the trajectory
             // Do a transition and get the next state and reward.
             let [[next_state, prob], reward] = this.game.mdp.get_transition_states_and_probs_for_replay({
             state: this.state,
@@ -147,8 +147,8 @@ export default class OvercookedTrajectoryReplay{
 
         //time run out
         }, this.TIMESTEP);
-        //By default it seems like we'd want to remove the response listener 
-        // But we could maybe also keep a response listener that takes in the keys Left and Right 
+        //By default it seems like we'd want to remove the response listener
+        // But we could maybe also keep a response listener that takes in the keys Left and Right
         // And if it gets left it regresses the state, and if it gets. right, it progresses the state
         //this.activate_response_listener();
     }
@@ -164,25 +164,25 @@ export default class OvercookedTrajectoryReplay{
 
     activate_response_listener () {
         var slider = document.getElementById("stepSlider");
-        let total_timesteps = this.total_timesteps; 
-        let game = this; 
+        let total_timesteps = this.total_timesteps;
+        let game = this;
         slider.oninput = function() {
             let slider_percent = this.value/100.0;
-            game.cur_gameloop = Math.round(slider_percent*game.total_timesteps); 
+            game.cur_gameloop = Math.round(slider_percent*game.total_timesteps);
             game.paused = false;
         }
         $(document).on("keydown", (e) => {
             switch(e.which) {
             case 37: // left
                 this.cur_gameloop -= 1;
-                this.speed_play = -1; 
-                this.paused = false; 
+                this.speed_play = -1;
+                this.paused = false;
                 break;
 
             case 39: // right
                 this.cur_gameloop += 1;
-                this.speed_play = +1; 
-                this.paused = false; 
+                this.speed_play = +1;
+                this.paused = false;
                 break;
 
             case 32: //space
@@ -194,7 +194,7 @@ export default class OvercookedTrajectoryReplay{
                     this.keyboard_paused = true;
                     console.log("Pausing")
                 }
-                
+
                 break;
             default: return; // exit this handler for other keys
             }
@@ -203,10 +203,10 @@ export default class OvercookedTrajectoryReplay{
 
 	$(document).on("keyup", (e) => {
             if (e.which == 37 || e.which == 39) {
-		this.speed_play = 0; 
+		this.speed_play = 0;
             }
-            
-	}); 
+
+	});
     }
 
     disable_response_listener () {

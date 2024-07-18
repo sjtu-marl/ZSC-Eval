@@ -4,7 +4,7 @@ import numpy as np
 NOTE: Currently under construction...
 
 
-TODO: stretch goal of taking object-oriented approach to trajectories by creating Trajectory class. 
+TODO: stretch goal of taking object-oriented approach to trajectories by creating Trajectory class.
 This would require changes both throughout this repo and overcooked-ai repo, so it's blue sky goal for now
 
 

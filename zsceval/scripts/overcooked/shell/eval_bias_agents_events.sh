@@ -32,9 +32,9 @@ do
     agent1_policy_name="hsp${i}_final_w1"
     exp="eval-hsp${i}"
     yml=${yml_dir}/${exp}.yml
-    
+
     sed -e "s/agent0/${agent0_policy_name}/g" -e "s/agent1/${agent1_policy_name}/g" -e "s/pop/${policy_version}/g" ${path}/${layout}/hsp/s1/${eval_template}.yml > ${yml}
-    
+
     echo "########################################"
     echo "evaluate ${agent0_policy_name}-${agent1_policy_name}"
     python eval/eval.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --layout_name ${layout} \

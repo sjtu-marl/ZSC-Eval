@@ -12,7 +12,7 @@ let Action = OvercookedMDP.Action;
 let OvercookedGridworld = OvercookedMDP.OvercookedGridworld;
 let OvercookedState = OvercookedMDP.OvercookedState;
 
-let dictToState = OvercookedMDP.dictToState; 
+let dictToState = OvercookedMDP.dictToState;
 let lookupActions = OvercookedMDP.lookupActions;
 
 expect.extend({
@@ -45,7 +45,7 @@ let player_colors = {};
 
 const testTrajectoryFolder = '../common_tests/trajectory_tests/';
 const fs = require('fs');
-let testFiles = []; 
+let testFiles = [];
 fs.readdirSync(testTrajectoryFolder).forEach(function(item, index) {
 	// I'm sorry for this, blame the fact that require and all other file system things use different reference points
 	testFiles.push('../' + testTrajectoryFolder + item)
@@ -57,9 +57,9 @@ function trajectoryTest(trajectoryFile) {
 	var trajectoryData = require(trajectoryFile);
 	let game = new OvercookedGame({
 		        start_grid: [
-							    "XXPXX", 
-							    "O  2O", 
-							    "T1  T", 
+							    "XXPXX",
+							    "O  2O",
+							    "T1  T",
 							    "XDPSX"
 							    ],
 		        container_id: "overcooked",
@@ -72,9 +72,9 @@ function trajectoryTest(trajectoryFile) {
 		        player_colors: player_colors
 		    });
 
-			let alignedStates = []; 
+			let alignedStates = [];
 			let alignedRewards = [];
-			let alignedStartingStates = []; 
+			let alignedStartingStates = [];
 			let alignedJointActions = [];
 
 			let observations = trajectoryData.ep_observations[0];
@@ -83,28 +83,28 @@ function trajectoryTest(trajectoryFile) {
 
 		    let current_state = dictToState(observations[0]);
 
-		    let i = 0; 
+		    let i = 0;
 		    while (i < observations.length - 2) {
-		    	let joint_action = lookupActions(actions[i]); 
+		    	let joint_action = lookupActions(actions[i]);
 		    	let trajectory_reward = rewards[i]
 		    	let  [[next_transitioned_state, prob], transitioned_reward] =
 		                    game.mdp.get_transition_states_and_probs({
 		                        state: current_state,
 		                        joint_action: joint_action
-		                    }); 
+		                    });
 		        let next_trajectory_state = dictToState(observations[i+1]);
-		        alignedStartingStates.push(current_state); 
-		        alignedJointActions.push(joint_action); 
-		        alignedStates.push({'trajectory': next_trajectory_state,  'transitioned': next_transitioned_state}); 
+		        alignedStartingStates.push(current_state);
+		        alignedJointActions.push(joint_action);
+		        alignedStates.push({'trajectory': next_trajectory_state,  'transitioned': next_transitioned_state});
 		        alignedRewards.push({'trajectory': trajectory_reward, 'transitioned': transitioned_reward})
 		        current_state = next_trajectory_state
 
-		    	i += 1; 
+		    	i += 1;
 		    }
 
 			alignedStates.forEach(function(item, index) {
 				//console.log("Reached state index " + index)
-				let failMessage = "State failed to match. Started from " + JSON.stringify(alignedStartingStates[index]) + " and took actions " + alignedJointActions[index]; 
+				let failMessage = "State failed to match. Started from " + JSON.stringify(alignedStartingStates[index]) + " and took actions " + alignedJointActions[index];
 				expect(item['trajectory'], failMessage).toEqualState(item['transitioned'])
 			})
 			alignedRewards.forEach(function(item, index) {
@@ -115,13 +115,7 @@ function trajectoryTest(trajectoryFile) {
 testFiles.forEach(function(testFile, index) {
 	console.log("Testing " + testFile)
 	test('States and rewards in ' + testFile + ' should be equivalent between python and JS', () => {
-	trajectoryTest(testFile)	
+	trajectoryTest(testFile)
 });
 
 })
-
-
-
-
-
-

@@ -40,7 +40,7 @@ for (( i=1; i<=$n; i++ ))
 do
     exp="br"
     yml=${yml_dir}/train_${exp}_${i}.yml
-    
+
     python train/train_adaptive.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${exp}" --layout_name ${layout} --num_agents ${num_agents} \
     --seed ${i} --n_training_threads 1 --num_mini_batch 1 --episode_length 400 --num_env_steps ${num_env_steps} --reward_shaping_horizon ${reward_shaping_horizon} \
     --overcooked_version ${version} \

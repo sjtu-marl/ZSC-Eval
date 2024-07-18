@@ -105,7 +105,7 @@ e3t3:
     featurize_type: ppo
     algo: E3T
     model_path:
-        actor: random3/e3t/s1/e3t/3.pt        
+        actor: random3/e3t/s1/e3t/3.pt
 cole1:
     policy_config_path: random3/policy_config/rnn_policy_config.pkl
     featurize_type: ppo

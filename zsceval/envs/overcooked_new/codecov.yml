@@ -11,6 +11,6 @@ coverage:
     precision: 2
     round: down
     range: "70...100"
-    
+
 fixes:
     - "src/::"

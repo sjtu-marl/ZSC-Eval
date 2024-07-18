@@ -48,12 +48,12 @@ export default function getOvercookedPolicy(model_type, layout_name, playerIndex
 				let action_probs;
 
 				// NOTE: Useful for debugging model issues
-				// console.log(model) 
-				if (model.inputs.length == 1) { 
+				// console.log(model)
+				if (model.inputs.length == 1) {
 					// Non-recurrent models
 					action_tensor = model.execute({ "ppo_agent/ppo2_model/Ob": state_tensor });
 					action_probs = action_tensor.arraySync()[0];
-				} else if (model.inputs.length == 3) { 
+				} else if (model.inputs.length == 3) {
 					// Recurrent models
 					let shape = [sim_threads];
 					let dones = constant(0, shape);

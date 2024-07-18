@@ -28,7 +28,7 @@ NAME_TRANSLATION_REVERSE = {v: k for k, v in NAME_TRANSLATION.items()}
 ALL_LAYOUTS = ["random1", "random3"]
 # ALL_LAYOUTS = ["random1"]
 USER_AGENTS = {}
-""" 
+"""
 {
     username_phone:
         - agent_call
@@ -467,7 +467,7 @@ def main(args: argparse.Namespace):
         os.makedirs(os.path.dirname(ARGS.progress_save_path), exist_ok=True)
         with open(ARGS.progress_save_path, "w", encoding="utf-8") as f:
             json.dump({"user_progress": {}, "used_game_settings": []}, f)
-            """ 
+            """
             user_progress:
                 {
                     user_id:

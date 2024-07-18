@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#agent_type_in_a_layout").text(`${agent_settings[agent_type]['run_id']} of ${agent_settings[agent_type]['n_runs']}`)
   }
   // console.log("qqq", agent_settings[agent_type]['layout'])
-  // 
+  //
   changeModel(agent_type);
   $("#layout").text(layout_saved)
   // console.log(paid)
@@ -339,6 +339,3 @@ function getLayoutName(agent_type, agent_settings) {
 $(document).ready(() => {
   enableEnter();
 });
-
-
-

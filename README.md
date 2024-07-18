@@ -5,7 +5,7 @@
 <img src="assets/ZSC-Eval.png" width="800px">
 </div>
 
-This repository is the official implementation of [ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination](https://arxiv.org/abs/2310.05208v2). 
+This repository is the official implementation of [ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination](https://arxiv.org/abs/2310.05208v2).
 
 ZSC-Eval is a comprehensive and convenient evaluation toolkit and benchmark for zero-shot coordination (ZSC) algorithms, including partner candidates generation via behavior-preferring rewards, partners selection via Best-Response Diversity (BR-Div), and ZSC capability measurement via Best-Response Proximity (BR-Prox).
 
@@ -40,11 +40,11 @@ This repo includes:
 
 ## 🗺️ Supported Environments
 
-### 🧑‍🍳 Overcooked 
+### 🧑‍🍳 Overcooked
 
 [Overcooked](https://github.com/HumanCompatibleAI/overcooked_ai) is a simulation environment for reinforcement learning derived from the Overcooked! video game and popular for coordination problems.
 
-The Overcooked environment features a two-player collaborative game structure with shared rewards, where each player assumes the role of a chef in a kitchen, working together to prepare and serve soup for a team reward. 
+The Overcooked environment features a two-player collaborative game structure with shared rewards, where each player assumes the role of a chef in a kitchen, working together to prepare and serve soup for a team reward.
 
 <div align=center>
 <img src="assets/overcooked.png" width="500px">
@@ -59,7 +59,7 @@ We further include Overcooked games with multiple recipes, in which agents shoul
 
 ### ⚽️ Google Research Football
 
-[Google Research Football (GRF)](https://github.com/google-research/football) is a simulation environment for reinforcement learning based on the popular football video game. 
+[Google Research Football (GRF)](https://github.com/google-research/football) is a simulation environment for reinforcement learning based on the popular football video game.
 We choose the Football *Academy 3 vs. 1 with Keeper* scenario and implement it as a ZSC challenge.
 
 <div align=center>
@@ -336,8 +336,8 @@ bash zsc_eval/human_exp/human_exp_up.sh
 
 `utils/`:
 - `config.py`: basic configuration
-- `overcooked_config.py`: configuration for overcooked experimenets 
-- `grf_config.py`: configuration for grf experimenets 
+- `overcooked_config.py`: configuration for overcooked experimenets
+- `grf_config.py`: configuration for grf experimenets
 
 `policy_pool/`: training, evaluation yamls and agent models
 
@@ -346,7 +346,7 @@ bash zsc_eval/human_exp/human_exp_up.sh
 `scripts/`
 - `prep/`: generate yamls for training
     - `select_bias_agent_br.py`: select evaluation partners
-- `extract_models/`: code for extracting trained agent models 
+- `extract_models/`: code for extracting trained agent models
 - `render/`: environment rendering
 - `overcooked/`: scripts for training and evaluating overcooked agents
     - `eval/`: python scripts for evaluation and extraction evaluation results
@@ -372,14 +372,14 @@ The GRF environment is integrated in `zsceval/envs/grf/`:
 
 - `grf_env.py`: the environment wrapper to provide consistent interface with Gym.
 - `scenarios/`: ZSC scenarios.
-- **`reward_process.py`**: event-based reward shaping. 
+- **`reward_process.py`**: event-based reward shaping.
 - **`stats_process.py`**: pre-defined events recording.
 - `raw_feature_process.py`: observation processing for GRF, based on https://github.com/jidiai/GRF_MARL .
 - `multiagentenv.py`: abstract interface
 
 **`reward_process.py`** and **`stats_process.py`** are two key modifications to include GRF in ZSC-Eval.
 
-We argue that ZSC focuses on high-level strategies instead of low-level operations, and thus use some common statistical variables as events, including: 
+We argue that ZSC focuses on high-level strategies instead of low-level operations, and thus use some common statistical variables as events, including:
 
 ```python
 SHAPED_INFOS = [
@@ -473,7 +473,7 @@ Overall ZSC-Eval benchmark results in GRF.
 ## Citation
 ```
 @misc{wang2024zsceval,
-      title={ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination}, 
+      title={ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
       author={Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
       year={2024},
       eprint={2310.05208},
@@ -482,4 +482,4 @@ Overall ZSC-Eval benchmark results in GRF.
 
 ## Acknowledgements
 
-We implement algorithms heavily based on https://github.com/samjia2000/HSP , and human study platform based on https://github.com/liyang619/COLE-Platform. 
+We implement algorithms heavily based on https://github.com/samjia2000/HSP , and human study platform based on https://github.com/liyang619/COLE-Platform.

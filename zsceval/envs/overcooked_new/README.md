@@ -4,7 +4,7 @@
 
 <p align="center">
   <!-- <img src="overcooked_ai_js/images/screenshot.png" width="350"> -->
-  <img src="./images/layouts.gif" width="100%"> 
+  <img src="./images/layouts.gif" width="100%">
   <i>5 of the available layouts. New layouts are easy to hardcode or generate programmatically.</i>
 </p>
 
@@ -52,7 +52,7 @@ conda create -n overcooked_ai python=3.7
 conda activate overcooked_ai
 ```
 
-Clone the repo 
+Clone the repo
 ```
 git clone https://github.com/HumanCompatibleAI/overcooked_ai.git
 ```
@@ -71,7 +71,7 @@ When building from source, you can verify the installation by running the Overco
 python testing/overcooked_test.py
 ```
 
-If you're thinking of using the planning code extensively, you should run the full testing suite that verifies all of the Overcooked accessory tools (this can take 5-10 mins): 
+If you're thinking of using the planning code extensively, you should run the full testing suite that verifies all of the Overcooked accessory tools (this can take 5-10 mins):
 ```
 python -m unittest discover -s testing/ -p "*_test.py"
 ```
@@ -103,4 +103,3 @@ One can adapt a version of [this file](https://github.com/HumanCompatibleAI/huma
 ## Further Issues and questions ❓
 
 If you have issues or questions, don't hesitate to contact either [Micah Carroll](https://micahcarroll.github.io) at mdc@berkeley.edu or [Nathan Miller](https://github.com/nathan-miller23) at nathan_miller23@berkeley.edu
-

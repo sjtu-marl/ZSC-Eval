@@ -20,7 +20,7 @@ let PARAMS = {
     MODEL_TYPE: 'ppo_bc'  // Either ppo_bc, ppo_sp, or pbt
 };
 let trajectoryPath = "static/assets/test_traj.json";
-let trajectoryData; 
+let trajectoryData;
 /***********************************
       Main trial order
 ************************************/
@@ -60,37 +60,37 @@ let layouts = {
         "D XXXX S",
         "X2    1X",
         "XXXOOXXX"
-    ], 
+    ],
     "mdp_test": [
-	"XXPXX", 
-	"O  2O", 
-	"T1  T", 
+	"XXPXX",
+	"O  2O",
+	"T1  T",
 	"XDPSX"
     ]
 };
 
 let game;
 function replayGame(endOfGameCallback){
-    // make sure the game metadata matches what's 
+    // make sure the game metadata matches what's
     // in the trajectory file
     $("#overcooked").empty();
     if (trajectoryData != undefined) {
 
         replayTrajectory(trajectoryData, endOfGameCallback);
     }
-    else { 
+    else {
         console.log("Upload data not found")
         $.getJSON(trajectoryPath, function(trajectoryData) {
             replayTrajectory(trajectoryData, endOfGameCallback);
-        }); 
-    } 
+        });
+    }
 }
 
 function replayTrajectory(trajectoryDataObj, endOfGameCallback) {
     let mdp_params = trajectoryDataObj.mdp_params[0];
     game = new OvercookedTrajectoryReplay({
-        container_id: "overcooked", 
-        trajectory: trajectoryDataObj, 
+        container_id: "overcooked",
+        trajectory: trajectoryDataObj,
         start_grid: layouts[mdp_params.layout_name],
         MAX_TIME : PARAMS.MAIN_TRIAL_TIME, //seconds
         cook_time: mdp_params.cook_time,
@@ -129,7 +129,7 @@ function setTrajectoryPathOnLoad(event){
     trajectoryData = JSON.parse(event.target.result);
     console.log("Uploaded data: ")
     console.log(trajectoryData)
-    
+
 
 }
 
@@ -159,7 +159,7 @@ function alert_data(name, family){
 
 function enableEnter() {
     $(document).keydown(startGameOnEnter);
-    $("#fileInput").on("change", onChange); 
+    $("#fileInput").on("change", onChange);
     if ($("#fileInfo").is(':empty')) {
         $("#fileInfo").html("<p>Reading trajectory info from " + trajectoryPath + "</p>");
     }

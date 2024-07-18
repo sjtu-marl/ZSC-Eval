@@ -83,13 +83,13 @@ for (( i=0; i<$len; i++ )); do
     for seed in $(seq 1 5); do
         exp_name="${exp}"
         agent_name="${exp_name}-${seed}"
-        
+
         echo "Exp name ${exp_name}"
         eval_exp="eval-${agent_name}"
         yml=${yml_dir}/${eval_exp}.yml
-        
+
         sed -e "s/agent_name/${agent_name}/g" -e "s/algorithm/${algorithm}/g" -e "s/population/${exp_name}/g" -e "s/seed/${seed}/g" "${bias_yml}" > "${yml}"
-        
+
         if [[ (${layout} == "random3_m" && $algorithm == "cole")  || $exp == *"mlp" ]]; then
             sed -i -e "s/rnn_policy_config/mlp_policy_config/g" "${yml}"
         fi

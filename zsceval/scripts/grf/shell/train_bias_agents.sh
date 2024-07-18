@@ -43,4 +43,4 @@ do
     --layer_N 2 --layer_after_N 1 --use_recurrent_policy \
     --save_interval 25 --log_interval 10 --use_eval --eval_interval 20 --n_eval_rollout_threads 20 \
     --use_wandb
-done        
+done

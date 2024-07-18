@@ -37,7 +37,7 @@ export default class OvercookedSinglePlayerTask {
     }) {
         //NPC policies get called at every time step
         if (typeof (npc_policies) === 'undefined') {
-            // TODO maybe delete this? 
+            // TODO maybe delete this?
             npc_policies = {
                 1:
                     (function () {
@@ -162,8 +162,8 @@ export default class OvercookedSinglePlayerTask {
             });
 
 
-            // Apparently doing a Parse(Stringify(Obj)) is actually the most succinct way. 
-            // to do a deep copy in JS 
+            // Apparently doing a Parse(Stringify(Obj)) is actually the most succinct way.
+            // to do a deep copy in JS
             // let cleanedState = JSON.parse(JSON.stringify(this.state));
             // cleanedState['objects'] = Object.values(cleanedState['objects']);
             this.trajectory.ep_states[0].push(JSON.stringify(this.state))
@@ -220,8 +220,8 @@ export default class OvercookedSinglePlayerTask {
         let task_params = this.task_params;
 
         // Looks like all the internal objects are getting stored as strings rather than actual arrays or objects
-        // So it looks like Bodyparser only parses the top levl keys, and keeps everything on the lower level as strings rather 
-        // than processing it recursively 
+        // So it looks like Bodyparser only parses the top levl keys, and keeps everything on the lower level as strings rather
+        // than processing it recursively
 
         let parsed_trajectory_data = {
             "ep_states": [[]],

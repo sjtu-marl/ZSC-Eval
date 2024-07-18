@@ -3,7 +3,7 @@
                 O  2O
                 T1  T
                 XDPSX""",
-    "start_all_orders": [ 
+    "start_all_orders": [
         { "ingredients" : ["onion"]},
         { "ingredients" : ["onion", "onion", "onion"]},
         { "ingredients" : ["onion", "tomato", "onion"]}

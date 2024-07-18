@@ -44,7 +44,7 @@ class ZSCEvalAgentPool(AgentPool):
         population_config = yaml.load(open(population_yaml_path, encoding="utf-8"), yaml.Loader)
         self.n_agents = len(population_config)
         self.policy_pool: Dict[str, List[Tuple]] = defaultdict(list)
-        """ 
+        """
         MEP:
             - 0
                 - policy_name

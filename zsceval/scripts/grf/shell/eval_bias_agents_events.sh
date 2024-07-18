@@ -49,7 +49,7 @@ do
     echo "agents ${pair_name}"
     exp="eval-${hsp_name}"
     yml=${yml_dir}/${exp}.yml
-    
+
     sed_command="sed"
     for (( i=0; i<num_agents; i++ ))
     do
@@ -59,7 +59,7 @@ do
     sed_command+=" -e \"s/pop/${policy_version}/g\" ${path}/${scenario}/hsp/s1/${eval_template}.yml > ${yml}"
 
     eval $sed_command
-    
+
     echo "########################################"
     python eval/eval.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --num_agents ${num_agents} \
     --seed 1 --episode_length 200 --n_eval_rollout_threads $((n_combs * 20)) --eval_episodes $((n_combs * 40)) --eval_stochastic --dummy_batch_size 1 \
