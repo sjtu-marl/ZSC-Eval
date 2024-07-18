@@ -369,33 +369,33 @@ class TrainerPool:
             if r > self.best_r[trainer_name]:
                 self.best_r[trainer_name] = r
                 if trainer_name in self.on_training and save_dir is not None:
-                    if not os.path.exists(str(save_dir) + "/{}".format(trainer_name)):
-                        os.makedirs(str(save_dir) + "/{}".format(trainer_name))
+                    if not os.path.exists(str(save_dir) + f"/{trainer_name}"):
+                        os.makedirs(str(save_dir) + f"/{trainer_name}")
                     # print("save", str(save_dir) + "/{}".format(trainer_name), f"best_r")
                     if self.policy_config(trainer_name)[0].use_single_network:
                         policy_model = trainer.policy.model
                         torch.save(
                             policy_model.state_dict(),
-                            str(save_dir) + "/{}/model_best_r.pt".format(trainer_name),
+                            str(save_dir) + f"/{trainer_name}/model_best_r.pt",
                         )
                     else:
                         policy_actor = trainer.policy.actor
                         torch.save(
                             policy_actor.state_dict(),
-                            str(save_dir) + "/{}/actor_best_r.pt".format(trainer_name),
+                            str(save_dir) + f"/{trainer_name}/actor_best_r.pt",
                         )
                         policy_critic = trainer.policy.critic
                         torch.save(
                             policy_critic.state_dict(),
-                            str(save_dir) + "/{}/critic_best_r.pt".format(trainer_name),
+                            str(save_dir) + f"/{trainer_name}/critic_best_r.pt",
                         )
 
     def save(self, step, save_dir, save_critic: bool = False):
         trainer_steps = self.save_steps()
         for trainer_name in self.on_training:
             trainer = self.trainer_pool[trainer_name]
-            if not os.path.exists(str(save_dir) + "/{}".format(trainer_name)):
-                os.makedirs(str(save_dir) + "/{}".format(trainer_name))
+            if not os.path.exists(str(save_dir) + f"/{trainer_name}"):
+                os.makedirs(str(save_dir) + f"/{trainer_name}")
             trainer_step = trainer_steps[trainer_name] if trainer_name in trainer_steps else 0
             if getattr(self.all_args, "data_parallel", False):
 
@@ -410,36 +410,36 @@ class TrainerPool:
                     policy_model = trainer.policy.model
                     torch.save(
                         get_new_state_dict(policy_model.state_dict()),
-                        str(save_dir) + "/{}/model_periodic_{}.pt".format(trainer_name, trainer_step),
+                        str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt",
                     )
                 else:
                     policy_actor = trainer.policy.actor
                     torch.save(
                         get_new_state_dict(policy_actor.state_dict()),
-                        str(save_dir) + "/{}/actor_periodic_{}.pt".format(trainer_name, trainer_step),
+                        str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt",
                     )
                     if save_critic:
                         policy_critic = trainer.policy.critic
                         torch.save(
                             get_new_state_dict(policy_critic.state_dict()),
-                            str(save_dir) + "/{}/critic_periodic_{}.pt".format(trainer_name, trainer_step),
+                            str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt",
                         )
             else:
                 if self.policy_config(trainer_name)[0].use_single_network:
                     policy_model = trainer.policy.model
                     torch.save(
                         policy_model.state_dict(),
-                        str(save_dir) + "/{}/model_periodic_{}.pt".format(trainer_name, trainer_step),
+                        str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt",
                     )
                 else:
                     policy_actor = trainer.policy.actor
                     torch.save(
                         policy_actor.state_dict(),
-                        str(save_dir) + "/{}/actor_periodic_{}.pt".format(trainer_name, trainer_step),
+                        str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt",
                     )
                     if save_critic:
                         policy_critic = trainer.policy.critic
                         torch.save(
                             policy_critic.state_dict(),
-                            str(save_dir) + "/{}/critic_periodic_{}.pt".format(trainer_name, trainer_step),
+                            str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt",
                         )

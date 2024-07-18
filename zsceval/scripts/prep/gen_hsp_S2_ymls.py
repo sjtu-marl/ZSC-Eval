@@ -174,7 +174,7 @@ if __name__ == "__main__":
         for e in exclude:
             if e in logfile:
                 continue
-        with open(logfile, "r", encoding="utf-8") as f:
+        with open(logfile, encoding="utf-8") as f:
             eval_result = json.load(f)
             hsp_exp_name = os.path.basename(logfile).split("eval-")[1].split(".")[0]
             agents = []

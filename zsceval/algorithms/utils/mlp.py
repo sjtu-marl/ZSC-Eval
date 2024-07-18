@@ -7,7 +7,7 @@ from .util import get_clones, init
 
 class MLPLayer(nn.Module):
     def __init__(self, input_dim, hidden_size, layer_N, use_orthogonal, activation_id):
-        super(MLPLayer, self).__init__()
+        super().__init__()
         self._layer_N = layer_N
 
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
@@ -38,7 +38,7 @@ class MLPLayer(nn.Module):
 
 class CONVLayer(nn.Module):
     def __init__(self, input_dim, hidden_size, use_orthogonal, activation_id):
-        super(CONVLayer, self).__init__()
+        super().__init__()
 
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
@@ -87,7 +87,7 @@ class CONVLayer(nn.Module):
 
 class MLPBase(nn.Module):
     def __init__(self, args, obs_shape, use_attn_internal=False, use_cat_self=True):
-        super(MLPBase, self).__init__()
+        super().__init__()
 
         self._use_feature_normalization = args.use_feature_normalization
         self._use_orthogonal = args.use_orthogonal

@@ -252,7 +252,7 @@ def main(args):
 
     #  override policy config
     population_config = yaml.load(open(all_args.population_yaml_path), yaml.Loader)
-    logger.info("population_config: {}".format(pformat(population_config)))
+    logger.info(f"population_config: {pformat(population_config)}")
 
     override_policy_config = {}
     agent_name = all_args.adaptive_agent_name

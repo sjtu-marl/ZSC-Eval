@@ -46,7 +46,7 @@ NO_COUNTERS_START_OR_PARAMS = {
 }
 
 
-class MotionPlanner(object):
+class MotionPlanner:
     """A planner that computes optimal plans for a single agent to
     arrive at goal positions and orientations in an OvercookedGridworld.
 
@@ -325,7 +325,7 @@ class MotionPlanner(object):
         return goals
 
 
-class JointMotionPlanner(object):
+class JointMotionPlanner:
     """A planner that computes optimal plans for a two agents to
     arrive at goal positions and orientations in a OvercookedGridworld.
 
@@ -373,7 +373,7 @@ class JointMotionPlanner(object):
         """
         assert self.is_valid_joint_motion_pair(
             start_jm_state, goal_jm_state
-        ), "start: {} \t end: {} was not a valid motion goal pair".format(start_jm_state, goal_jm_state)
+        ), f"start: {start_jm_state} \t end: {goal_jm_state} was not a valid motion goal pair"
 
         if self.start_orientations:
             plan_key = (start_jm_state, goal_jm_state)
@@ -805,7 +805,7 @@ class JointMotionPlanner(object):
         return end_state
 
 
-class MediumLevelActionManager(object):
+class MediumLevelActionManager:
     """
     Manager for medium level actions (specific joint motion goals).
     Determines available medium level actions for each state.
@@ -996,7 +996,7 @@ class MediumLevelActionManager(object):
         return possible_motion_goals
 
 
-class MediumLevelPlanner(object):
+class MediumLevelPlanner:
     """
     A planner that computes optimal plans for two agents to deliver a certain number of dishes
     in an OvercookedGridworld using medium level actions (single motion goals) in the corresponding
@@ -1042,10 +1042,10 @@ class MediumLevelPlanner(object):
     @staticmethod
     def compute_mlp(filename, mdp, mlp_params):
         final_filepath = os.path.join(PLANNERS_DIR, filename)
-        print("Computing MediumLevelPlanner to be saved in {}".format(final_filepath))
+        print(f"Computing MediumLevelPlanner to be saved in {final_filepath}")
         start_time = time.time()
         mlp = MediumLevelPlanner(mdp, mlp_params=mlp_params)
-        print("It took {} seconds to create mlp".format(time.time() - start_time))
+        print(f"It took {time.time() - start_time} seconds to create mlp")
         mlp.ml_action_manager.save_to_file(final_filepath)
         return mlp
 
@@ -1072,7 +1072,7 @@ class MediumLevelPlanner(object):
             cost, len(full_joint_action_plan)
         )
         if debug:
-            print("Found plan with cost {}".format(cost))
+            print(f"Found plan with cost {cost}")
         return full_joint_action_plan
 
     def get_low_level_plan_from_ml_plan(self, start_state, ml_plan, heuristic_fn, debug=False, goal_info=False):
@@ -1265,7 +1265,7 @@ class MediumLevelPlanner(object):
             successor_state = results
         else:
             print("Tried to find successor of terminal")
-            assert False, "state {} \t action {}".format(state, action)
+            assert False, f"state {state} \t action {action}"
             successor_state = state
         return successor_state, joint_action
 
@@ -1289,7 +1289,7 @@ class HighLevelAction:
         return self.motion_goals[i]
 
 
-class HighLevelActionManager(object):
+class HighLevelActionManager:
     """
     Manager for high level actions. Determines available high level actions
     for each state and player.
@@ -1364,7 +1364,7 @@ class HighLevelActionManager(object):
         return [HighLevelAction(hl_action_list) for hl_action_list in hl_level_actions]
 
 
-class HighLevelPlanner(object):
+class HighLevelPlanner:
     """A planner that computes optimal plans for two agents to
     deliver a certain number of dishes in an OvercookedGridworld
     using high level actions in the corresponding A* search problems
@@ -1469,7 +1469,7 @@ class HighLevelPlanner(object):
             return idx0, idx1 + 1
 
 
-class Heuristic(object):
+class Heuristic:
     def __init__(self, mp):
         self.motion_planner = mp
         self.mdp = mp.mdp
@@ -1607,7 +1607,7 @@ class Heuristic(object):
             env = OvercookedEnv(self.mdp)
             env.state = state
             print("\n" + "#" * 35)
-            print("Current state: (ml timestep {})\n".format(time))
+            print(f"Current state: (ml timestep {time})\n")
 
             print(
                 "# in transit: \t\t Soups {} \t Dishes {} \t Onions {}".format(
@@ -1641,7 +1641,7 @@ class Heuristic(object):
                 )
             )
 
-            print(str(env) + "HEURISTIC: {}".format(heuristic_cost))
+            print(str(env) + f"HEURISTIC: {heuristic_cost}")
 
         return heuristic_cost
 
@@ -1768,7 +1768,7 @@ class Heuristic(object):
             env = OvercookedEnv(self.mdp)
             env.state = state
             print("\n" + "#" * 35)
-            print("Current state: (ml timestep {})\n".format(time))
+            print(f"Current state: (ml timestep {time})\n")
 
             print(
                 "# in transit: \t\t Soups {} \t Dishes {} \t Onions {}".format(
@@ -1784,6 +1784,6 @@ class Heuristic(object):
                 )
             )
 
-            print(str(env) + "HEURISTIC: {}".format(heuristic_cost))
+            print(str(env) + f"HEURISTIC: {heuristic_cost}")
 
         return heuristic_cost

@@ -375,7 +375,7 @@ class TestJointMotionPlanner(unittest.TestCase):
             plan_lengths,
         ) = joint_motion_planner.get_low_level_action_plan(start, goal)
         if debug:
-            print("Start state: {}, Goal state: {}, Action plan: {}".format(start, goal, action_plan))
+            print(f"Start state: {start}, Goal state: {goal}, Action plan: {action_plan}")
 
         start_state = OvercookedState([P(*start[0]), P(*start[1])], {}, all_orders=simple_mdp.start_all_orders)
         env = OvercookedEnv.from_mdp(joint_motion_planner.mdp, horizon=1000)

@@ -5,14 +5,13 @@ import json
 import os.path as osp
 import re
 import sys
-from collections import defaultdict
-from pprint import pformat, pprint
+from pprint import pformat
 
 import yaml
 from loguru import logger
-from scipy.stats import bootstrap, trim_mean
+from scipy.stats import trim_mean
 
-from zsceval.utils.bias_agent_vars import LAYOUTS_EXPS, LAYOUTS_KS, LAYOUTS_NS
+from zsceval.utils.bias_agent_vars import LAYOUTS_KS, LAYOUTS_NS
 
 ALG_EXPS = {
     "sp": ["sp"],
@@ -98,7 +97,7 @@ if __name__ == "__main__":
     num_agents = LAYOUTS_NS[layout]
 
     bias_yml_path = BIAS_YML_PATH.format(layout=layout, N=LAYOUTS_KS[layout] * 2)
-    yml_dict = yaml.load(open(bias_yml_path, "r", encoding="utf-8"), Loader=yaml.FullLoader)
+    yml_dict = yaml.load(open(bias_yml_path, encoding="utf-8"), Loader=yaml.FullLoader)
     bias_agent_names = yml_dict.keys()
     bias_agent_names = [name for name in bias_agent_names if name != "agent_name"]
     logger.debug(f"bias agents\n{bias_agent_names}")
@@ -112,7 +111,7 @@ if __name__ == "__main__":
         if "final" in a_n:
             version_name = a_n.replace("bias", "hsp")
             eval_file_path = osp.join(bias_result_dir, f"eval-{version_name.split('_')[0]}.json")
-            eval_result = json.load(open(eval_file_path, "r", encoding="utf-8"))
+            eval_result = json.load(open(eval_file_path, encoding="utf-8"))
 
             agents = (f"{version_name}_w0",)
             combs = get_agent_pairs(agents, agent_name, num_agents)
@@ -141,7 +140,7 @@ if __name__ == "__main__":
     actual_agent_name = "br_agent"
     pattern = r"^(?!either).+eval_ep_sparse_r$"
     for m_p in mid_result_file_paths:
-        eval_result = json.load(open(m_p, "r", encoding="utf-8"))
+        eval_result = json.load(open(m_p, encoding="utf-8"))
         for k, v in eval_result.items():
             if re.match(pattern, k):
                 data_name = k.replace("-eval_ep_sparse_r", "").replace(actual_agent_name, agent_name)
@@ -169,7 +168,7 @@ if __name__ == "__main__":
             pos_results = [[] for _ in range(num_agents)]
             for seed in range(1, 6):
                 actual_agent_name = f"{exp_name}-{seed}"
-                eval_result = json.load(open(f"{eval_result_dir}/eval-{actual_agent_name}.json", "r", encoding="utf-8"))
+                eval_result = json.load(open(f"{eval_result_dir}/eval-{actual_agent_name}.json", encoding="utf-8"))
                 # logger.debug(pformat(eval_result))
                 combs = get_agent_pairs(bias_agent_names, f"{actual_agent_name}", num_agents)
 

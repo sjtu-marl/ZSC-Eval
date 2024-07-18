@@ -54,7 +54,7 @@ def test_render_state_from_dict(test_dict):
         return False
 
     wrong_rows, wrong_columns, wrong_color_channels = np.where(actual_result != expected_result)
-    wrong_coordinates = set([(row, col) for row, col in zip(wrong_rows, wrong_columns)])
+    wrong_coordinates = {(row, col) for row, col in zip(wrong_rows, wrong_columns)}
     incorrect_pixels_num = len(wrong_coordinates)
     all_pixels_num = int(expected_result.size / 3)
     if incorrect_pixels_num:

@@ -15,7 +15,7 @@ from zsceval.utils.util import get_shape_from_obs_space
 
 class R_Actor(nn.Module):
     def __init__(self, args, obs_space, action_space, device=torch.device("cpu")):
-        super(R_Actor, self).__init__()
+        super().__init__()
         self.hidden_size = args.hidden_size
 
         self._gain = args.gain
@@ -296,7 +296,7 @@ class R_Actor(nn.Module):
 
 class R_Critic(nn.Module):
     def __init__(self, args, share_obs_space, device=torch.device("cpu")):
-        super(R_Critic, self).__init__()
+        super().__init__()
         self.hidden_size = args.hidden_size
         self._use_orthogonal = args.use_orthogonal
         self._activation_id = args.activation_id

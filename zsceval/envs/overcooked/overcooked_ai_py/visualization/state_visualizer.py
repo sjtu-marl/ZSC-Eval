@@ -352,7 +352,7 @@ class StateVisualizer:
             return frame_name
 
         def hat_frame_name(direction_name, player_color_name):
-            return "%s-%shat" % (direction_name, player_color_name)
+            return f"{direction_name}-{player_color_name}hat"
 
         for player_num, player in enumerate(players):
             player_color_name = self.player_colors[player_num]

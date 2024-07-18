@@ -14,7 +14,7 @@ import psutil
 from zsceval.utils.util import tile_images
 
 
-class CloudpickleWrapper(object):
+class CloudpickleWrapper:
     """
     Uses cloudpickle to serialize contents (otherwise multiprocessing tries to use pickle)
     """
@@ -156,7 +156,7 @@ def worker(remote, parent_remote, env_fn_wrapper):
             remote.send((ob, reward, done, info))
         elif cmd == "reset":
             ob = env.reset()
-            remote.send((ob))
+            remote.send(ob)
         elif cmd == "render":
             if data == "rgb_array":
                 fr = env.render(mode=data)
@@ -173,7 +173,7 @@ def worker(remote, parent_remote, env_fn_wrapper):
         elif cmd == "get_spaces":
             remote.send((env.observation_space, env.share_observation_space, env.action_space))
         elif cmd == "get_max_step":
-            remote.send((env.max_steps))
+            remote.send(env.max_steps)
         elif cmd == "anneal_reward_shaping_factor":
             env.anneal_reward_shaping_factor(data)
         elif cmd == "reset_featurize_type":
@@ -358,7 +358,7 @@ def shareworker(remote, parent_remote, env_fn_wrapper, worker_id: int = None):
             remote.send((env.observation_space, env.share_observation_space, env.action_space))
         elif cmd == "render_vulnerability":
             fr = env.render_vulnerability(data)
-            remote.send((fr))
+            remote.send(fr)
         elif cmd == "anneal_reward_shaping_factor":
             env.anneal_reward_shaping_factor(data)
         elif cmd == "reset_featurize_type":
@@ -782,7 +782,7 @@ def choosesimpleworker(remote, parent_remote, env_fn_wrapper):
             # Qs: why not reset?
         elif cmd == "reset":
             ob = env.reset(data)
-            remote.send((ob))
+            remote.send(ob)
         elif cmd == "reset_task":
             ob = env.reset_task()
             remote.send(ob)
@@ -799,7 +799,7 @@ def choosesimpleworker(remote, parent_remote, env_fn_wrapper):
         elif cmd == "get_spaces":
             remote.send((env.observation_space, env.share_observation_space, env.action_space))
         elif cmd == "get_max_step":
-            remote.send((env.max_steps))
+            remote.send(env.max_steps)
         else:
             raise NotImplementedError
 
@@ -1051,7 +1051,7 @@ def chooseguardworker(remote, parent_remote, env_fn_wrapper):
             remote.send((ob, reward, done, info))
         elif cmd == "reset":
             ob = env.reset(data)
-            remote.send((ob))
+            remote.send(ob)
         elif cmd == "reset_task":
             ob = env.reset_task()
             remote.send(ob)

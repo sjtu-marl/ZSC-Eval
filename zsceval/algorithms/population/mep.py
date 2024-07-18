@@ -11,7 +11,7 @@ from zsceval.algorithms.population.utils import _t2n
 
 class MEP_Trainer(TrainerPool):
     def __init__(self, args, policy_pool: PolicyPool, device=torch.device("cpu")):
-        super(MEP_Trainer, self).__init__(args, policy_pool, device)
+        super().__init__(args, policy_pool, device)
 
         self.stage = args.stage
         if self.stage == 1:
@@ -23,7 +23,7 @@ class MEP_Trainer(TrainerPool):
         self.args = args
 
     def init_population(self):
-        super(MEP_Trainer, self).init_population()
+        super().init_population()
 
         self.agent_name = self.all_args.adaptive_agent_name
         self.population = {
@@ -57,7 +57,7 @@ class MEP_Trainer(TrainerPool):
                     assert f"{x}_{a}" in self.trainer_pool.keys()
 
     def reward_shaping_steps(self):
-        reward_shaping_steps = super(MEP_Trainer, self).reward_shaping_steps()
+        reward_shaping_steps = super().reward_shaping_steps()
         if self.stage == 1:
             return [x // 2 for x in reward_shaping_steps]
         return reward_shaping_steps
@@ -204,7 +204,7 @@ class MEP_Trainer(TrainerPool):
 
                 buffer.rewards[: buffer.episode_length] += nlog_pop_act_prob[active_trainer_name] * self.entropy_alpha
 
-        super(MEP_Trainer, self).train()
+        super().train()
 
         if self.stage == 1:
             # subtract population entropy from reward

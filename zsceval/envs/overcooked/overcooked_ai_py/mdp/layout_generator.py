@@ -26,7 +26,7 @@ CODE_TO_TYPE = {
 TYPE_TO_CODE = {v: k for k, v in CODE_TO_TYPE.items()}
 
 
-class LayoutGenerator(object):
+class LayoutGenerator:
     # NOTE: This class hasn't been tested extensively.
 
     def __init__(self, outer_shape, mdp_params):
@@ -199,7 +199,7 @@ class LayoutGenerator(object):
         return pos0, pos1
 
 
-class Grid(object):
+class Grid:
     def __init__(self, shape):
         assert len(shape) == 2, "Grid must be 2 dimensional"
         grid = (np.ones(shape) * TYPE_TO_CODE[COUNTER]).astype(np.int)
@@ -315,7 +315,7 @@ class Grid(object):
                 column.append(CODE_TO_TYPE[self.mtx[x][y]])
             rows.append(column)
         string_grid = np.array(rows)
-        assert np.array_equal(string_grid.T.shape, self.shape), "{} vs {}".format(string_grid.shape, self.shape)
+        assert np.array_equal(string_grid.T.shape, self.shape), f"{string_grid.shape} vs {self.shape}"
         return string_grid
 
     def __repr__(self):
@@ -328,7 +328,7 @@ class Grid(object):
         return s
 
 
-class Fringe(object):
+class Fringe:
     def __init__(self, grid):
         self.fringe_list = []
         self.distribution = []
@@ -350,7 +350,7 @@ class Fringe(object):
         self.distribution = np.ones(len(self.fringe_list)) / len(self.fringe_list)
 
 
-class DisjointSets(object):
+class DisjointSets:
     """A simple implementation of the Disjoint Sets data structure.
 
     Implements path compression but not union-by-rank.

@@ -189,7 +189,7 @@ class Pickup_Ingredient_and_Place_in_Pot(BaseScriptPeriod):
 
 class Pickup_Onion_and_Place_in_Pot(Pickup_Ingredient_and_Place_in_Pot):
     def __init__(self, random_put=True, random_pot=True, random_onion=True):
-        super(Pickup_Onion_and_Place_in_Pot, self).__init__(
+        super().__init__(
             obj="onion",
             random_put=random_put,
             random_pot=random_pot,
@@ -199,7 +199,7 @@ class Pickup_Onion_and_Place_in_Pot(Pickup_Ingredient_and_Place_in_Pot):
 
 class Pickup_Tomato_and_Place_in_Pot(Pickup_Ingredient_and_Place_in_Pot):
     def __init__(self, random_put=True, random_pot=True, random_tomato=True):
-        super(Pickup_Tomato_and_Place_in_Pot, self).__init__(
+        super().__init__(
             obj="tomato",
             random_put=random_put,
             random_pot=random_pot,
@@ -324,7 +324,7 @@ class Pickup_Ingredient_and_Place_Mix(BaseScriptPeriod):
 
 class Pickup_Onion_and_Place_Mix(Pickup_Ingredient_and_Place_Mix):
     def __init__(self, random_put=True, random_pot=True, random_onion=True):
-        super(Pickup_Onion_and_Place_Mix, self).__init__(
+        super().__init__(
             obj=["onion"],
             random_put=random_put,
             random_pot=random_pot,
@@ -334,7 +334,7 @@ class Pickup_Onion_and_Place_Mix(Pickup_Ingredient_and_Place_Mix):
 
 class Pickup_Tomato_and_Place_Mix(Pickup_Ingredient_and_Place_Mix):
     def __init__(self, random_put=True, random_pot=True, random_tomato=True):
-        super(Pickup_Tomato_and_Place_Mix, self).__init__(
+        super().__init__(
             obj=["tomato"],
             random_put=random_put,
             random_pot=random_pot,
@@ -529,16 +529,12 @@ class Pickup_Ingredient_and_Place_Random(BaseScriptPeriod):
 
 class Pickup_Onion_and_Place_Random(BaseScriptPeriod):
     def __init__(self, random_put=True, random_onion=True):
-        super(Pickup_Onion_and_Place_Random, self).__init__(
-            random_put=random_put, random_ingredient=random_onion, obj="onion"
-        )
+        super().__init__(random_put=random_put, random_ingredient=random_onion, obj="onion")
 
 
 class Pickup_Tomato_and_Place_Random(BaseScriptPeriod):
     def __init__(self, random_put=True, random_tomato=True):
-        super(Pickup_Tomato_and_Place_Random, self).__init__(
-            random_put=random_put, random_ingredient=random_tomato, obj="tomato"
-        )
+        super().__init__(random_put=random_put, random_ingredient=random_tomato, obj="tomato")
 
 
 class Put_Ingredient_Everywhere(BaseScriptPeriod):
@@ -591,14 +587,12 @@ class Put_Ingredient_Everywhere(BaseScriptPeriod):
 
 class Put_Onion_Everywhere(Put_Ingredient_Everywhere):
     def __init__(self, random_put=True, random_onion=True):
-        super(Put_Onion_Everywhere, self).__init__(random_put=random_put, random_ingredient=random_onion, obj="onion")
+        super().__init__(random_put=random_put, random_ingredient=random_onion, obj="onion")
 
 
 class Put_Tomato_Everywhere(Put_Ingredient_Everywhere):
     def __init__(self, random_put=True, random_tomato=True):
-        super(Put_Tomato_Everywhere, self).__init__(
-            random_put=random_put, random_ingredient=random_tomato, obj="tomato"
-        )
+        super().__init__(random_put=random_put, random_ingredient=random_tomato, obj="tomato")
 
 
 class Pickup_Dish_and_Place_Random(BaseScriptPeriod):

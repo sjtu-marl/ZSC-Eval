@@ -42,7 +42,7 @@ DEFAULT_TRAJ_KEYS = [
 ]
 
 
-class AgentEvaluator(object):
+class AgentEvaluator:
     """
     Class used to get rollouts and evaluate performance of various types of agents.
     """
@@ -181,7 +181,7 @@ class AgentEvaluator(object):
                 assert states[i + 1] == next_state, "States differed (expected vs actual): {}".format(
                     simulation_env.display_states(states[i + 1], next_state)
                 )
-                assert rewards[i] == reward, "{} \t {}".format(rewards[i], reward)
+                assert rewards[i] == reward, f"{rewards[i]} \t {reward}"
 
     ### I/O METHODS ###
 
@@ -261,9 +261,7 @@ class AgentEvaluator(object):
             env.state = states[int(t)]
             joint_action = joint_actions[int(t - 1)] if t > 0 else (Action.STAY, Action.STAY)
             print(env)
-            print(
-                "Joint Action: {} \t Score: {}".format(Action.joint_action_to_char(joint_action), cumulative_rewards[t])
-            )
+            print(f"Joint Action: {Action.joint_action_to_char(joint_action)} \t Score: {cumulative_rewards[t]}")
 
         t = widgets.IntSlider(min=0, max=len(states) - 1, step=1, value=0)
         out = interactive_output(update, {"t": t})

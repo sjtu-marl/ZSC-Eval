@@ -7,7 +7,7 @@ import numpy as np
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.actions import Action
 
 
-class Agent(object):
+class Agent:
     def __init__(self):
         self.reset()
 
@@ -66,7 +66,7 @@ class Agent(object):
         self.mdp = None
 
 
-class AgentGroup(object):
+class AgentGroup:
     """
     AgentGroup is a group of N agents used to sample
     joint actions in the context of an OvercookedEnv instance.
@@ -128,7 +128,7 @@ class AgentPair(AgentGroup):
             return super().joint_action(state)
 
 
-class NNPolicy(object):
+class NNPolicy:
     """
     This is a common format for NN-based policies. Once one has wrangled the intended trained neural net
     to this format, one can then easily create an Agent with the AgentFromPolicy class.
@@ -178,7 +178,7 @@ class AgentFromPolicy(Agent):
         self.policy.mdp = mdp
 
     def reset(self):
-        super(AgentFromPolicy, self).reset()
+        super().reset()
         self.policy.mdp = None
 
 
@@ -433,7 +433,7 @@ class GreedyHumanModel(Agent):
                     state.all_orders
                 )
                 next_order = list(state.all_orders)[0]
-                soups_ready_to_cook_key = "{}_items".format(len(next_order.ingredients))
+                soups_ready_to_cook_key = f"{len(next_order.ingredients)}_items"
                 soups_ready_to_cook = pot_states_dict[soups_ready_to_cook_key]
                 if soups_ready_to_cook:
                     only_pot_states_ready_to_cook = defaultdict(list)

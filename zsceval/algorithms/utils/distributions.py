@@ -51,7 +51,7 @@ class FixedBernoulli(torch.distributions.Bernoulli):
 
 class Categorical(nn.Module):
     def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01):
-        super(Categorical, self).__init__()
+        super().__init__()
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
 
         def init_(m):
@@ -79,7 +79,7 @@ class Categorical(nn.Module):
 
 class DiagGaussian(nn.Module):
     def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01):
-        super(DiagGaussian, self).__init__()
+        super().__init__()
 
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
 
@@ -103,7 +103,7 @@ class DiagGaussian(nn.Module):
 
 class Bernoulli(nn.Module):
     def __init__(self, num_inputs, num_outputs, use_orthogonal=True, gain=0.01):
-        super(Bernoulli, self).__init__()
+        super().__init__()
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
 
         def init_(m):
@@ -118,7 +118,7 @@ class Bernoulli(nn.Module):
 
 class AddBias(nn.Module):
     def __init__(self, bias):
-        super(AddBias, self).__init__()
+        super().__init__()
         self._bias = nn.Parameter(bias.unsqueeze(1))
 
     def forward(self, x):

@@ -12,7 +12,7 @@ class Flatten(nn.Module):
 
 class CNNBase(nn.Module):
     def __init__(self, args, obs_shape, cnn_layers_params=None):
-        super(CNNBase, self).__init__()
+        super().__init__()
 
         self._use_orthogonal = args.use_orthogonal
         self._activation_id = args.activation_id

@@ -109,7 +109,7 @@ class Place_Onion_and_Deliver_Soup_Agent(RandomScriptAgent):
                     i=0
                 )  # pickup_onion_and_place_in_pot
                 self._current_period.reset(mdp, state, player_idx)
-        return super(Place_Onion_and_Deliver_Soup_Agent, self).step(mdp, state, player_idx)
+        return super().step(mdp, state, player_idx)
 
 
 class Place_Tomato_and_Deliver_Soup_Agent(RandomScriptAgent):
@@ -137,7 +137,7 @@ class Place_Tomato_and_Deliver_Soup_Agent(RandomScriptAgent):
                     i=0
                 )  # pickup_tomato_and_place_in_pot
                 self._current_period.reset(mdp, state, player_idx)
-        return super(Place_Tomato_and_Deliver_Soup_Agent, self).step(mdp, state, player_idx)
+        return super().step(mdp, state, player_idx)
 
 
 class Noisy_Agent(RandomScriptAgent):
@@ -169,7 +169,7 @@ class Noisy_Agent(RandomScriptAgent):
                     i=0
                 )  # pickup_onion_and_place_in_pot; Do not use pickup_onion_and_place_random since we want to really put onion into pot
                 self._current_period.reset(mdp, state, player_idx)
-        return super(Noisy_Agent, self).step(mdp, state, player_idx)
+        return super().step(mdp, state, player_idx)
 
 
 class Random3_Only_Onion_to_Middle_Agent(RandomScriptAgent):

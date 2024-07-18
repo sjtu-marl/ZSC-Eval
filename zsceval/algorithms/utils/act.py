@@ -6,7 +6,7 @@ from .distributions import Bernoulli, Categorical, DiagGaussian
 
 class ACTLayer(nn.Module):
     def __init__(self, action_space, inputs_dim, use_orthogonal, gain):
-        super(ACTLayer, self).__init__()
+        super().__init__()
         self.multidiscrete_action = False
         self.continuous_action = False
         self.mixed_action = False

@@ -16,7 +16,7 @@ class PopArt(torch.nn.Module):
         epsilon=1e-5,
         device=torch.device("cpu"),
     ):
-        super(PopArt, self).__init__()
+        super().__init__()
 
         self.beta = beta
         self.epsilon = epsilon

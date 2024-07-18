@@ -28,7 +28,7 @@ class OvercookedRunner(Runner):
     """
 
     def __init__(self, config):
-        super(OvercookedRunner, self).__init__(config)
+        super().__init__(config)
 
         # for training br
         self.br_best_sparse_r = 0
@@ -288,19 +288,19 @@ class OvercookedRunner(Runner):
             policy_model = self.trainer.policy.model
             torch.save(
                 policy_model.state_dict(),
-                str(self.save_dir) + "/model_periodic_{}.pt".format(step),
+                str(self.save_dir) + f"/model_periodic_{step}.pt",
             )
         else:
             policy_actor = self.trainer.policy.actor
             torch.save(
                 policy_actor.state_dict(),
-                str(self.save_dir) + "/actor_periodic_{}.pt".format(step),
+                str(self.save_dir) + f"/actor_periodic_{step}.pt",
             )
             if save_critic:
                 policy_critic = self.trainer.policy.critic
                 torch.save(
                     policy_critic.state_dict(),
-                    str(self.save_dir) + "/critic_periodic_{}.pt".format(step),
+                    str(self.save_dir) + f"/critic_periodic_{step}.pt",
                 )
 
     @torch.no_grad()
@@ -565,11 +565,11 @@ class OvercookedRunner(Runner):
                 self.br_eval_json = copy.deepcopy(eval_infos2dump)
 
                 if getattr(self.all_args, "eval_result_path", None):
-                    logger.debug("dump eval_infos to {}".format(self.all_args.eval_result_path))
+                    logger.debug(f"dump eval_infos to {self.all_args.eval_result_path}")
                     with open(self.all_args.eval_result_path, "w", encoding="utf-8") as f:
                         json.dump(self.br_eval_json, f)
         elif getattr(self.all_args, "eval_result_path", None):
-            logger.debug("dump eval_infos to {}".format(self.all_args.eval_result_path))
+            logger.debug(f"dump eval_infos to {self.all_args.eval_result_path}")
             with open(self.all_args.eval_result_path, "w", encoding="utf-8") as f:
                 json.dump(eval_infos2dump, f)
 

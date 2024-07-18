@@ -94,7 +94,7 @@ def beforegame():
     if request.method == "POST":
         script_path = os.path.abspath(__file__)
         script_directory = os.path.dirname(script_path)
-        f = open(os.path.join(script_directory, "..", "configs", "before_game.yaml"), "r", encoding="utf-8")
+        f = open(os.path.join(script_directory, "..", "configs", "before_game.yaml"), encoding="utf-8")
         config = yaml.load(f, Loader=yaml.FullLoader)
         return config
 
@@ -104,7 +104,7 @@ def statement():
     if request.method == "POST":
         script_path = os.path.abspath(__file__)
         script_directory = os.path.dirname(script_path)
-        f = open(os.path.join(script_directory, "..", "configs", "statement.md"), "r", encoding="utf-8").read()
+        f = open(os.path.join(script_directory, "..", "configs", "statement.md"), encoding="utf-8").read()
         html = markdown(f)
         return html
 
@@ -115,7 +115,7 @@ def init_game_settings(
     """
     random_start_index : whether to use randomized starting index in overcooked
     """
-    with open(ARGS.progress_save_path, "r", encoding="utf-8") as f:
+    with open(ARGS.progress_save_path, encoding="utf-8") as f:
         progress_dict = json.load(f)
     layout_game_algo_lists = defaultdict(list)
     for g_settings in progress_dict["used_game_settings"]:
@@ -176,7 +176,7 @@ def randomize_game_settings():
         user_info = json.loads(request.data)
         user_id = f"{user_info['name']}_{user_info['phone']}"
         logger.debug(f"data json {user_info}")
-        with open(ARGS.progress_save_path, "r", encoding="utf-8") as f:
+        with open(ARGS.progress_save_path, encoding="utf-8") as f:
             progress_dict = json.load(f)
         if user_id in progress_dict["user_progress"]:
             game_settings, agent_type, code_order = progress_dict["user_progress"][user_id]
@@ -256,10 +256,10 @@ def create_questionnaire_before_game():
     user_id = f"{data_json.get('name')}_{data_json.get('phone')}"
     questionnaire_path = os.path.join(ARGS.questionnaire_save_path, f"{user_id}.json")
     if os.path.exists(questionnaire_path):
-        with open(f"{questionnaire_path}", "r", encoding="utf-8") as f:
+        with open(f"{questionnaire_path}", encoding="utf-8") as f:
             prev_data_json: Dict = json.load(f)
         data_json |= prev_data_json
-        with open(ARGS.progress_save_path, "r", encoding="utf-8") as f:
+        with open(ARGS.progress_save_path, encoding="utf-8") as f:
             progress_dict = json.load(f)
             logger.info(f"user {user_id} resume run {pformat(progress_dict['user_progress'][user_id][1])}")
     with open(f"{questionnaire_path}", "w", encoding="utf-8") as f:
@@ -287,7 +287,7 @@ def create_questionnaire_in_game():
     data_json = json.loads(request.data)
     user_id = f"{data_json.get('name')}_{data_json.get('phone')}"
     questionnaire_path = os.path.join(ARGS.questionnaire_save_path, f"{user_id}.json")
-    with open(f"{questionnaire_path}", "r", encoding="utf-8") as f:
+    with open(f"{questionnaire_path}", encoding="utf-8") as f:
         questionnaire = json.load(f)
     if "in_game" not in questionnaire.keys():
         in_game = []
@@ -334,7 +334,7 @@ def create_questionnaire_in_game():
     with open(f"{questionnaire_path}", "w", encoding="utf-8") as fw:
         fw.write(json.dumps(questionnaire))
 
-    with open(ARGS.progress_save_path, "r", encoding="utf-8") as f:
+    with open(ARGS.progress_save_path, encoding="utf-8") as f:
         progress_dict = json.load(f)
     progress_dict["user_progress"][user_id] = (
         progress_dict["user_progress"][user_id][0],
@@ -379,7 +379,7 @@ def predict(algo):
     user_id = f"{data_json['user_info']['name']}_{data_json['user_info']['phone']}"
 
     if user_id not in USER_AGENTS:
-        with open(ARGS.progress_save_path, "r", encoding="utf-8") as f:
+        with open(ARGS.progress_save_path, encoding="utf-8") as f:
             progress_dict = json.load(f)
         game_settings, agent_type, _ = progress_dict["user_progress"][user_id]
         g_setting = game_settings[agent_type]

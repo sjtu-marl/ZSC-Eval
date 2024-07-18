@@ -77,18 +77,18 @@ class Recipe:
         for elem in ingredients:
             if not elem in cls.ALL_INGREDIENTS:
                 raise ValueError(
-                    "Invalid ingredient: {0}. Recipe can only contain ingredients {1}".format(elem, cls.ALL_INGREDIENTS)
+                    f"Invalid ingredient: {elem}. Recipe can only contain ingredients {cls.ALL_INGREDIENTS}"
                 )
         if not len(ingredients) <= cls.MAX_NUM_INGREDIENTS:
             raise ValueError(
-                "Recipe of length {0} is invalid. Recipe can contain at most {1} ingredients".format(
+                "Recipe of length {} is invalid. Recipe can contain at most {} ingredients".format(
                     len(ingredients), cls.MAX_NUM_INGREDIENTS
                 )
             )
         key = hash(tuple(sorted(ingredients)))
         if key in cls.ALL_RECIPES_CACHE:
             return cls.ALL_RECIPES_CACHE[key]
-        cls.ALL_RECIPES_CACHE[key] = super(Recipe, cls).__new__(cls)
+        cls.ALL_RECIPES_CACHE[key] = super().__new__(cls)
         return cls.ALL_RECIPES_CACHE[key]
 
     def __init__(self, ingredients):
@@ -322,7 +322,7 @@ class Recipe:
         return cls(**obj_dict)
 
 
-class ObjectState(object):
+class ObjectState:
     """
     State of an object in OvercookedGridworld.
     """
@@ -356,7 +356,7 @@ class ObjectState(object):
         return hash((self.name, self.position))
 
     def __repr__(self):
-        return "{}@{}".format(self.name, self.position)
+        return f"{self.name}@{self.position}"
 
     def to_dict(self):
         return {"name": self.name, "position": self.position}
@@ -379,7 +379,7 @@ class SoupState(ObjectState):
         cooking (int): How long the soup has been cooking for. -1 means cooking hasn't started yet
         cook_time(int): How long soup needs to be cooked, used only mostly for getting soup from dict with supplied cook_time, if None self.recipe.time is used
         """
-        super(SoupState, self).__init__("soup", position)
+        super().__init__("soup", position)
         self._ingredients = ingredients
         self._cooking_tick = cooking_tick
         self._recipe = None
@@ -396,13 +396,13 @@ class SoupState(ObjectState):
 
     def __hash__(self):
         ingredient_hash = hash(tuple([hash(i) for i in self._ingredients]))
-        supercls_hash = super(SoupState, self).__hash__()
+        supercls_hash = super().__hash__()
         return hash((supercls_hash, self._cooking_tick, ingredient_hash))
 
     def __repr__(self):
-        supercls_str = super(SoupState, self).__repr__()
+        supercls_str = super().__repr__()
         ingredients_str = self._ingredients.__repr__()
-        return "{}\nIngredients:\t{}\nCooking Tick:\t{}".format(supercls_str, ingredients_str, self._cooking_tick)
+        return f"{supercls_str}\nIngredients:\t{ingredients_str}\nCooking Tick:\t{self._cooking_tick}"
 
     def __str__(self):
         res = "{"
@@ -411,7 +411,7 @@ class SoupState(ObjectState):
         if self.is_cooking:
             res += str(self._cooking_tick)
         elif self.is_ready:
-            res += str("✓")
+            res += "✓"
         return res
 
     @ObjectState.position.setter
@@ -520,7 +520,7 @@ class SoupState(ObjectState):
         )
 
     def to_dict(self):
-        info_dict = super(SoupState, self).to_dict()
+        info_dict = super().to_dict()
         ingrdients_dict = [ingredient.to_dict() for ingredient in self._ingredients]
         info_dict["_ingredients"] = ingrdients_dict
         info_dict["cooking_tick"] = self._cooking_tick
@@ -538,7 +538,7 @@ class SoupState(ObjectState):
     def from_dict(cls, obj_dict):
         obj_dict = copy.deepcopy(obj_dict)
         if obj_dict["name"] != "soup":
-            return super(SoupState, cls).from_dict(obj_dict)
+            return super().from_dict(obj_dict)
 
         if "state" in obj_dict:
             # Legacy soup representation
@@ -591,7 +591,7 @@ class SoupState(ObjectState):
         return soup
 
 
-class PlayerState(object):
+class PlayerState:
     """
     State of a player in OvercookedGridworld.
 
@@ -655,7 +655,7 @@ class PlayerState(object):
         return hash((self.position, self.orientation, self.held_object))
 
     def __repr__(self):
-        return "{} facing {} holding {}".format(self.position, self.orientation, str(self.held_object))
+        return f"{self.position} facing {self.orientation} holding {str(self.held_object)}"
 
     def to_dict(self):
         return {
@@ -673,7 +673,7 @@ class PlayerState(object):
         return PlayerState(**player_dict)
 
 
-class OvercookedState(object):
+class OvercookedState:
     """A state in OvercookedGridworld."""
 
     def __init__(self, players, objects, bonus_orders=[], all_orders=[], timestep=0, **kwargs):
@@ -928,7 +928,7 @@ POTENTIAL_CONSTANTS = {
 }
 
 
-class OvercookedGridworld(object):
+class OvercookedGridworld:
     """
     An MDP grid world based off of the Overcooked game.
     TODO: clean the organization of this class further.
@@ -1045,7 +1045,7 @@ class OvercookedGridworld(object):
         for k, v in params_to_overwrite.items():
             curr_val = mdp_config.get(k, None)
             if debug:
-                print("Overwriting mdp layout standard config value {}:{} -> {}".format(k, curr_val, v))
+                print(f"Overwriting mdp layout standard config value {k}:{curr_val} -> {v}")
             mdp_config[k] = v
 
         return OvercookedGridworld(**mdp_config)
@@ -1254,10 +1254,10 @@ class OvercookedGridworld(object):
         (not soup deliveries).
         """
         events_infos = {event: [False] * self.num_players for event in EVENT_TYPES}
-        assert not self.is_terminal(state), "Trying to find successor of a terminal state: {}".format(state)
+        assert not self.is_terminal(state), f"Trying to find successor of a terminal state: {state}"
         for action, action_set in zip(joint_action, self.get_actions(state)):
             if action not in action_set:
-                raise ValueError("Illegal action %s in state %s" % (action, state))
+                raise ValueError(f"Illegal action {action} in state {state}")
 
         new_state = state.deepcopy()
 
@@ -1667,7 +1667,7 @@ class OvercookedGridworld(object):
                     pots_states_dict["cooking"].append(pot_pos)
                 else:
                     num_ingredients = len(soup.ingredients)
-                    pots_states_dict["{}_items".format(num_ingredients)].append(pot_pos)
+                    pots_states_dict[f"{num_ingredients}_items"].append(pot_pos)
 
         return pots_states_dict
 
@@ -1698,7 +1698,7 @@ class OvercookedGridworld(object):
         return pot_states["cooking"]
 
     def get_full_but_not_cooking_pots(self, pot_states):
-        return pot_states["{}_items".format(Recipe.MAX_NUM_INGREDIENTS)]
+        return pot_states[f"{Recipe.MAX_NUM_INGREDIENTS}_items"]
 
     def get_full_pots(self, pot_states):
         return (
@@ -1708,7 +1708,7 @@ class OvercookedGridworld(object):
         )
 
     def get_partially_full_pots(self, pot_states):
-        return list(set().union(*[pot_states["{}_items".format(i)] for i in range(1, Recipe.MAX_NUM_INGREDIENTS)]))
+        return list(set().union(*[pot_states[f"{i}_items"] for i in range(1, Recipe.MAX_NUM_INGREDIENTS)]))
 
     def soup_ready_at_location(self, state, pos):
         if not state.has_object(pos):
@@ -1901,7 +1901,7 @@ class OvercookedGridworld(object):
         """Player added an ingredient to a pot"""
         obj_pickup_key = "potting_" + obj_name
         if obj_pickup_key not in events_infos:
-            raise ValueError("Unknown event {}".format(obj_pickup_key))
+            raise ValueError(f"Unknown event {obj_pickup_key}")
         events_infos[obj_pickup_key][player_index] = True
 
         POTTING_FNS = {
@@ -1913,14 +1913,14 @@ class OvercookedGridworld(object):
 
         for outcome, outcome_fn in POTTING_FNS.items():
             if outcome_fn(state, old_soup, new_soup):
-                potting_key = "{}_{}_potting".format(outcome, obj_name)
+                potting_key = f"{outcome}_{obj_name}_potting"
                 events_infos[potting_key][player_index] = True
 
     def log_object_pickup(self, events_infos, state, obj_name, pot_states, player_index):
         """Player picked an object up from a counter or a dispenser"""
         obj_pickup_key = obj_name + "_pickup"
         if obj_pickup_key not in events_infos:
-            raise ValueError("Unknown event {}".format(obj_pickup_key))
+            raise ValueError(f"Unknown event {obj_pickup_key}")
         events_infos[obj_pickup_key][player_index] = True
 
         USEFUL_PICKUP_FNS = {
@@ -1937,7 +1937,7 @@ class OvercookedGridworld(object):
         """Player dropped the object on a counter"""
         obj_drop_key = obj_name + "_drop"
         if obj_drop_key not in events_infos:
-            raise ValueError("Unknown event {}".format(obj_drop_key))
+            raise ValueError(f"Unknown event {obj_drop_key}")
         events_infos[obj_drop_key][player_index] = True
 
         USEFUL_DROP_FNS = {
@@ -2105,7 +2105,7 @@ class OvercookedGridworld(object):
             grid_string += "\n\n"
 
         if state.bonus_orders:
-            grid_string += "Bonus orders: {}\n".format(state.bonus_orders)
+            grid_string += f"Bonus orders: {state.bonus_orders}\n"
         # grid_string += "State potential value: {}\n".format(self.potential_function(state))
         return grid_string
 
@@ -2157,10 +2157,10 @@ class OvercookedGridworld(object):
             # Ensure that primary_agent_idx layers are ordered before other_agent_idx layers
             other_agent_idx = 1 - primary_agent_idx
             ordered_player_features = [
-                "player_{}_loc".format(primary_agent_idx),
-                "player_{}_loc".format(other_agent_idx),
+                f"player_{primary_agent_idx}_loc",
+                f"player_{other_agent_idx}_loc",
             ] + [
-                "player_{}_orientation_{}".format(i, Direction.DIRECTION_TO_INDEX[d])
+                f"player_{i}_orientation_{Direction.DIRECTION_TO_INDEX[d]}"
                 for i, d in itertools.product([primary_agent_idx, other_agent_idx], Direction.ALL_DIRECTIONS)
             ]
 
@@ -2187,10 +2187,8 @@ class OvercookedGridworld(object):
             # PLAYER LAYERS
             for i, player in enumerate(overcooked_state.players):
                 player_orientation_idx = Direction.DIRECTION_TO_INDEX[player.orientation]
-                state_mask_dict["player_{}_loc".format(i)] = make_layer(player.position, 1)
-                state_mask_dict["player_{}_orientation_{}".format(i, player_orientation_idx)] = make_layer(
-                    player.position, 1
-                )
+                state_mask_dict[f"player_{i}_loc"] = make_layer(player.position, 1)
+                state_mask_dict[f"player_{i}_orientation_{player_orientation_idx}"] = make_layer(player.position, 1)
 
             # state_mask_dict["player_id"] = np.ones(self.shape) * primary_agent_idx
 
@@ -2282,10 +2280,10 @@ class OvercookedGridworld(object):
             # Ensure that primary_agent_idx layers are ordered before other_agent_idx layers
             other_agent_idx = 1 - primary_agent_idx
             ordered_player_features = [
-                "player_{}_loc".format(primary_agent_idx),
-                "player_{}_loc".format(other_agent_idx),
+                f"player_{primary_agent_idx}_loc",
+                f"player_{other_agent_idx}_loc",
             ] + [
-                "player_{}_orientation_{}".format(i, Direction.DIRECTION_TO_INDEX[d])
+                f"player_{i}_orientation_{Direction.DIRECTION_TO_INDEX[d]}"
                 for i, d in itertools.product(
                     [primary_agent_idx, other_agent_idx],
                     Direction.ALL_DIRECTIONS,
@@ -2320,10 +2318,8 @@ class OvercookedGridworld(object):
             # PLAYER LAYERS
             for i, player in enumerate(overcooked_state.players):
                 player_orientation_idx = Direction.DIRECTION_TO_INDEX[player.orientation]
-                state_mask_dict["player_{}_loc".format(i)] = make_layer(player.position, 1)
-                state_mask_dict["player_{}_orientation_{}".format(i, player_orientation_idx)] = make_layer(
-                    player.position, 1
-                )
+                state_mask_dict[f"player_{i}_loc"] = make_layer(player.position, 1)
+                state_mask_dict[f"player_{i}_orientation_{player_orientation_idx}"] = make_layer(player.position, 1)
 
             # OBJECT & STATE LAYERS
             for obj in all_objects:
@@ -2454,12 +2450,12 @@ class OvercookedGridworld(object):
             held_obj_name = held_obj.name if held_obj else "none"
             if held_obj_name == name:
                 obj = held_obj
-                feat_dict["p{}_closest_{}".format(i, name)] = (0, 0)
+                feat_dict[f"p{i}_closest_{name}"] = (0, 0)
             else:
                 loc, deltas = self.get_deltas_to_closest_location(player, locations, mlam)
                 if loc and overcooked_state.has_object(loc):
                     obj = overcooked_state.get_object(loc)
-                feat_dict["p{}_closest_{}".format(idx, name)] = deltas
+                feat_dict[f"p{idx}_closest_{name}"] = deltas
 
             if name == "soup":
                 num_onions = num_tomatoes = 0
@@ -2469,8 +2465,8 @@ class OvercookedGridworld(object):
                         ingredients_cnt["onion"],
                         ingredients_cnt["tomato"],
                     )
-                feat_dict["p{}_closest_soup_n_onions".format(i)] = [num_onions]
-                feat_dict["p{}_closest_soup_n_tomatoes".format(i)] = [num_tomatoes]
+                feat_dict[f"p{i}_closest_soup_n_onions"] = [num_onions]
+                feat_dict[f"p{i}_closest_soup_n_tomatoes"] = [num_tomatoes]
 
             return feat_dict
 
@@ -2481,15 +2477,15 @@ class OvercookedGridworld(object):
             # Pot doesn't exist
             feat_dict = {}
             if not pot_loc:
-                feat_dict["p{}_closest_pot_{}_exists".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_is_empty".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_is_full".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_is_cooking".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_is_ready".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_num_onions".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_num_tomatoes".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}_cook_time".format(idx, pot_idx)] = [0]
-                feat_dict["p{}_closest_pot_{}".format(idx, pot_idx)] = (0, 0)
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_exists"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_empty"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_full"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_cooking"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_ready"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_num_onions"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_num_tomatoes"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}_cook_time"] = [0]
+                feat_dict[f"p{idx}_closest_pot_{pot_idx}"] = (0, 0)
                 return feat_dict
 
             # Get position information
@@ -2514,15 +2510,15 @@ class OvercookedGridworld(object):
                 cook_time_remaining = 0 if soup.is_idle else soup.cook_time_remaining
 
             # Encode pot and soup info
-            feat_dict["p{}_closest_pot_{}_exists".format(idx, pot_idx)] = [1]
-            feat_dict["p{}_closest_pot_{}_is_empty".format(idx, pot_idx)] = [is_empty]
-            feat_dict["p{}_closest_pot_{}_is_full".format(idx, pot_idx)] = [is_full]
-            feat_dict["p{}_closest_pot_{}_is_cooking".format(idx, pot_idx)] = [is_cooking]
-            feat_dict["p{}_closest_pot_{}_is_ready".format(idx, pot_idx)] = [is_ready]
-            feat_dict["p{}_closest_pot_{}_num_onions".format(idx, pot_idx)] = [num_onions]
-            feat_dict["p{}_closest_pot_{}_num_tomatoes".format(idx, pot_idx)] = [num_tomatoes]
-            feat_dict["p{}_closest_pot_{}_cook_time".format(idx, pot_idx)] = [cook_time_remaining]
-            feat_dict["p{}_closest_pot_{}".format(idx, pot_idx)] = deltas
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_exists"] = [1]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_empty"] = [is_empty]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_full"] = [is_full]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_cooking"] = [is_cooking]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_is_ready"] = [is_ready]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_num_onions"] = [num_onions]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_num_tomatoes"] = [num_tomatoes]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}_cook_time"] = [cook_time_remaining]
+            feat_dict[f"p{idx}_closest_pot_{pot_idx}"] = deltas
 
             return feat_dict
 
@@ -2535,16 +2531,16 @@ class OvercookedGridworld(object):
         for i, player in enumerate(overcooked_state.players):
             # Player info
             orientation_idx = Direction.DIRECTION_TO_INDEX[player.orientation]
-            all_features["p{}_orientation".format(i)] = np.eye(4)[orientation_idx]
+            all_features[f"p{i}_orientation"] = np.eye(4)[orientation_idx]
             obj = player.held_object
 
             if obj is None:
                 held_obj_name = "none"
-                all_features["p{}_objs".format(i)] = np.zeros(len(IDX_TO_OBJ))
+                all_features[f"p{i}_objs"] = np.zeros(len(IDX_TO_OBJ))
             else:
                 held_obj_name = obj.name
                 obj_idx = OBJ_TO_IDX[held_obj_name]
-                all_features["p{}_objs".format(i)] = np.eye(len(IDX_TO_OBJ))[obj_idx]
+                all_features[f"p{i}_objs"] = np.eye(len(IDX_TO_OBJ))[obj_idx]
 
             # Closest feature for each object type
             all_features = concat_dicts(
@@ -2607,7 +2603,7 @@ class OvercookedGridworld(object):
             # Adjacent features info
             for direction, pos_and_feat in enumerate(self.get_adjacent_features(player)):
                 _, feat = pos_and_feat
-                all_features["p{}_wall_{}".format(i, direction)] = [0] if feat == " " else [1]
+                all_features[f"p{i}_wall_{direction}"] = [0] if feat == " " else [1]
 
         # Convert all list and tuple values to np.arrays
         features_np = {k: np.array(v) for k, v in all_features.items()}
@@ -2619,7 +2615,7 @@ class OvercookedGridworld(object):
         # Compute all player-centric features for each player
         for i, player_i in enumerate(overcooked_state.players):
             # All absolute player-centric features
-            player_i_dict = {k: v for k, v in features_np.items() if k[:2] == "p{}".format(i)}
+            player_i_dict = {k: v for k, v in features_np.items() if k[:2] == f"p{i}"}
             features = np.concatenate(list(player_i_dict.values()))
             abs_pos = np.array(player_i.position)
 
@@ -2889,7 +2885,7 @@ class OvercookedGridworld(object):
                         closest_player = player
 
                 # Update discount to account for adding this missing ingredient (defaults to min_coeff if no pertinent players exist)
-                discount *= gamma ** min(dist, potential_params["pot_{}_steps".format(ingredient)])
+                discount *= gamma ** min(dist, potential_params[f"pot_{ingredient}_steps"])
 
                 # Cross off this player's ingreident contribution so it can't be double-counted
                 if closest_player:

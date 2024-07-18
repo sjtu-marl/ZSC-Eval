@@ -49,7 +49,7 @@ NO_COUNTERS_START_OR_PARAMS = {
 }
 
 
-class MotionPlanner(object):
+class MotionPlanner:
     """A planner that computes optimal plans for a single agent to
     arrive at goal positions and orientations in an OvercookedGridworld.
 
@@ -104,16 +104,16 @@ class MotionPlanner(object):
             return MotionPlanner.compute_mp(filename, mdp, counter_goals)
 
         if info:
-            print("Loaded MotionPlanner from {}".format(os.path.join(PLANNERS_DIR, filename)))
+            print(f"Loaded MotionPlanner from {os.path.join(PLANNERS_DIR, filename)}")
         return mp
 
     @staticmethod
     def compute_mp(filename, mdp, counter_goals):
         final_filepath = os.path.join(PLANNERS_DIR, filename)
-        print("Computing MotionPlanner to be saved in {}".format(final_filepath))
+        print(f"Computing MotionPlanner to be saved in {final_filepath}")
         start_time = time.time()
         mp = MotionPlanner(mdp, counter_goals)
-        print("It took {} seconds to create mp".format(time.time() - start_time))
+        print(f"It took {time.time() - start_time} seconds to create mp")
         mp.save_to_file(final_filepath)
         return mp
 
@@ -372,7 +372,7 @@ class MotionPlanner(object):
         return goals
 
 
-class JointMotionPlanner(object):
+class JointMotionPlanner:
     """A planner that computes optimal plans for a two agents to
     arrive at goal positions and orientations in a OvercookedGridworld.
 
@@ -421,7 +421,7 @@ class JointMotionPlanner(object):
         """
         assert self.is_valid_joint_motion_pair(
             start_jm_state, goal_jm_state
-        ), "start: {} \t end: {} was not a valid motion goal pair".format(start_jm_state, goal_jm_state)
+        ), f"start: {start_jm_state} \t end: {goal_jm_state} was not a valid motion goal pair"
 
         if self.start_orientations:
             plan_key = (start_jm_state, goal_jm_state)
@@ -868,7 +868,7 @@ class JointMotionPlanner(object):
         return end_state
 
 
-class MediumLevelActionManager(object):
+class MediumLevelActionManager:
     """
     Manager for medium level actions (specific joint motion goals).
     Determines available medium level actions for each state.
@@ -920,18 +920,18 @@ class MediumLevelActionManager(object):
             return MediumLevelActionManager.compute_mlam(filename, mdp, mlam_params, info=info)
 
         if info:
-            print("Loaded MediumLevelActionManager from {}".format(os.path.join(PLANNERS_DIR, filename)))
+            print(f"Loaded MediumLevelActionManager from {os.path.join(PLANNERS_DIR, filename)}")
         return mlam
 
     @staticmethod
     def compute_mlam(filename, mdp, mlam_params, info=False):
         final_filepath = os.path.join(PLANNERS_DIR, filename)
         if info:
-            print("Computing MediumLevelActionManager to be saved in {}".format(final_filepath))
+            print(f"Computing MediumLevelActionManager to be saved in {final_filepath}")
         start_time = time.time()
         mlam = MediumLevelActionManager(mdp, mlam_params=mlam_params)
         if info:
-            print("It took {} seconds to create mlam".format(time.time() - start_time))
+            print(f"It took {time.time() - start_time} seconds to create mlam")
         mlam.save_to_file(final_filepath)
         return mlam
 

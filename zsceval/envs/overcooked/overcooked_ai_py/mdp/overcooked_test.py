@@ -179,7 +179,7 @@ class TestGridworld(unittest.TestCase):
             try:
                 AgentEvaluator.check_trajectories(test_trajectory)
             except AssertionError as e:
-                self.fail("File {} failed with error:\n{}".format(test_json_path, e))
+                self.fail(f"File {test_json_path} failed with error:\n{e}")
 
     def test_four_player_mdp(self):
         try:
@@ -232,7 +232,7 @@ class TestOvercookedEnvironment(unittest.TestCase):
         try:
             OvercookedEnv(self.base_mdp, horizon=10)
         except Exception as e:
-            self.fail("Failed to instantiate OvercookedEnv:\n{}".format(e))
+            self.fail(f"Failed to instantiate OvercookedEnv:\n{e}")
 
         with self.assertRaises(TypeError):
             OvercookedEnv(self.base_mdp, **{"invalid_env_param": None})
@@ -255,7 +255,7 @@ class TestOvercookedEnvironment(unittest.TestCase):
         try:
             self.env.get_rollouts(self.rnd_agent_pair, 3)
         except Exception as e:
-            self.fail("Failed to get rollouts from environment:\n{}".format(e))
+            self.fail(f"Failed to get rollouts from environment:\n{e}")
 
     def test_one_player_env(self):
         mdp = OvercookedGridworld.from_layout_name("simple_single")

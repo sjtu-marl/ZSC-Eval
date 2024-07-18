@@ -112,7 +112,7 @@ class TestRecipe(unittest.TestCase):
 
         # Save and then load every recipe instance
         for i, recipe in enumerate(self.recipes):
-            pickle_path = os.path.join(self.pickle_temp_dir, "recipe_{}".format(i))
+            pickle_path = os.path.join(self.pickle_temp_dir, f"recipe_{i}")
             save_pickle(recipe, pickle_path)
             loaded = load_pickle(pickle_path)
             loaded_recipes.append(loaded)
@@ -193,7 +193,7 @@ class TestRecipe(unittest.TestCase):
 
         self.assertCountEqual(
             only_onions_recipes,
-            set([Recipe.generate_random_recipes(n=1, recipes=only_onions_recipes)[0] for _ in range(100)]),
+            {Recipe.generate_random_recipes(n=1, recipes=only_onions_recipes)[0] for _ in range(100)},
         )  # false positives rate for this test is 1/10^99
 
     def _expected_num_recipes(self, num_ingredients, max_len):
@@ -274,7 +274,7 @@ class TestSoupState(unittest.TestCase):
         except ValueError:
             pass
         except Exception as e:
-            self.fail("Expected ValueError to be raised, {} raised instead".format(e))
+            self.fail(f"Expected ValueError to be raised, {e} raised instead")
 
         try:
             self.s2.recipe
@@ -282,7 +282,7 @@ class TestSoupState(unittest.TestCase):
         except ValueError:
             pass
         except Exception as e:
-            self.fail("Expected ValueError to be raised, {} raised instead".format(e))
+            self.fail(f"Expected ValueError to be raised, {e} raised instead")
         self.assertEqual(self.s3.recipe, Recipe([Recipe.ONION]))
         self.assertEqual(self.s4.recipe, Recipe([Recipe.TOMATO, Recipe.TOMATO]))
 
@@ -496,7 +496,7 @@ class TestGridworld(unittest.TestCase):
                 self.assertEqual(
                     state,
                     reconstructed_state,
-                    "\nState: \t\t\t{}\nReconstructed State: \t{}".format(state, reconstructed_state),
+                    f"\nState: \t\t\t{state}\nReconstructed State: \t{reconstructed_state}",
                 )
 
                 # Advance state
@@ -894,7 +894,7 @@ class TestFeaturizations(unittest.TestCase):
         obs = self.base_mdp.lossless_state_encoding(s)[0]
         self.assertTrue(
             np.array_equal(obs.shape, self.base_mdp.get_lossless_state_encoding_shape()),
-            "{} vs {}".format(obs.shape, self.base_mdp.get_lossless_state_encoding_shape()),
+            f"{obs.shape} vs {self.base_mdp.get_lossless_state_encoding_shape()}",
         )
 
     def test_state_featurization_shape(self):
@@ -905,11 +905,11 @@ class TestFeaturizations(unittest.TestCase):
             expected_shape = self.base_mdp.get_featurize_state_shape(num_pots=num_pots)
             self.assertTrue(
                 np.array_equal(obs_0.shape, expected_shape),
-                "{} vs {}".format(obs_0.shape, expected_shape),
+                f"{obs_0.shape} vs {expected_shape}",
             )
             self.assertTrue(
                 np.array_equal(obs_1.shape, expected_shape),
-                "{} vs {}".format(obs_1.shape, expected_shape),
+                f"{obs_1.shape} vs {expected_shape}",
             )
 
     def test_lossless_state_featurization(self):
@@ -937,7 +937,7 @@ class TestFeaturizations(unittest.TestCase):
             pickle_path = os.path.join(
                 TESTING_DATA_DIR,
                 "test_state_featurization",
-                "expected_{}".format(num_pots),
+                f"expected_{num_pots}",
             )
             # NOTE: If the featurizations are updated intentionally, you can overwrite the expected
             # featurizations by uncommenting the following line:
@@ -961,9 +961,9 @@ class TestOvercookedEnvironment(unittest.TestCase):
         shutil.rmtree(self.dummy_dir)
 
     def _assert_files_equal(self, file_1, file_2):
-        with open(file_1, "r") as f:
+        with open(file_1) as f:
             lines_1 = f.readlines()
-        with open(file_2, "r") as f:
+        with open(file_2) as f:
             lines_2 = f.readlines()
 
         for line_1, line_2 in zip(lines_1, lines_2):
@@ -973,7 +973,7 @@ class TestOvercookedEnvironment(unittest.TestCase):
         try:
             OvercookedEnv.from_mdp(self.base_mdp, horizon=10, info_level=0)
         except Exception as e:
-            self.fail("Failed to instantiate OvercookedEnv:\n{}".format(e))
+            self.fail(f"Failed to instantiate OvercookedEnv:\n{e}")
 
         with self.assertRaises(TypeError):
             OvercookedEnv.from_mdp(self.base_mdp, **{"invalid_env_param": None})
@@ -997,7 +997,7 @@ class TestOvercookedEnvironment(unittest.TestCase):
             self.env.get_rollouts(self.rnd_agent_pair, 3, info=False)
         except Exception as e:
             print(e.with_traceback())
-            self.fail("Failed to get rollouts from environment:\n{}".format(e))
+            self.fail(f"Failed to get rollouts from environment:\n{e}")
 
     def test_one_player_env(self):
         mdp = OvercookedGridworld.from_layout_name("cramped_room_single")

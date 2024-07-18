@@ -9,7 +9,7 @@ from .util import get_clones, init
 
 class Encoder(nn.Module):
     def __init__(self, args, split_shape, cat_self=True):
-        super(Encoder, self).__init__()
+        super().__init__()
         self._use_orthogonal = args.use_orthogonal
         self._activation_id = args.activation_id
         self._attn_N = args.attn_N
@@ -71,7 +71,7 @@ def split_obs(obs, split_shape):
 
 class FeedForward(nn.Module):
     def __init__(self, d_model, d_ff=512, dropout=0.0, use_orthogonal=True, activation_id=1):
-        super(FeedForward, self).__init__()
+        super().__init__()
         # We set d_ff as a default to 2048
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
@@ -107,7 +107,7 @@ def ScaledDotProductAttention(q, k, v, d_k, mask=None, dropout=None):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, heads, d_model, dropout=0.0, use_orthogonal=True):
-        super(MultiHeadAttention, self).__init__()
+        super().__init__()
 
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
 
@@ -160,7 +160,7 @@ class EncoderLayer(nn.Module):
         d_ff=512,
         use_FF=False,
     ):
-        super(EncoderLayer, self).__init__()
+        super().__init__()
         self._use_FF = use_FF
         self.norm_1 = nn.LayerNorm(d_model)
         self.norm_2 = nn.LayerNorm(d_model)
@@ -180,7 +180,7 @@ class EncoderLayer(nn.Module):
 
 class CatSelfEmbedding(nn.Module):
     def __init__(self, split_shape, d_model, use_orthogonal=True, activation_id=1):
-        super(CatSelfEmbedding, self).__init__()
+        super().__init__()
         self.split_shape = split_shape
 
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
@@ -229,9 +229,9 @@ class CatSelfEmbedding(nn.Module):
                 temp = torch.cat((x[i][:, (L * j) : (L * j + L)], self_x), dim=-1)
                 if is_policy_id:
                     temp = (temp * self.split_shape[i][3]).long()
-                exec("x1.append(self.fc_{}(temp))".format(i))
+                exec(f"x1.append(self.fc_{i}(temp))")
         temp = x[self_idx]
-        exec("x1.append(self.fc_{}(temp))".format(N - 1))
+        exec(f"x1.append(self.fc_{N - 1}(temp))")
 
         out = torch.stack(x1, 1)
 
@@ -240,7 +240,7 @@ class CatSelfEmbedding(nn.Module):
 
 class Embedding(nn.Module):
     def __init__(self, split_shape, d_model, use_orthogonal=True, activation_id=1):
-        super(Embedding, self).__init__()
+        super().__init__()
         self.split_shape = split_shape
 
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
@@ -285,7 +285,7 @@ class Embedding(nn.Module):
                         temp.max(),
                         temp.min(),
                     )
-                exec("x1.append(self.fc_{}(temp))".format(i))
+                exec(f"x1.append(self.fc_{i}(temp))")
                 if is_policy_id:
                     x1[-1] = x1[-1].squeeze(-2)
 

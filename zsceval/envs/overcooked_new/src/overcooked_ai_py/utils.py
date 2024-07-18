@@ -28,7 +28,7 @@ def load_pickle(filename):
 
 
 def load_dict_from_file(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         return eval(f.read())
 
 
@@ -49,7 +49,7 @@ def save_as_json(data, filename):
 
 
 def load_from_json(filename):
-    with open(fix_filetype(filename, ".json"), "r") as json_file:
+    with open(fix_filetype(filename, ".json")) as json_file:
         return json.load(json_file)
 
 

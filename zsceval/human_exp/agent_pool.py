@@ -41,7 +41,7 @@ class ZSCEvalAgentPool(AgentPool):
     POLICY_POOL_PATH = os.environ["POLICY_POOL"]
 
     def __init__(self, population_yaml_path: str, layout_name: str, deterministic: bool = True, epsilon: float = 0.5):
-        population_config = yaml.load(open(population_yaml_path, "r", encoding="utf-8"), yaml.Loader)
+        population_config = yaml.load(open(population_yaml_path, encoding="utf-8"), yaml.Loader)
         self.n_agents = len(population_config)
         self.policy_pool: Dict[str, List[Tuple]] = defaultdict(list)
         """ 

@@ -12,7 +12,7 @@ from zsceval.algorithms.r_mappo.r_mappo import R_MAPPO
 
 class Traj_Trainer(TrainerPool):
     def __init__(self, args, policy_pool: PolicyPool, device=torch.device("cpu")):
-        super(Traj_Trainer, self).__init__(args, policy_pool, device)
+        super().__init__(args, policy_pool, device)
 
         self.seed = args.seed
         self.stage = args.stage

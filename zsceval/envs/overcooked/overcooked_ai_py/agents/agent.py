@@ -7,7 +7,7 @@ from zsceval.envs.overcooked.overcooked_ai_py.planning.planners import Heuristic
 from zsceval.envs.overcooked.overcooked_ai_py.planning.search import SearchTree
 
 
-class Agent(object):
+class Agent:
     def action(self, state):
         return NotImplementedError()
 
@@ -21,7 +21,7 @@ class Agent(object):
         pass
 
 
-class AgentGroup(object):
+class AgentGroup:
     """
     AgentGroup is a group of N agents used to sample
     joint actions in the context of an OvercookedEnv instance.

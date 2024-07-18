@@ -13,7 +13,7 @@ def _cast(x):
     return x.transpose(1, 0, 2).reshape(-1, *x.shape[2:])
 
 
-class SeparatedReplayBuffer(object):
+class SeparatedReplayBuffer:
     def __init__(self, args, obs_space, share_obs_space, act_space):
         self.episode_length = args.episode_length
         self.n_rollout_threads = args.n_rollout_threads

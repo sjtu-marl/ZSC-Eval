@@ -27,7 +27,7 @@ DEFAULT_ENV_PARAMS = {"horizon": 400}
 MAX_HORIZON = 1e10
 
 
-class OvercookedEnv(object):
+class OvercookedEnv:
     """
     An environment wrapper for the OvercookedGridworld Markov Decision Process.
 
@@ -358,7 +358,7 @@ class OvercookedEnv(object):
         self.state = start_state
         done = False
         if display:
-            print("Starting state\n{}".format(self))
+            print(f"Starting state\n{self}")
         for joint_action in joint_action_plan:
             self.step(joint_action)
             done = self.is_done()
@@ -408,7 +408,7 @@ class OvercookedEnv(object):
             if display and self.state.timestep < display_until:
                 self.print_state_transition(a_t, r_t, info, fname, display_phi)
 
-        assert len(trajectory) == self.state.timestep, "{} vs {}".format(len(trajectory), self.state.timestep)
+        assert len(trajectory) == self.state.timestep, f"{len(trajectory)} vs {self.state.timestep}"
 
         # Add final state
         if include_final_state:
@@ -645,11 +645,11 @@ class Overcooked(gym.Env):
         returns:
             observation: formatted to be standard input for self.agent_idx's policy
         """
-        assert all(self.action_space.contains(a) for a in action), "%r (%s) invalid" % (
+        assert all(self.action_space.contains(a) for a in action), "{!r} ({}) invalid".format(
             action,
             type(action),
         )
-        agent_action, other_agent_action = [Action.INDEX_TO_ACTION[a] for a in action]
+        agent_action, other_agent_action = (Action.INDEX_TO_ACTION[a] for a in action)
 
         if self.agent_idx == 0:
             joint_action = (agent_action, other_agent_action)

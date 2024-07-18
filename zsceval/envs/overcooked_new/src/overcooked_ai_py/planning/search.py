@@ -5,7 +5,7 @@ import numpy as np
 import scipy.sparse
 
 
-class SearchTree(object):
+class SearchTree:
     """
     A class to help perform tree searches of various types. Once a goal state is found, returns a list of tuples
     containing (action, state) pairs. This enables to recover the optimal action and state path.
@@ -91,7 +91,7 @@ class SearchTree(object):
         return node.backwards_cost + self.heuristic_fn(node.state)
 
 
-class SearchNode(object):
+class SearchNode:
     """
     A helper class that stores a state, action, and parent tuple and enables to restore paths
 
@@ -137,7 +137,7 @@ class SearchNode(object):
         return path
 
 
-class Graph(object):
+class Graph:
     def __init__(self, dense_adjacency_matrix, encoder, decoder, debug=False):
         """
         Each graph node is distinguishable by a key, encoded by the encoder into
@@ -154,7 +154,7 @@ class Graph(object):
         self._decoder = decoder
         start_time = time.time()
         if debug:
-            print("Computing shortest paths took {} seconds".format(time.time() - start_time))
+            print(f"Computing shortest paths took {time.time() - start_time} seconds")
         self._ccs = None
 
     @property
@@ -239,7 +239,7 @@ class Graph(object):
             # This is actually an absolutely impossible transition
             # 08/16/2020 update: This has been addressed by catching NotConnectedError upstream
             raise NotConnectedError(
-                "No path could be found from {} to {}".format(self._decoder[start_index], self._decoder[goal_index])
+                f"No path could be found from {self._decoder[start_index]} to {self._decoder[goal_index]}"
                 + "This could be caused by using another layout's planner on this layout"
             )
 

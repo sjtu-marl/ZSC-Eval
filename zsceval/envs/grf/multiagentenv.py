@@ -7,7 +7,7 @@ def convert(dictionary):
     return namedtuple("GenericDict", dictionary.keys())(**dictionary)
 
 
-class MultiAgentEnv(object):
+class MultiAgentEnv:
     def __init__(self, batch_size=None, **kwargs):
         # Unpack arguments from sacred
         args = kwargs["env_args"]

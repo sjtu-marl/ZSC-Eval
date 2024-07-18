@@ -17,7 +17,7 @@ def _t2n(x):
 
 class OvercookedRunner(Runner):
     def __init__(self, config):
-        super(OvercookedRunner, self).__init__(config)
+        super().__init__(config)
 
     def run(self):
         self.warmup()

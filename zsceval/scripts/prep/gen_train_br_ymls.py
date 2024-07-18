@@ -21,7 +21,6 @@ if __name__ == "__main__":
         bench_dict = yaml.load(
             open(
                 f"../policy_pool/{layout}/hsp/s1/{args.bias_agent_version}/benchmarks-s{LAYOUTS_KS[layout] * 2}.yml",
-                "r",
             ),
             Loader=yaml.FullLoader,
         )

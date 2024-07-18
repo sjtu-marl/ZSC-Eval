@@ -18,7 +18,7 @@ class CNNLayer(nn.Module):
         kernel_size=3,
         stride=1,
     ):
-        super(CNNLayer, self).__init__()
+        super().__init__()
 
         active_func = [nn.Tanh(), nn.ReLU(), nn.LeakyReLU(), nn.ELU()][activation_id]
         init_method = [nn.init.xavier_uniform_, nn.init.orthogonal_][use_orthogonal]
@@ -62,7 +62,7 @@ class CNNLayer(nn.Module):
 
 class CNNBase(nn.Module):
     def __init__(self, args, obs_shape):
-        super(CNNBase, self).__init__()
+        super().__init__()
 
         self._use_orthogonal = args.use_orthogonal
         self._activation_id = args.activation_id

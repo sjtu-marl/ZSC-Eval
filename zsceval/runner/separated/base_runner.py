@@ -1,7 +1,7 @@
 import importlib
 import os
 import pickle
-from collections import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 import torch
@@ -64,7 +64,7 @@ def make_trainer_policy_cls(algorithm_name, use_single_network=False):
     return TrainAlgo, Policy
 
 
-class Runner(object):
+class Runner:
     def __init__(self, config):
         self.all_args = config["all_args"]
         self.envs = config["envs"]

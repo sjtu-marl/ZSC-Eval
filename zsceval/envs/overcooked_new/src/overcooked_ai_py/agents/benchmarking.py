@@ -35,7 +35,7 @@ from zsceval.envs.overcooked_new.src.overcooked_ai_py.utils import (
 )
 
 
-class AgentEvaluator(object):
+class AgentEvaluator:
     """
     Class used to get rollouts and evaluate performance of various types of agents.
 
@@ -358,7 +358,7 @@ class AgentEvaluator(object):
                     states[i + 1].to_dict(),
                     next_state.to_dict(),
                 )
-                assert rewards[i] == reward, "{} \t {}".format(rewards[i], reward)
+                assert rewards[i] == reward, f"{rewards[i]} \t {reward}"
 
     @staticmethod
     def get_mdps_and_envs_from_trajectories(trajectories):

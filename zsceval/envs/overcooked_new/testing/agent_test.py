@@ -54,7 +54,7 @@ class TestAgentEvaluator(unittest.TestCase):
         try:
             AgentEvaluator.check_trajectories(trajs, verbose=False)
         except AssertionError as e:
-            self.fail("Trajectories were not returned in standard format:\n{}".format(e))
+            self.fail(f"Trajectories were not returned in standard format:\n{e}")
 
     def test_rollouts(self):
         ap = AgentPair(RandomAgent(), RandomAgent())
@@ -62,13 +62,13 @@ class TestAgentEvaluator(unittest.TestCase):
         try:
             AgentEvaluator.check_trajectories(trajs, verbose=False)
         except AssertionError as e:
-            self.fail("Trajectories were not returned in standard format:\n{}".format(e))
+            self.fail(f"Trajectories were not returned in standard format:\n{e}")
 
     def test_mlam_computation(self):
         try:
             self.agent_eval.env.mlam
         except Exception as e:
-            self.fail("Failed to compute MediumLevelActionManager:\n{}".format(e))
+            self.fail(f"Failed to compute MediumLevelActionManager:\n{e}")
 
 
 class TestBasicAgents(unittest.TestCase):

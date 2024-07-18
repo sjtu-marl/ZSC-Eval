@@ -15,7 +15,7 @@ class ValueNorm(nn.Module):
         epsilon=1e-5,
         device=torch.device("cpu"),
     ):
-        super(ValueNorm, self).__init__()
+        super().__init__()
 
         self.input_shape = input_shape
         self.norm_axes = norm_axes

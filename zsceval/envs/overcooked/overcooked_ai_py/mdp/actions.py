@@ -1,7 +1,7 @@
 import itertools
 
 
-class Direction(object):
+class Direction:
     """
     The four possible directions a player can be facing.
     """
@@ -28,7 +28,7 @@ class Direction(object):
         raise ValueError("Invalid direction: %s" % direction)
 
 
-class Action(object):
+class Action:
     """
     The six actions available in the OvercookedGridworld.
 

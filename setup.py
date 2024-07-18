@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 
@@ -9,7 +8,7 @@ from setuptools import setup
 
 def get_version() -> str:
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    init = open(os.path.join("zsceval", "__init__.py"), "r").read().split()
+    init = open(os.path.join("zsceval", "__init__.py")).read().split()
     return init[init.index("__version__") + 2][1:-1]
 
 

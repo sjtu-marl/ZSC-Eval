@@ -251,7 +251,7 @@ def main(args):
     #  override policy config
     population_config = yaml.load(open(all_args.population_yaml_path), yaml.Loader)
 
-    logger.info("population_config: {}".format(population_config))
+    logger.info(f"population_config: {population_config}")
 
     override_policy_config = {}
     # MARK: the ego agent

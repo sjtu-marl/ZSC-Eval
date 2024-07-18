@@ -14,7 +14,7 @@ def _cast(x):
     return x.transpose(1, 2, 0, 3).reshape(-1, *x.shape[3:])
 
 
-class SharedReplayBuffer(object):
+class SharedReplayBuffer:
     def __init__(
         self,
         args,

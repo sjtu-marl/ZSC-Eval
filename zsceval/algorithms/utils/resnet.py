@@ -12,7 +12,7 @@ class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, in_planes, planes, stride=1, down_sample=None):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.conv1 = conv3x3(in_planes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
         self.relu = nn.ReLU(inplace=True)
@@ -43,7 +43,7 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, input_channles, layers, num_classes=1000):
         self.in_planes = 64
-        super(ResNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(input_channles, 64, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(64),
@@ -119,7 +119,7 @@ class ResNet(nn.Module):
 
 class MapNet(nn.Module):
     def __init__(self, inputs_channels, num_classes, layers):
-        super(MapNet, self).__init__()
+        super().__init__()
 
         self.resnet = ResNet(BasicBlock, inputs_channels, layers, num_classes)
 
@@ -132,7 +132,7 @@ class MapNet(nn.Module):
 
 class Pre_MapNet(nn.Module):
     def __init__(self, inputs_channels, num_classes):
-        super(Pre_MapNet, self).__init__()
+        super().__init__()
 
         self.conv1 = nn.Sequential(nn.Conv2d(inputs_channels, 64, kernel_size=7, stride=2, padding=3, bias=False))
         resnet = models.resnet18(pretrained=1)
