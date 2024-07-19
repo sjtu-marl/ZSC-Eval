@@ -13,7 +13,7 @@ from flask_cors import CORS
 from loguru import logger
 from markdown import markdown
 
-from zsceval.human_exp.agent_pool import ZSCEvalAgentPool
+
 from zsceval.human_exp.overcooked_utils import (
     NAME_TRANSLATION,
     LAYOUT_LIST,
@@ -397,6 +397,9 @@ def predict(algo):
 
 
 def main(args: argparse.Namespace):
+    
+    from zsceval.human_exp.agent_pool import ZSCEvalAgentPool
+    # from zsceval.human_exp.agent_pool_new import ZSCEvalAgentPool
     global ARGS, AGENT_POOLS, ALL_ALGOS, CODE, CODE_2_ALGO, ALGO_2_CODE
 
     ARGS = args

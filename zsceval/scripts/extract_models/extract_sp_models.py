@@ -107,6 +107,8 @@ if __name__ == "__main__":
         "random3_m",
         "academy_3_vs_1_with_keeper",
         "forced_coordination_tomato",
+        "inverse_marshmallow_experiment",
+        "subobjective",
         "cramped_room",
         "all",
     ], layout
@@ -131,10 +133,12 @@ if __name__ == "__main__":
         "random3_m": "sp",
         "random0":"sp",
         "cramped_room":"sp",
+        "random3":"sp",
     }
 
     logger.info(f"hostname: {hostname}")
     for l in layout:
-        exp = exp_names[l]
+        #exp = exp_names[l]
+        exp = "sp"
         logger.info(f"Extracting {exp} for {l}")
         extract_sp_S1_models(l, exp, env)
