@@ -172,5 +172,11 @@ package-lock.json
 print_dir.sh
 delete_yml.sh
 
+eval
 *.json
 *.png
+*.gif
+*.zip
+
+
+*.out

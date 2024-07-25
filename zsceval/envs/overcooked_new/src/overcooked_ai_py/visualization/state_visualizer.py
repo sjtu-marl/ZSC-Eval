@@ -67,7 +67,7 @@ class StateVisualizer:
         "tile_size": 75,
         "window_fps": 30,
         "player_colors": ["blue", "green"],
-        "is_rendering_hud": False,
+        "is_rendering_hud": True,
         "hud_font_size": 10,
         "hud_font_path": roboto_path,
         "hud_system_font_name": None,  # if set to None use hud_font_path
@@ -87,15 +87,15 @@ class StateVisualizer:
         "hud_order_size": 15,
         # "is_rendering_cooking_timer": True,
         # "show_timer_when_cooked": True,
-        "is_rendering_cooking_timer": False,
-        "show_timer_when_cooked": False,
+        "is_rendering_cooking_timer": True,
+        "show_timer_when_cooked": True,
         "cooking_timer_font_size": 20,  # # if set to None use cooking_timer_font_path
         "cooking_timer_font_path": roboto_path,
         "cooking_timer_system_font_name": None,
         "cooking_timer_font_color": (255, 0, 0),  # red
         "grid": None,
         "background_color": (155, 101, 0),  # color of empty counter
-        "is_rendering_action_probs": False,  # whatever represent visually on the grid what actions some given agent would make
+        "is_rendering_action_probs": True,  # whatever represent visually on the grid what actions some given agent would make
         # "is_rendering_action_probs": True,  # whatever represent visually on the grid what actions some given agent would make
     }
     TILE_TO_FRAME_NAME = {

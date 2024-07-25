@@ -41,6 +41,7 @@ do
     --num_agents ${num_agents} --seed 1 --episode_length 400 --n_eval_rollout_threads 40 --eval_episodes 80 --eval_stochastic --dummy_batch_size 2 \
     --use_proper_time_limits \
     --use_wandb \
+    --use_render \
     --population_yaml_path ${yml} --population_size 2 \
     --agent0_policy_name ${agent0_policy_name} \
     --agent1_policy_name ${agent1_policy_name} --overcooked_version ${version} --eval_result_path eval/results/${layout}/sp/${exp}.json

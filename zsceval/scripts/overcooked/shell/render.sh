@@ -14,10 +14,10 @@ reward_shaping_horizon="1e8"
 num_env_steps="1e7"
 
 num_agents=2
-algo="mappo"
+algo=$2
 exp="render"
-seed_begin=1
-seed_max=1
+seed=$3
+seed_max=$3
 ulimit -n 65536
 
 echo "env is ${env}, layout is ${layout}, algo is ${algo}, exp is ${exp}, seed from ${seed_begin} to ${seed_max}"

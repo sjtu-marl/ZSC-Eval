@@ -10,6 +10,8 @@ import sys
 import json
 import pickle
 import os
+import glob
+import shutil
 from pathlib import Path
 
 from sklearn.decomposition import PCA
@@ -156,6 +158,8 @@ def load_behavior(layout, alg, exp, seed_max, use_new):
                 if not "either" in name:
                    values.append(json_dict[name])
             json_values.append(values)
+            
+        summon_gif(layout, exp, i)
     
     LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
     
@@ -173,6 +177,47 @@ def load_behavior(layout, alg, exp, seed_max, use_new):
                         
     df = pd.DataFrame(data=shaped_dict, index=index)
     #df = df.rename(index=index)
+    
+    return df
+
+def load_human_ai():
+    json_values = []
+    index = []
+    for i in range(1,seed_max+1):
+        if(i is 25 or i is 26):
+            continue
+        file = f"eval-{exp}{i}"
+        index.append(f"{exp}{i}")
+        path = f"eval/results/{layout}/{alg}/{file}.json"
+        with open(path, mode="rt", encoding="utf-8") as f:
+            json_dict = json.load(f)
+            orderedNames = sorted(list(json_dict.keys()))
+            values = []
+            for name in orderedNames:
+                #print(name)
+                if not "either" in name:
+                   values.append(json_dict[name])
+            json_values.append(values)
+            
+        summon_gif(layout, exp, i)
+    
+    LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
+    
+    print(len(LABELS))
+    print(f"{len(json_values)}, {len(json_values[0])}")
+    
+    shaped_dict = {}
+    for label in LABELS:
+        shaped_dict[label] = []
+    for values in json_values:
+        for j, v in enumerate(values):
+            if(j >= len(LABELS)):
+                break
+            shaped_dict[LABELS[j]].append(v)
+                        
+    df = pd.DataFrame(data=shaped_dict, index=index)
+    #df = df.rename(index=index)
+    
     return df
     
 def load_trajectory(layout_name, alg, exps, ranks, run, traj_num, use_new):
@@ -188,19 +233,21 @@ def load_trajectory(layout_name, alg, exps, ranks, run, traj_num, use_new):
     
 def plot_pca(df_all, exps, layout):
     
-    std_scaler = StandardScaler()
+    std_scaler = MinMaxScaler()
     std_scaler.fit(df_all.to_numpy())
     
-    df_std = pd.DataFrame(std_scaler.transform(df_all), index=df_all.index, columns=df_all.columns)
+    df_std = std_scaler.transform(df_all)
     
-    print(df_all)
+    df_std = pd.DataFrame(df_std, index=df_all.index, columns=df_all.columns)
+    
+    print(df_std)
     
     pca = PCA()
     pca.fit(df_std)
     
     score = pd.DataFrame(pca.transform(df_std))
 
-    print(score)
+    #print(score)
     
     num = len(score)  # 可視化するデータ数を指定
     
@@ -241,7 +288,7 @@ def compute_cos_similarity(df_all):
     df_1 = pd.DataFrame(std_scaler.transform(df_all), index=df_all.index, columns=df_all.columns)
     df_2 = pd.DataFrame(std_scaler.transform(df_all), index=df_all.index, columns=df_all.columns)
     
-    print(df_1)
+    #print(df_1)
     
     # 行列ベクトルの片方を転置して積を求める
     df_dot = df_1.dot(df_2.T)
@@ -259,20 +306,21 @@ def compute_cos_similarity(df_all):
     return df_cos
     
     
-def plot_radar(df, layout):
+def plot_radar(df, layout, subscript):
     
-    df_no_zero = df.loc[:, (df != 0).any(axis=0)]
+    #df_no_zero = df.loc[:, (df != 0).any(axis=0)]
+    df_no_zero = df
     
     label_list = df_no_zero.columns.values
     index_list = df_no_zero.index
     
-    mm = MinMaxScaler()
-    #print(mm.fit_transform(df))
-    df_mm = pd.DataFrame(mm.fit_transform(df_no_zero), columns=label_list)
+    scaler = MinMaxScaler()
+    #print(scaler.fit_transform(df_no_zero))
+    df_scaler = pd.DataFrame(scaler.fit_transform(df_no_zero), columns=label_list)
     
-    df_mm.to_csv(f"eval/results/{layout}/min_max_scale.csv")
+    df_scaler.to_csv(f"eval/results/{layout}/min_max_scale.csv")
     
-    for i, series in df_mm.iterrows():
+    for i, series in df_scaler.iterrows():
         
         value_list = series.tolist()
         value_list += value_list[:1]
@@ -285,12 +333,27 @@ def plot_radar(df, layout):
         
         ax.plot(angle_list, value_list, linewidth=1, linestyle='solid')
         ax.fill(angle_list, value_list, 'blue', alpha=0.1)
+        ax.set_ylim(ymin=0, ymax=1.0)
         
-        plt.savefig(f"eval/results/{layout}/rader_{index_list[i]}.png")
+        print(index_list[i])
+         
+        plt.savefig(f"eval/results/{layout}/radar_{index_list[i]}_{subscript}.png")
         plt.close()
         
-        
-
+def summon_gif(layout, alg, index):
+    
+    run_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval-" + alg + str(index) + "/**/*.gif" )
+    
+    print(str(run_dir))
+    
+    gifs =  glob.glob(str(run_dir), recursive=True)
+    
+    if(len(gifs)==0):
+        print(f"No gif for {alg}{str(index)}")
+        return
+    
+    shutil.copy(gifs[0], f"eval/results/{layout}/{alg}{str(index)}.gif")
+    print(f"gif saved at eval/results/{layout}/{alg}{str(index)}.gif")
 
 if __name__ == "__main__":
     
@@ -299,7 +362,7 @@ if __name__ == "__main__":
     exps = ["sp","mep", "hsp"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [3, 5, 72]
+    seed_max = [5, 5, 72]
     
     #exps = [e for e in range(1,4)]
     #ranks = [r for r in range(1)]
@@ -307,7 +370,7 @@ if __name__ == "__main__":
     #traj_num = 1
     
     dfs = [] # index : alg
-    
+    index = 0
     for seeds, alg, exp in zip(seed_max, algs, exps):
     
         df = load_behavior(layout, alg, exp, seeds, True)
@@ -317,20 +380,31 @@ if __name__ == "__main__":
         
         dfs.append(df)
         
+        index += 1
+        
     df_all = pd.concat(dfs, axis=0)
     
     #print(df_all)
 
     df_cs = compute_cos_similarity(df_all)
     
-    print(df_cs)
+    # print(df_cs)
     
     sns.heatmap(df_cs)
-    plt.savefig(f"eval/results/{layout}/cs.png", dpi=300)
+    plt.savefig(f"eval/results/{layout}/cos_similarity.png", dpi=300)
     
     plt.close()
     
-    plot_radar(df_all, layout)
+    df_agent0 = df_all.filter(like="agent0", axis=1)
+    df_agent1 = df_all.filter(like="agent1", axis=1)
+    
+    print(df_agent1)
+    
+    df_agent0.to_csv(f"eval/results/{layout}/behavior_metrics.csv")
+    df_agent1.to_csv(f"eval/results/{layout}/behavior_metrics.csv")
+    
+    plot_radar(df_agent0, layout, "agent0")
+    plot_radar(df_agent1, layout, "agent1")
     
     plot_pca(df_all, exps, layout)
     

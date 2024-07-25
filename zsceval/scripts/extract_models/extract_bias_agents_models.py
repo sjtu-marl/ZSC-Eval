@@ -115,6 +115,8 @@ if __name__ == "__main__":
         "random0_m",
         "random1_m",
         "random3_m",
+        "inverse_marshmallow_experiment",
+        "subobjective",
         "academy_3_vs_1_with_keeper",
         "all",
     ], layout
@@ -144,6 +146,7 @@ if __name__ == "__main__":
     # logger.add(f"./extract_log/extract_{layout}_hsp_S1_models.log")
     # logger.info(f"hostname: {hostname}")
     for l in layout:
-        exp = exp_names[l]
+        #exp = exp_names[l]
+        exp = "hsp-S1"
         logger.info(f"Extracting {exp} for {l}")
         extract_sp_S1_models(l, exp, env)
