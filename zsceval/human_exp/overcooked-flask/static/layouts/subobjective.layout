@@ -1,0 +1,20 @@
+{
+    "grid":  """XOXPXXXXXPXOX
+                X           X
+                XXXX  D  XXXX
+                XXS 2 P 1 SXX
+                XXXXXTXTXXXXX""",
+    "start_bonus_orders": [
+        { "ingredients" : ["onion", "onion", "onion"]}
+    ],
+    "start_all_orders" : [
+        { "ingredients" : ["onion"]},
+        { "ingredients" : ["tomato"]},
+        { "ingredients" : ["onion", "tomato", "onion"]},
+        { "ingredients" : ["onion", "onion", "onion"]},
+        { "ingredients" : ["tomato", "tomato", "tomato"]}
+    ],
+    "recipe_times" : [20, 20, 50, 50, 50],
+    "onion_value" : 21,
+    "tomato_value" : 13,
+}

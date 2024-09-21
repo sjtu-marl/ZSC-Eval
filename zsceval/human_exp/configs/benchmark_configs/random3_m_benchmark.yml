@@ -1,0 +1,36 @@
+mep1:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3_m/mep/s2/mep-S2-s24/1.pt
+mep2:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3_m/mep/s2/mep-S2-s24/2.pt
+mep3:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: MEP
+    model_path:
+        actor: random3_m/mep/s2/mep-S2-s24/3.pt
+hsp1:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3_m/hsp/s2/hsp-S2-s24/1.pt
+hsp2:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3_m/hsp/s2/hsp-S2-s24/2.pt
+hsp3:
+    policy_config_path: random3_m/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP
+    model_path:
+        actor: random3_m/hsp/s2/hsp-S2-s24/3.pt

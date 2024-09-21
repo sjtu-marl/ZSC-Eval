@@ -175,32 +175,44 @@ function startGame(endOfGameCallback) {
   // let layout_name = (0, _jquery.default)("#layout").val();
   let layout_name = getLayoutName(agent_type, agent_settings)
   let game_time = $("#gameTime").val();
+
   if (agent_type > 0) {
-    game_time = 75;
+    game_time = 9999;
     $("#gameTime").val(game_time);
-  } else {
+  } else {  // tutorial
     game_time = 30;
     $("#gameTime").val(game_time);
   }
-  if (game_time > 1800) {
+
+  if (game_time > 9999) {
     $("#overcooked").html("<h3>Sorry, please choose a shorter amount of time for the game!</h3>");
     endOfGameCallback();
     return;
   }
-  let layout = layouts[layout_name];
+
+  // let layout = layouts[layout_name];
+
+  let [grid, base_layout_params] = get_layout_params(agent_settings);
+
+
   // console.log(layout);
   // console.log(layout_name);
+
   $("#overcooked").empty();
   let mdp_params = {
     "layout_name": layout_name,
     "num_items_for_soup": 3,
     "rew_shaping_params": null
   };
+
+
+
   game = new OvercookedSinglePlayerTask({
     container_id: "overcooked",
     player_index: player_index,
-    start_grid: layout,
     layout_name: layout_name,
+    start_grid : grid,
+    base_layout_params : base_layout_params,
     npc_policies: npc_policies,
     algo: algo,
     mdp_params: mdp_params,
@@ -332,8 +344,38 @@ function getLayoutName(agent_type, agent_settings) {
     "random0": "forced_coordination",
     "random3": "counter_circuit",
   }
-  let layout = agent_settings[agent_type].layout
-  return layoutMap[layout]
+  let layout = agent_settings[agent_type].layout;
+  if (layout in layoutMap){
+    return layoutMap[layout];
+  }else{
+    return layout;
+  }
+}
+
+function get_layout_params(game_setting_list) {
+
+  let base_layout_params = game_setting_list[0]["base_layout_params"];
+
+  let grid = base_layout_params["grid"];
+  delete base_layout_params["grid"];
+  // base_layout_params["layout"] = layout_name;
+  if (base_layout_params["start_state"]) {
+      base_layout_params["start_state"] = OvercookedState.from_dict(base_layout_params["start_state"]);
+  }
+  // Clean grid
+  grid = grid.split("\n").map(layout_row => layout_row.trim());
+
+  // Convert Objects to Arrays
+  var toString = Object.prototype.toString;
+  base_layout_params["start_bonus_orders"] = Object.values(base_layout_params["start_bonus_orders"]);
+  console.log(toString.call(base_layout_params["start_bonus_orders"]));
+  /*
+  for(let i = 0; i < base_layout_params["start_all_orders"].length; i++){
+    base_layout_params["start_all_orders"][i] = Object.entries(base_layout_params["start_all_orders"][i]);
+    console.log(base_layout_params["start_all_orders"]);
+  }
+  */
+  return [grid, base_layout_params];
 }
 
 $(document).ready(() => {

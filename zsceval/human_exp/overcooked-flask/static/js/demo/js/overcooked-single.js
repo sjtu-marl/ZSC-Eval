@@ -4,7 +4,7 @@ let OvercookedMDP = Overcooked.OvercookedMDP;
 let Direction = OvercookedMDP.Direction;
 let Action = OvercookedMDP.Action;
 let [NORTH, SOUTH, EAST, WEST] = Direction.CARDINAL;
-let [STAY, INTERACT] = [Direction.STAY, Action.INTERACT];
+let [STAY, INTERACT] = [Action.STAY, Action.INTERACT];
 
 let COOK_TIME = 20;
 
@@ -26,6 +26,7 @@ export default class OvercookedSinglePlayerTask {
         task_params,
         algo,
         start_grid,
+        base_layout_params,
         layout_name,
         save_trajectory = false,
         TIMESTEP = 200,
@@ -33,7 +34,36 @@ export default class OvercookedSinglePlayerTask {
         init_orders = null,
         completion_callback = () => { console.log("Time up") },
         timestep_callback = (data) => { },
-        DELIVERY_REWARD = 20
+        DELIVERY_REWARD = 20,
+        SHAPED_INFOS = ["put_onion_on_X",
+                        "put_tomato_on_X",
+                        "put_dish_on_X",
+                        "put_soup_on_X",
+                        "pickup_onion_from_X",
+                        "pickup_onion_from_O",
+                        "pickup_tomato_from_X",
+                        "pickup_tomato_from_T",
+                        "pickup_dish_from_X",
+                        "pickup_dish_from_D",
+                        "pickup_soup_from_X",
+                        "USEFUL_DISH_PICKUP",  
+                        "SOUP_PICKUP",
+                        "PLACEMENT_IN_POT", 
+                        "viable_placement",
+                        "optimal_placement",
+                        "catastrophic_placement",
+                        "useless_placement", 
+                        "potting_onion",
+                        "potting_tomato",
+                        "cook",
+                        "delivery",
+                        "deliver_size_two_order",
+                        "deliver_size_three_order",
+                        "deliver_useless_order",
+                        "STAY",
+                        "MOVEMENT",
+                        "IDLE_MOVEMENT",
+                        "IDLE_INTERACT",]
     }) {
         //NPC policies get called at every time step
         if (typeof (npc_policies) === 'undefined') {
@@ -65,15 +95,18 @@ export default class OvercookedSinglePlayerTask {
         let player_colors = this.getHatColor();
 
         this.game = new OvercookedGame({
-            start_grid,
+            layout_name,
             container_id,
+            start_grid : start_grid,
+            base_layout_params : base_layout_params,
             assets_loc: "static/assets/",
+            layout_loc: "static/layouts/",
             ANIMATION_DURATION: TIMESTEP * 0.2,
             tileSize: 80,
             COOK_TIME: COOK_TIME,
             explosion_time: Number.MAX_SAFE_INTEGER,
             DELIVERY_REWARD: DELIVERY_REWARD,
-            player_colors: player_colors
+            player_colors: player_colors,
         });
         this.init_orders = init_orders;
         if (Object.keys(npc_policies).length == 1) {
@@ -111,7 +144,7 @@ export default class OvercookedSinglePlayerTask {
 
         this.start_time = -1;
 
-        this.state = this.game.mdp.get_start_state(this.init_orders);
+        this.state = this.game.mdp.get_standard_start_state();
         this.game.drawState(this.state);
         this.joint_action = [STAY, STAY];
         // this.lstm_state = [null, null];
@@ -145,7 +178,7 @@ export default class OvercookedSinglePlayerTask {
                 }));
                 var action_idx = JSON.parse(xhr.responseText)["action"];
                 let npc_a = Action.INDEX_TO_ACTION[action_idx];
-                // console.log(npc_a);
+                console.log(npc_a);
 
                 // this.lstm_state[npc_index] = lstm_state;
                 this.joint_action[npc_index] = npc_a;
@@ -156,18 +189,23 @@ export default class OvercookedSinglePlayerTask {
 
             }
             this.joint_action_idx = [Action.ACTION_TO_INDEX[this.joint_action[0]], Action.ACTION_TO_INDEX[this.joint_action[1]]];
-            let [[next_state, prob], reward] = this.game.mdp.get_transition_states_and_probs({
+            let [[next_state, prob], infos] = this.game.mdp.get_transition_states_and_probs({
                 state: this.state,
                 joint_action: this.joint_action
             });
+            let reward = infos["sparse_reward_by_agent"][0] + infos["sparse_reward_by_agent"][1]; 
 
 
             // Apparently doing a Parse(Stringify(Obj)) is actually the most succinct way. 
             // to do a deep copy in JS 
             // let cleanedState = JSON.parse(JSON.stringify(this.state));
             // cleanedState['objects'] = Object.values(cleanedState['objects']);
+
+            const _lodash = require("lodash");
+
             this.trajectory.ep_states[0].push(JSON.stringify(this.state))
             this.trajectory.ep_actions[0].push(JSON.stringify(this.joint_action_idx))
+            this.shaped_infos = _lodash.cloneDeep(infos.shaped_info_by_agent[this.player_index]);
             this.trajectory.ep_rewards[0].push(reward)
             //update next round
             this.game.drawState(next_state);
@@ -248,6 +286,7 @@ export default class OvercookedSinglePlayerTask {
                 traj_id: traj_time + "_human=" + this.player_index,
                 traj: parsed_trajectory_data,
                 layout_name: this.layout_name,
+                shaped_infos: this.shaped_infos,
                 algo: this.algo,
                 agent_type: Number(sessionStorage.getItem('agent_type')),
                 user_info: getDomData(),

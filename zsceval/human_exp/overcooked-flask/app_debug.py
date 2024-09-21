@@ -18,6 +18,7 @@ from zsceval.human_exp.overcooked_utils import (
     NAME_TRANSLATION,
     LAYOUT_LIST,
     generate_balanced_permutation,
+    read_layout_dict,
 )
 
 app = Flask(__name__)
@@ -27,7 +28,7 @@ NAME_TRANSLATION_REVERSE = {v: k for k, v in NAME_TRANSLATION.items()}
 
 OLD_LAYOUTS = ["random0","random1","random3",]
 
-ALL_LAYOUTS = ["forced_coordination_tomato"]
+ALL_LAYOUTS = ["random3_m"]
 #ALL_LAYOUTS = ["random3"]
 USER_AGENTS = {}
 """ 
@@ -65,6 +66,12 @@ def get_args() -> argparse.ArgumentParser:
         type=str,
         default=os.getenv("TRAJs_SAVE_PATH", "./zsceval/human_exp/data/trajs"),
         help="optional trajectory save path",
+    )
+    parser.add_argument(
+        "--infos_save_path",
+        type=str,
+        default=os.getenv("INFOs_SAVE_PATH", "./zsceval/human_exp/data/infos"),
+        help="optional info save path",
     )
     parser.add_argument(
         "--progress_save_path",
@@ -154,11 +161,14 @@ def init_game_settings(
             #layout_alias = NAME_TRANSLATION_REVERSE[layout] if layout in NAME_TRANSLATION_REVERSE.values() else layout
             layout_alias = layout 
 
+            base_layout_params = read_layout_dict(layout)
+
             game_settings.append(
                 {
                     "agents": human_algo_pair,
                     "algo": algo_control,
                     "layout": layout,
+                    "base_layout_params" : base_layout_params,
                     "run_id": algo_i + 1,
                     "n_runs": len(algo_list),
                     "layout_alias": layout_alias,
@@ -185,7 +195,7 @@ def randomize_game_settings():
             with open(ARGS.progress_save_path, "w", encoding="utf-8") as f:
                 json.dump(progress_dict, f)
         logger.debug(f"Games generate for {user_id}:\n{pformat(game_settings)}, agent_type {agent_type}")
-        return jsonify({"game_setting_list": game_settings, "agent_type": agent_type, "algo_order": code_order})
+        return jsonify({"game_setting_list": game_settings, "agent_type": agent_type, "algo_order": code_order},)
 
 
 @app.route("/finish_episode", methods=["POST"])
@@ -198,7 +208,9 @@ def finish_episode():
         if data_json["algo"] == "dummy":
             return jsonify({"status": True})
         traj_dict, traj_id, server_layout_name = data_json["traj"], data_json["traj_id"], data_json["layout_name"]
-            
+        
+        agent_infos = data_json["shaped_infos"]
+        
         layout_name = NAME_TRANSLATION[server_layout_name] if server_layout_name in NAME_TRANSLATION else server_layout_name
 
         if ARGS.trajs_save_path:
@@ -213,6 +225,19 @@ def finish_episode():
             ) as f:
                 json.dump(traj_dict, f)
             logger.info(f"saving traj: {traj_id} in {save_path}")
+            
+        if ARGS.infos_save_path:
+            # Save infos
+            filename = f"{traj_id}.json".replace(":", "_")
+            save_path = os.path.normpath(os.path.join(ARGS.infos_save_path, layout_name))
+            os.makedirs(save_path, exist_ok=True)
+            with open(
+                os.path.normpath(os.path.join(save_path, filename)).replace("\\", "/"),
+                "w",
+                encoding="utf-8",
+            ) as f:
+                json.dump(agent_infos, f)
+            logger.info(f"saving info: {traj_id} in {save_path}")
 
         return jsonify({"status": True})
 
@@ -354,6 +379,21 @@ def get_action(state: Dict, agent: Callable, pos: int, algo: str) -> int:
     """
     return int(agent(state, pos).item())
 
+def rename_keys(a):
+    renamed_dict = a
+    for key, value in list(renamed_dict.items()):
+        if key[0] == '_':
+            renamed_dict[key[1:]] = renamed_dict[key]
+            del renamed_dict[key]
+            key = key[1:]
+        if isinstance(value, dict):
+            renamed_dict[key] = rename_keys(renamed_dict[key])
+        elif isinstance(value, list):
+            for i, n in enumerate(value):
+                if isinstance(n, dict):
+                    renamed_dict[key][i] = rename_keys(renamed_dict[key][i])
+            
+    return renamed_dict
 
 @app.route(f"/<algo>/predict/", methods=["POST"])
 def predict(algo):
@@ -369,12 +409,17 @@ def predict(algo):
     assert request.method == "POST"
     if algo == "dummy":
         return jsonify({"action": 4})
-    #algo = CODE_2_ALGO[algo]
+    algo = CODE_2_ALGO[algo]
     data_json = json.loads(request.data)
     state_dict, player_id = (
         data_json["state"],
         data_json["npc_index"],
     )
+    
+    state_dict_renamed = rename_keys(state_dict)
+    
+    print(state_dict_renamed)
+    
     pos = int(player_id)
 
     user_id = f"{data_json['user_info']['name']}_{data_json['user_info']['phone']}"
@@ -385,9 +430,11 @@ def predict(algo):
         game_settings, agent_type, _ = progress_dict["user_progress"][user_id]
         g_setting = game_settings[agent_type]
         USER_AGENTS[user_id] = AGENT_POOLS[g_setting["layout"]].get_agent(algo)
-
-    a = get_action(state_dict, USER_AGENTS[user_id], pos, algo)
-
+    print(user_id)
+    print(USER_AGENTS)
+    
+    a = get_action(state_dict_renamed, USER_AGENTS[user_id], pos, algo)
+    print(a)
     return jsonify({"action": a})
 
 

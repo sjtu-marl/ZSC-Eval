@@ -308,7 +308,7 @@
             // for (var i = )
             console.log('n_runs', n_runs)
             console.log('n_layouts', n_layouts)
-            for (var i = 1 + n_runs * n_layouts; i < n_agents + n_runs * n_layouts + 1; i++) {
+            for (var i = n_runs * n_layouts; i < n_agents + n_runs * n_layouts; i++) {
                 var agentName = agent_settings[i]['agents'][1] != 'human' ? agent_settings[i]['agents'][1] : agent_settings[i]['agents'][0];
                 if (!agentNameList.includes(agentName)) {
                     agentList.push({

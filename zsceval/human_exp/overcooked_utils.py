@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import List
+import os
 
 from loguru import logger
 
@@ -17,6 +18,8 @@ NAME_TRANSLATION = {
     "counter_circuit": "random3",
     "forced_coordination" : "random0",
 }
+
+LAYOUTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "overcooked-flask/static/layouts")
 
 
 def generate_balanced_permutation(existing_permutations: List[List], sequence: List):
@@ -50,3 +53,10 @@ def generate_balanced_permutation(existing_permutations: List[List], sequence: L
         position_counts[idx][chosen_element] += 1  # Update the count for the chosen element in this position
 
     return new_permutation
+
+def load_dict_from_file(filepath):
+    with open(filepath, "r") as f:
+        return eval(f.read())
+
+def read_layout_dict(layout_name):
+    return load_dict_from_file(os.path.join(LAYOUTS_DIR, layout_name + ".layout"))
