@@ -1,4 +1,4 @@
-# ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination
+# NeurIPS 2024 D&B Track - ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination
 
 ## Overview
 <div align=center>
