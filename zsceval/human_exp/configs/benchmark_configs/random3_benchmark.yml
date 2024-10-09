@@ -75,19 +75,19 @@ sp1:
     featurize_type: ppo
     algo: SP
     model_path:
-        actor: random3/fcp/s1/sp-S1-s15/sp1_final_actor.pt
+        actor: random3/fcp/s1/sp/sp1_final_actor.pt
 sp2:
     policy_config_path: random3/policy_config/mlp_policy_config.pkl
     featurize_type: ppo
     algo: SP
     model_path:
-        actor: random3/fcp/s1/sp-S1-s15/sp2_final_actor.pt
+        actor: random3/fcp/s1/sp/sp2_final_actor.pt
 sp3:
     policy_config_path: random3/policy_config/mlp_policy_config.pkl
     featurize_type: ppo
     algo: SP
     model_path:
-        actor: random3/fcp/s1/sp-S1-s15/sp3_final_actor.pt
+        actor: random3/fcp/s1/sp/sp3_final_actor.pt
 e3t1:
     policy_config_path: random3/policy_config/mlp_policy_config.pkl
     featurize_type: ppo

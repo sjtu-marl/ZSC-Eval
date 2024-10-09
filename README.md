@@ -312,11 +312,12 @@ We implement a human study platform, including game-playing, subjective ranking,
 
 #### Debug Mode
 ```shell
-export POLICY_POOL="zsc_eval/policy_pool"; python zsc_eval/human_exp/overcooked-flask/app.py
+export POLICY_POOL="zsceval/policy_pool"
+python zsceval/human_exp/overcooked-flask/app.py
 ```
 #### Production Mode
 ```shell
-bash zsc_eval/human_exp/human_exp_up.sh
+bash zsceval/human_exp/human_exp_up.sh
 ```
 
 ## 🛠️ Code Structure Overview
