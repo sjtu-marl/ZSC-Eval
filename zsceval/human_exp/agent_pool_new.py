@@ -167,7 +167,7 @@ class ZSCEvalAgentPool(AgentPool):
                 or (terrain_type in ["O", "T", "D"] and player.has_object())
                 or (
                     terrain_type == "P"
-                    and (not player.has_object() or player.get_object().name not in ["dish", "onion", "tomato"])
+                    and (player.has_object() and player.get_object().name not in ["dish", "onion", "tomato"])
                 )
                 or (terrain_type == "S" and (not player.has_object() or player.get_object().name not in ["soup"]))
             ):
@@ -178,6 +178,7 @@ class ZSCEvalAgentPool(AgentPool):
     def _get_action(self, policy: EvalPolicy, state: np.ndarray, available_actions: np.ndarray = None) -> int:
         policy.prep_rollout()
         epsilon = random.random()
+        # print(available_actions)
         if not self.deterministic or epsilon < self.epsilon:
             return policy.step(
                 np.array([state]),

@@ -178,7 +178,7 @@ export default class OvercookedSinglePlayerTask {
                 }));
                 var action_idx = JSON.parse(xhr.responseText)["action"];
                 let npc_a = Action.INDEX_TO_ACTION[action_idx];
-                console.log(npc_a);
+                // console.log(npc_a);
 
                 // this.lstm_state[npc_index] = lstm_state;
                 this.joint_action[npc_index] = npc_a;

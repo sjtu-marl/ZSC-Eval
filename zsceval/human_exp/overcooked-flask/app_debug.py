@@ -132,7 +132,7 @@ def init_game_settings(
         for g_setting in g_settings:
             if g_setting["algo"] == "dummy":
                 continue
-            #_layout_game_algos[g_setting["layout"]].append(CODE_2_ALGO[g_setting["algo"]])
+            _layout_game_algos[g_setting["layout"]].append(g_setting["algo"])
         for k, v in _layout_game_algos.items():
             layout_game_algo_lists[k].append(v)
 
@@ -150,11 +150,11 @@ def init_game_settings(
         algo_list = generate_balanced_permutation(used_algo_lists, algos)
         for algo_i, algo_control in enumerate(algo_list):
             pos = 0
-            algo_control = ALGO_2_CODE[algo_control]
+            algo_control = algo_control
             if random_pos:
                 pos = random.choice([0, 1])
             if pos == 0:
-                human_algo_pair = [HUMAN_NAME, algo_control]
+                human_algo_pair = [HUMAN_NAME, ALGO_2_CODE[algo_control]]
             else:
                 human_algo_pair = [algo_control, HUMAN_NAME]
 
@@ -254,8 +254,7 @@ def changemodel():
         game_setting = data_json["game_settings"][agent_type]
         logger.info(f"{user_id} with {game_setting['agents']}")
         if game_setting["algo"] != "dummy":
-            #agent_call = AGENT_POOLS[game_setting["layout"]].get_agent(game_setting["algo"])
-            agent_call = AGENT_POOLS[game_setting["layout"]].get_agent(CODE_2_ALGO[game_setting["algo"]])
+            agent_call = AGENT_POOLS[game_setting["layout"]].get_agent(game_setting["algo"])
             USER_AGENTS[user_id] = agent_call
 
         result = {"status": True}
@@ -338,7 +337,7 @@ def create_questionnaire_in_game():
     else:
         human_pos = 1
     agent_count = 0
-    #agent = CODE_2_ALGO[agent]
+    agent = CODE_2_ALGO[agent]
     for in_game_item in in_game:
         if in_game_item.get("teammate") == agent:
             agent_count += 1
@@ -346,8 +345,7 @@ def create_questionnaire_in_game():
     in_game.append(
         {
             "traj_path": os.path.normpath(os.path.join(save_path, filename)).replace("\\", "/"),
-            #"questionnaire": {CODE_2_ALGO[k]: v for k, v in data_json["questionnaire"].items()},
-            "questionnaire": {k: v for k, v in data_json["questionnaire"].items()},
+            "questionnaire": {CODE_2_ALGO[k]: v for k, v in data_json["questionnaire"].items()},
             "teammate": agent,
             "human_pos": human_pos,
             "run_id": agent_settings_list[agent_type_idx]["run_id"],
@@ -409,7 +407,6 @@ def predict(algo):
     assert request.method == "POST"
     if algo == "dummy":
         return jsonify({"action": 4})
-    algo = CODE_2_ALGO[algo]
     data_json = json.loads(request.data)
     state_dict, player_id = (
         data_json["state"],
@@ -418,7 +415,7 @@ def predict(algo):
     
     state_dict_renamed = rename_keys(state_dict)
     
-    print(state_dict_renamed)
+    #print(state_dict_renamed)
     
     pos = int(player_id)
 
@@ -430,11 +427,9 @@ def predict(algo):
         game_settings, agent_type, _ = progress_dict["user_progress"][user_id]
         g_setting = game_settings[agent_type]
         USER_AGENTS[user_id] = AGENT_POOLS[g_setting["layout"]].get_agent(algo)
-    print(user_id)
-    print(USER_AGENTS)
     
     a = get_action(state_dict_renamed, USER_AGENTS[user_id], pos, algo)
-    print(a)
+    #print(a)
     return jsonify({"action": a})
 
 
@@ -475,7 +470,7 @@ def main(args: argparse.Namespace):
             os.path.join(ARGS.population_yml_path, f"{layout}_benchmark.yml"),
             layout,
             deterministic=True,
-            epsilon=0.5,
+            epsilon=0.0,
         )
         for layout in ALL_LAYOUTS
     }

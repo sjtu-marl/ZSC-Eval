@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   let layout_saved = agent_settings[agent_type]['layout']
-  if (agent_type === 0) {
+  if (agent_type === -1) {
     $("#agent_type").text('Warmup trial')
     $("#agent_type_in_a_layout").text(`Warmup trial`)
   } else {
@@ -177,10 +177,10 @@ function startGame(endOfGameCallback) {
   let game_time = $("#gameTime").val();
 
   if (agent_type > 0) {
-    game_time = 9999;
+    game_time = 120;
     $("#gameTime").val(game_time);
   } else {  // tutorial
-    game_time = 30;
+    game_time = 120;
     $("#gameTime").val(game_time);
   }
 

@@ -144,9 +144,9 @@ export class Recipe {
         Recipe.ALL_RECIPES_CACHE[key] = this;
         this._ingredients = ingredients;
     }
-  
+
     _hash(ingredients) {
-        return JSON.stringify(ingredients.sort());
+        return ingredients.sort().toString();
     }
   
     __getnewargs__() {
@@ -227,31 +227,31 @@ export class Recipe {
     }
   
     get value() {
-        if (this._delivery_reward) {
-            return this._delivery_reward;
+        if (Recipe._delivery_reward) {
+            return Recipe._delivery_reward;
         }
-        if (this._value_mapping && this._value_mapping.has(this)) {
-            return this._value_mapping.get(this);
+        if (Recipe._value_mapping && Recipe._value_mapping.has(this.ingredients.toString())) {
+            return Recipe._value_mapping.get(this.ingredients.toString());
         }
-        if (this._onion_value && this._tomato_value) {
+        if (Recipe._onion_value && Recipe._tomato_value) {
             let num_onions = this.ingredients.filter(ingredient => ingredient === Recipe.ONION).length;
             let num_tomatoes = this.ingredients.filter(ingredient => ingredient === Recipe.TOMATO).length;
-            return this._tomato_value * num_tomatoes + this._onion_value * num_onions;
+            return Recipe._tomato_value * num_tomatoes + Recipe._onion_value * num_onions;
         }
         return 20;
     }
   
     get time() {
-        if (this._cook_time) {
-            return this._cook_time;
+        if (Recipe._cook_time) {
+            return Recipe._cook_time;
         }
-        if (this._time_mapping && this._time_mapping.has(this)) {
-            return this._time_mapping.get(this);
+        if (Recipe._time_mapping && Recipe._time_mapping.has(this.ingredients.toString())) {
+            return Recipe._time_mapping.get(this.ingredients.toString());
         }
-        if (this._onion_time && this._tomato_time) {
+        if (Recipe._onion_time && Recipe._tomato_time) {
             let num_onions = this.ingredients.filter(ingredient => ingredient === Recipe.ONION).length;
             let num_tomatoes = this.ingredients.filter(ingredient => ingredient === Recipe.TOMATO).length;
-            return this._onion_time * num_onions + this._tomato_time * num_tomatoes;
+            return Recipe._onion_time * num_onions + Recipe._tomato_time * num_tomatoes;
         }
         return 20;
     }
@@ -358,13 +358,13 @@ export class Recipe {
   
         if (conf.recipe_values) {
             Recipe._value_mapping = new Map(
-                conf.all_orders.map((recipe, index) => [Recipe.from_dict(recipe), conf.recipe_values[index]])
+                conf.all_orders.map((recipe, index) => [Recipe.from_dict(recipe).ingredients.toString(), conf.recipe_values[index]])
             );
         }
   
         if (conf.recipe_times) {
             Recipe._time_mapping = new Map(
-                conf.all_orders.map((recipe, index) => [Recipe.from_dict(recipe), conf.recipe_times[index]])
+                conf.all_orders.map((recipe, index) => [Recipe.from_dict(recipe).ingredients.toString(), conf.recipe_times[index]])
             );
         }
   
@@ -1842,15 +1842,14 @@ export class OvercookedGridworld {
          */
         if (!discounted) {
             if (!state.all_orders.some(
-                array => array.ingredients.every(
-                    ingredient => ingredient.includes(ingredient))
+                _recipe => _recipe.ingredients.toString() == recipe.ingredients.toString()
             )) {
                 // TODO: penalty
                 return -10;
             }
     
             if (!state.bonus_orders.some(
-                array => array.ingredients.every(ingredient => recipe.ingredient.includes(ingredient))
+                _recipe => _recipe.ingredients.toString() == recipe.ingredients.toString()
             )) {
                 return recipe.value;
             }

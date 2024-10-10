@@ -1,3 +1,7 @@
+# npm install
+
+# npm list .
+
 npm run build
 
 cd ~/ZSC-Eval/zsceval/human_exp/overcooked-flask
