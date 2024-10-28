@@ -6,6 +6,8 @@
            "node": "current"
          }
        }],
-     "jest"
-   ]
+     "jest",
+     "@babel/preset-env"
+   ],
+   "plugins": ["@babel/plugin-proposal-class-properties"]
 }

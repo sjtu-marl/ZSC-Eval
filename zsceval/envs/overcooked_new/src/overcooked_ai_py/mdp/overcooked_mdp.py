@@ -33,13 +33,13 @@ SHAPED_INFOS = [
     "pickup_dish_from_X",
     "pickup_dish_from_D",
     "pickup_soup_from_X",
-    "USEFUL_DISH_PICKUP",  # counted when #taken_dishes < #cooking_pots + #partially_full_pots and no dishes on the counter
-    "SOUP_PICKUP",  # counted when soup in the pot is picked up (not a soup placed on the table)
-    "PLACEMENT_IN_POT",  # counted when some ingredient is put into pot
+    "USEFUL_DISH_PICKUP",  
+    "SOUP_PICKUP",
+    "PLACEMENT_IN_POT", 
     "viable_placement",
     "optimal_placement",
     "catastrophic_placement",
-    "useless_placement",  # pot an ingredient to a useless recipe
+    "useless_placement", 
     "potting_onion",
     "potting_tomato",
     "cook",
@@ -154,7 +154,7 @@ class Recipe:
 
     @ingredients.setter
     def ingredients(self, _):
-        raise AttributeError("Recpes are read-only. Do not modify instance attributes after creation")
+        raise AttributeError("Recpies are read-only. Do not modify instance attributes after creation")
 
     @property
     def value(self):
@@ -446,6 +446,7 @@ class SoupState(ObjectState):
         if self._cook_time is not None:
             return self._cook_time
         else:
+            
             return self.recipe.time
 
     @property
@@ -1253,9 +1254,11 @@ class OvercookedGridworld(object):
         shaped reward is given only for completion of subgoals
         (not soup deliveries).
         """
+        
         events_infos = {event: [False] * self.num_players for event in EVENT_TYPES}
         assert not self.is_terminal(state), "Trying to find successor of a terminal state: {}".format(state)
         for action, action_set in zip(joint_action, self.get_actions(state)):
+            print(action_set)
             if action not in action_set:
                 raise ValueError("Illegal action %s in state %s" % (action, state))
 
@@ -1935,7 +1938,9 @@ class OvercookedGridworld(object):
 
     def log_object_drop(self, events_infos, state, obj_name, pot_states, player_index):
         """Player dropped the object on a counter"""
+        
         obj_drop_key = obj_name + "_drop"
+        
         if obj_drop_key not in events_infos:
             raise ValueError("Unknown event {}".format(obj_drop_key))
         events_infos[obj_drop_key][player_index] = True
@@ -2272,6 +2277,7 @@ class OvercookedGridworld(object):
         ]
         urgency_features = ["urgency"]
         all_objects = overcooked_state.all_objects_list
+        
 
         def make_layer(position, value):
             layer = np.zeros(self.shape)

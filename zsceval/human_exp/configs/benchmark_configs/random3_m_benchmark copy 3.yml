@@ -1,0 +1,23 @@
+# -5, 0
+hsp_cp1:
+    policy_config_path: random3_m/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP_CP1
+    model_path:
+        actor: random3_m/hsp_cp/adp/adaptive_mep-S2-s36-adp_cp-s5/1.pt
+
+# -5, 5
+hsp_cp2:
+    policy_config_path: random3_m/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP_CP2
+    model_path:
+        actor: random3_m/hsp_cp/adp/adaptive_mep-S2-s36-adp_cp-s5/2.pt
+
+# 0, -5
+hsp_cp3:
+    policy_config_path: random3_m/policy_config/mlp_policy_config.pkl
+    featurize_type: ppo
+    algo: HSP_CP3
+    model_path:
+        actor: random3_m/hsp_cp/adp/adaptive_mep-S2-s36-adp_cp-s5/3.pt

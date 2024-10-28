@@ -177,10 +177,10 @@ function startGame(endOfGameCallback) {
   let game_time = $("#gameTime").val();
 
   if (agent_type > 0) {
-    game_time = 120;
+    game_time = 90;
     $("#gameTime").val(game_time);
   } else {  // tutorial
-    game_time = 120;
+    game_time = 90;
     $("#gameTime").val(game_time);
   }
 

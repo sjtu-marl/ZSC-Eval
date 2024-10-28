@@ -1,18 +1,24 @@
 import argparse
 import json
 import os
+import shutil
 import random
 import time
 from collections import defaultdict
 from pprint import pformat
 from typing import Callable, Dict
 
+
+import imageio
 import yaml
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from loguru import logger
 from markdown import markdown
 
+from zsceval.envs.overcooked_new.src.overcooked_ai_py.visualization.state_visualizer import StateVisualizer
+
+from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.actions import Action
 
 from zsceval.human_exp.overcooked_utils import (
     NAME_TRANSLATION,
@@ -45,6 +51,7 @@ ALL_ALGOS = None
 CODE = None
 CODE_2_ALGO = None
 ALGO_2_CODE = None
+CURRENT_LAYOUT = None
 
 
 def get_args() -> argparse.ArgumentParser:
@@ -84,6 +91,12 @@ def get_args() -> argparse.ArgumentParser:
         type=str,
         default=os.getenv("QUESTIONNAIRE_SAVE_PATH", "./zsceval/human_exp/data/questionnaires"),
         help="optional questionnaire save path",
+    )
+    parser.add_argument(
+        "--gifs_save_path",
+        type=str,
+        default=os.getenv("GIFs_SAVE_PATH", "./zsceval/human_exp/data/gifs"),
+        help="optional info save path",
     )
     return parser
 
@@ -154,7 +167,7 @@ def init_game_settings(
             if random_pos:
                 pos = random.choice([0, 1])
             if pos == 0:
-                human_algo_pair = [HUMAN_NAME, ALGO_2_CODE[algo_control]]
+                human_algo_pair = [HUMAN_NAME, algo_control]
             else:
                 human_algo_pair = [algo_control, HUMAN_NAME]
 
@@ -162,6 +175,7 @@ def init_game_settings(
             layout_alias = layout 
 
             base_layout_params = read_layout_dict(layout)
+            CURRENT_LAYOUT = base_layout_params
 
             game_settings.append(
                 {
@@ -176,7 +190,6 @@ def init_game_settings(
                 }
             )
     return game_settings
-
 
 @app.route("/randomize_game_settings", methods=["POST"])
 def randomize_game_settings():
@@ -197,6 +210,51 @@ def randomize_game_settings():
         logger.debug(f"Games generate for {user_id}:\n{pformat(game_settings)}, agent_type {agent_type}")
         return jsonify({"game_setting_list": game_settings, "agent_type": agent_type, "algo_order": code_order},)
 
+def render_traj(joint_actions, save_dir, layout_name, traj_id):
+    
+    try:
+        translated_joint_actions = []
+        for joint_action in joint_actions[0]:
+            
+            trans = (Action.INDEX_TO_ACTION[joint_action[0]], Action.INDEX_TO_ACTION[joint_action[1]])
+            translated_joint_actions.append(trans)
+            
+        filename = f"{traj_id}.gif".replace(":", "_")
+        traj_dir = os.path.normpath(os.path.join(save_dir, layout_name))
+        os.makedirs(traj_dir, exist_ok=True)
+        temp_dir = os.path.normpath(os.path.join(traj_dir, "temp"))
+        
+        StateVisualizer().render_from_actions(translated_joint_actions, layout_name, img_directory_path=temp_dir)
+        
+        for img_path in os.listdir(temp_dir):
+            img_path = temp_dir + "/" + img_path
+        imgs = []
+        imgs_dir = os.listdir(temp_dir)
+        imgs_dir = sorted(imgs_dir, key=lambda x: int(x.split(".")[0]))
+        for img_path in imgs_dir:
+            img_path = temp_dir + "/" + img_path
+            imgs.append(imageio.imread(img_path))
+        save_path = traj_dir + f'/{filename}'
+        imageio.mimsave(
+            save_path,
+            imgs,
+            duration=0.05,
+        )
+        logger.info(f"save gifs in {save_path}")
+        
+        # delete pngs
+        imgs_dir = os.listdir(temp_dir)
+        for img_path in imgs_dir:
+            img_path = temp_dir + "/" + img_path
+            if "png" in img_path:
+                os.remove(img_path)
+        shutil.rmtree(temp_dir)
+        
+    except Exception as e:
+        logger.exception(e)
+            
+    return 
+    
 
 @app.route("/finish_episode", methods=["POST"])
 def finish_episode():
@@ -204,12 +262,14 @@ def finish_episode():
     Save game trajectory to file
     """
     if request.method == "POST":
+        # dict_keys(['traj_id', 'traj', 'layout_name', 'shaped_infos', 'algo', 'agent_type', 'user_info'])
         data_json = json.loads(request.data)
         if data_json["algo"] == "dummy":
             return jsonify({"status": True})
         traj_dict, traj_id, server_layout_name = data_json["traj"], data_json["traj_id"], data_json["layout_name"]
         
         agent_infos = data_json["shaped_infos"]
+        
         
         layout_name = NAME_TRANSLATION[server_layout_name] if server_layout_name in NAME_TRANSLATION else server_layout_name
 
@@ -238,6 +298,9 @@ def finish_episode():
             ) as f:
                 json.dump(agent_infos, f)
             logger.info(f"saving info: {traj_id} in {save_path}")
+            
+        if ARGS.gifs_save_path:
+            render_traj(data_json["traj"]["ep_actions"], ARGS.gifs_save_path, layout_name, traj_id)
 
         return jsonify({"status": True})
 
@@ -337,7 +400,6 @@ def create_questionnaire_in_game():
     else:
         human_pos = 1
     agent_count = 0
-    agent = CODE_2_ALGO[agent]
     for in_game_item in in_game:
         if in_game_item.get("teammate") == agent:
             agent_count += 1
@@ -345,7 +407,7 @@ def create_questionnaire_in_game():
     in_game.append(
         {
             "traj_path": os.path.normpath(os.path.join(save_path, filename)).replace("\\", "/"),
-            "questionnaire": {CODE_2_ALGO[k]: v for k, v in data_json["questionnaire"].items()},
+            "questionnaire": {k: v for k, v in data_json["questionnaire"].items()},
             "teammate": agent,
             "human_pos": human_pos,
             "run_id": agent_settings_list[agent_type_idx]["run_id"],
@@ -470,7 +532,7 @@ def main(args: argparse.Namespace):
             os.path.join(ARGS.population_yml_path, f"{layout}_benchmark.yml"),
             layout,
             deterministic=True,
-            epsilon=0.0,
+            epsilon=0.5,
         )
         for layout in ALL_LAYOUTS
     }

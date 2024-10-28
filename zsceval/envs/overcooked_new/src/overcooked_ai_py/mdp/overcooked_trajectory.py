@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 """
 NOTE: Currently under construction...
@@ -65,3 +66,6 @@ def append_trajectories(traj_one, traj_two):
                 appended_traj[k] = np.concatenate([traj_one_value, traj_two_value], axis=0)
 
     return appended_traj
+
+def to_json(self):
+    return json.dumps(self.__dict__, ensure_ascii=False, indent=4) 

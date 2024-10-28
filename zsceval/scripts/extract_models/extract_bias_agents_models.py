@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     hostname = socket.gethostname()
     exp_names = {
-        "random3_m": "hsp-S1",
+        "random3_m": "hsp_plate-S1",
         "small_corridor": "hsp-S1",
         "random0" : "hsp-S1",
     }
@@ -150,3 +150,7 @@ if __name__ == "__main__":
         exp = "hsp-S1"
         logger.info(f"Extracting {exp} for {l}")
         extract_sp_S1_models(l, exp, env)
+
+def read_layout_dict():
+    
+    return load_dict_from_file(os.path.join(LAYOUTS_DIR, layout_name + ".layout"))

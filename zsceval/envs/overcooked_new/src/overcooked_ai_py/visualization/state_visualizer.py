@@ -4,6 +4,8 @@ import os
 
 import pygame
 
+from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_mdp import OvercookedGridworld
+
 from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.actions import (
     Action,
     Direction,
@@ -305,6 +307,58 @@ class StateVisualizer:
             result_surface = rendered_surface
 
         return result_surface
+    
+    def render_from_actions(
+        self,
+        joint_actions,
+        layout_name, 
+        hud_data=None,
+        action_probs=None,
+        img_directory_path=None,
+        img_extension=".png",
+        img_prefix=""
+    ):
+        
+        if hud_data is None:
+            if self.is_rendering_hud:
+                hud_data = [0]
+            else:
+                hud_data = [None] * (len(joint_actions)+1)
+
+        if action_probs is None:
+            action_probs = [None] * (len(joint_actions)+1)
+
+        if not img_directory_path:
+            img_directory_path = generate_temporary_file_path(prefix="overcooked_visualized_trajectory", extension="")
+        os.makedirs(img_directory_path, exist_ok=True)
+        
+        img_pathes = []
+        
+        grid_world = OvercookedGridworld.from_layout_name(layout_name)
+        
+        state = grid_world.get_standard_start_state()
+        mdp_params = grid_world.mdp_params
+        
+        img_name = img_prefix + str(0) + img_extension
+        img_path = os.path.join(img_directory_path, img_name)
+        
+        img_pathes.append(self.display_rendered_state(state, hud_data[0], action_probs[0], mdp_params["terrain"], img_path, None, None))
+        
+        for i, joint_action in enumerate(joint_actions):
+            
+            state, info = grid_world.get_state_transition(state, joint_action)
+            img_name = img_prefix + str(i) + img_extension
+            img_path = os.path.join(img_directory_path, img_name)
+            new_hud_data = {
+                "timestep": state.timestep,
+                "all_orders": [r.to_dict() for r in state.all_orders],
+                "bonus_orders": [r.to_dict() for r in state.bonus_orders],
+                "scores" : info["sparse_reward_by_agent"][0] + info["sparse_reward_by_agent"][1]
+            }
+            img_pathes.append(self.display_rendered_state(state, new_hud_data, action_probs[i], mdp_params["terrain"], img_path, None, None))
+            
+        return img_directory_path
+        
 
     @property
     def scale_by_factor(self):

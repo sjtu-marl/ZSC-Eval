@@ -142,6 +142,23 @@ LABELS_OLD = [
     "either_shaped_r_agent1",
 ]
 
+def summon_gif(save_path, layout, exp, index):
+    
+    data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval-" + exp + "_" + str(index))
+    
+    gifs =  glob.glob(str(data_dir) + "/**/*.gif" , recursive=True)
+    
+    if(len(gifs)==0):
+        print(f"No gif for {exp}{str(index)}")
+        return
+    
+    reward = re.findall(r'\d+', gifs[0])
+    
+    if not os.path.exists(f"{save_path}/gifs"):
+        os.makedirs(f"{save_path}/gifs")
+    
+    shutil.copy(gifs[0], f"{save_path}/gifs/{exp}_{str(index)}-reward_{reward[-1]}.gif")
+    print(f"gif saved at {save_path}/gifs/{exp}_{str(index)}-reward_{reward[-1]}.gif")  
 
 def load_behavior(layout, exp, seed_max, use_new, save_root, collect_gif):
     
@@ -156,12 +173,13 @@ def load_behavior(layout, exp, seed_max, use_new, save_root, collect_gif):
     
     files = glob.glob(f"eval/results/{layout}/{exp}/*.json")
     sorted_files = sorted(files, key=natural_keys)
+    print(sorted_files)
     
     for i in range(0,seed_max):
         #if(i is 25 or i is 26):
         #    continue
         file = sorted_files[i]
-        index.append(f"{exp}{i+1}")
+        index.append(f"{exp}_{i+1}")
         with open(file, mode="rt", encoding="utf-8") as f:
             json_dict = json.load(f)
             orderedNames = sorted(list(json_dict.keys()))
@@ -370,33 +388,20 @@ def plot_radar(df, exps, seed_max, subscript, save_root):
             rows = rows - seeds 
             exp_index = j if rows == 0 else exp_index
         
-        if not os.path.exists(f"{save_root}/{exp_index}/radars"):
-            os.makedirs(f"{save_root}/{exp_index}/radars")
+        if not os.path.exists(f"{save_root}/{exps[exp_index]}/radars"):
+            os.makedirs(f"{save_root}/{exps[exp_index]}/radars")
         
-        plt.savefig(f"{save_root}/{exp_index}/radars/radar_{index_list[i]}_{subscript}.png")
+        plt.savefig(f"{save_root}/{exps[exp_index]}/radars/radar_{index_list[i]}_{subscript}.png")
         plt.close()
         
-def summon_gif(save_path, layout, exp, index):
-    
-    data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval-" + exp + str(index))
-    
-    gifs =  glob.glob(str(data_dir) + "/**/*.gif" , recursive=True)
-    
-    if(len(gifs)==0):
-        print(f"No gif for {exp}{str(index)}")
-        return
-    
-    reward = re.findall(r'\d+', gifs[0])
-    
-    if not os.path.exists(f"{save_path}/gifs"):
-        os.makedirs(f"{save_path}/gifs")
-    
-    shutil.copy(gifs[0], f"{save_path}/gifs/{exp}{str(index)}-reward_{reward[-1]}.gif")
-    print(f"gif saved at {save_path}/gifs/{exp}{str(index)}-reward_{reward[-1]}.gif")  
+
     
     
 def dump_hist(df, df_atr, bins, xlabel, ylabel, save_dir, subscript, color):
     plt.rcParams["font.size"] = 20
+    
+    if(np.isnan(df_atr.min()) or np.isnan(df_atr.max()) or df_atr.min() >= df_atr.max()):
+        return
             
     plt.hist(df_atr, bins=bins, range=(df_atr.min(), df_atr.max()), color=color)
     
@@ -408,6 +413,34 @@ def dump_hist(df, df_atr, bins, xlabel, ylabel, save_dir, subscript, color):
     plt.tight_layout()
     plt.savefig(f"{save_dir}/{subscript}.png", dpi=300)
     plt.close() 
+
+def dump_hist_comp(df_atrs, exps, bins, xlabel, ylabel, save_dir, subscript, colors):
+    fig = plt.figure(figsize=(20,10))
+    fig.suptitle("")
+    
+    x_max = -10000000000
+    x_min = 10000000000
+    for df_atr in df_atrs:
+        if df_atr.min() < x_min:
+            x_min = df_atr.min()
+        if df_atr.max() > x_max:
+            x_max = df_atr.max()
+            
+    if(not np.isnan(x_min) or not np.isnan(x_max) or x_min >= x_max):
+        return
+    
+    for i, df_atr in enumerate(df_atrs):
+        ax = fig.add_subplot(2, 2, i+1)
+        ax.hist(df_atr, bins=bins, range=(x_min, x_max), color=colors[i])
+        ax.set_title(exps[i])
+        ax.set_ylim(0, len(df_atr))
+        ax.set_xlabel(xlabel=xlabel)
+        ax.set_ylabel(ylabel=ylabel)
+        
+    plt.tight_layout()
+    plt.savefig(f"{save_dir}/{subscript}.png", dpi=300)
+    plt.close() 
+    
 
 def plot_histgrams(df, layout, exps, save_root):
         
@@ -431,9 +464,9 @@ def plot_histgrams(df, layout, exps, save_root):
             else:
                 colors.append(cmap(2*i))
         
-        df_dish = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"]
-        df_soup = value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
-        df_plate = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"] + value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
+        df_dish_remain = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"]
+        df_soup_remain = value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
+        df_plate_remain = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"] + value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
         df_stay = value[f"STAY_by_{key}"]
         df_movement = value[f"MOVEMENT_by_{key}"]
         df_onion = value[f"potting_onion_by_{key}"]
@@ -457,11 +490,12 @@ def plot_histgrams(df, layout, exps, save_root):
         df_pickup_dish_from_D = value[f"pickup_dish_from_D_by_{key}"]
         df_SOUP_PICKUP = value[f"SOUP_PICKUP_by_{key}"]
         
+        
         pd.set_option('display.max_rows', None)
         print(df_reward)
         
-        df_atrs = {"dish" : df_dish, "soup" : df_soup,
-                   "plate" : df_plate, "movement" : df_movement, "onion" : df_onion,
+        df_atrs = {"dish_remain" : df_dish_remain, "soup_remain" : df_soup_remain,
+                   "plate_remain" : df_plate_remain, "movement" : df_movement, "onion" : df_onion,
                    "tomato" : df_tomato,  "size_2" : df_size_2,
                    "size_3" : df_size_3, "reward" : df_reward, "stay" : df_stay,
                    "put_onion_on_X" : df_put_onion_on_X, "put_tomato_on_X" : df_put_tomato_on_X,
@@ -473,15 +507,15 @@ def plot_histgrams(df, layout, exps, save_root):
                    }
         atrs_min = {atr_label : atr_value.min() for atr_label, atr_value in df_atrs.items()}
         atrs_max = {atr_label : atr_value.max() for atr_label, atr_value in df_atrs.items()}
-        atrs_disc = {"dish" : "Counts for dish remaining",
-                    "soup" : "Counts for soup remaining",
-                   "plate" : "Counts for plate (placement - pickup)",
+        atrs_disc = {"dish_remain" : "Counts for dish remaining",
+                    "soup_remain" : "Counts for soup remaining",
+                   "plate_remain" : "Counts for plate (placement - pickup)",
                    "movement" : "Counts for movement", 
                    "onion" : "Counts for cooking onions",
                    "tomato" : "Counts for cooking tomatos",
                    "size_2" : "Counts for delivering size 2 recipe",
                    "size_3" : "Counts for delivering size 3 recipe",
-                   "reward" : "Counts for final scores",
+                   "reward" : "Final scores",
                    "stay" : "Counts for Staying",
                    "put_onion_on_X" : "Counts for putting a onion on the counter",
                    "put_tomato_on_X" : "Counts for putting a tomato on the counter",
@@ -499,8 +533,8 @@ def plot_histgrams(df, layout, exps, save_root):
                    "pickup_soup_from_P" : "Counts for picking up a plate of soup from the pot",
                    }
         
-        atrs_bins = {"dish" : 20, "soup" : 20,
-                   "plate" : 20, "movement" : 20, "onion" : 20,
+        atrs_bins = {"dish_remain" : 20, "soup_remain" : 20,
+                   "plate_remain" : 20, "movement" : 20, "onion" : 20,
                    "tomato" : 20, "size_2" : 20,
                    "size_3" : 20, "reward" : 20, "stay" : 20,
                    "put_onion_on_X" : 20, "put_tomato_on_X" :20,  "put_dish_on_X" :20, "put_soup_on_X" :20,
@@ -509,12 +543,48 @@ def plot_histgrams(df, layout, exps, save_root):
                    "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20}
         ylabel = "Number of AIs"
         
+        
+        if key == "all":
+            
+            plates_remain_agent0 = df_agent0[f"put_dish_on_X_by_agent0"] - df_agent0[f"pickup_dish_from_X_by_agent0"]
+            plates_remain_agent1 = df_agent1[f"put_dish_on_X_by_agent1"] - df_agent1[f"pickup_dish_from_X_by_agent1"]
+            
+            plates_pickup_agent0 = df_agent0[f"pickup_dish_from_X_by_agent0"] - df_agent0[f"put_dish_on_X_by_agent0"]
+            plates_pickup_agent1 = df_agent1[f"pickup_dish_from_X_by_agent1"] - df_agent1[f"put_dish_on_X_by_agent1"]
+            
+            df_atrs["plates_coord_0_to_1"] = plates_pickup_agent1
+            df_atrs["plates_coord_1_to_0"] = plates_pickup_agent0
+            df_atrs["plates_coord_total"] = df_atrs["plates_coord_0_to_1"] + df_atrs["plates_coord_1_to_0"]
+            
+            atrs_disc["plates_coord_0_to_1"] = "Counts for plate pickup - plate placement"
+            atrs_disc["plates_coord_1_to_0"] = "Counts for plate pickup - plate placement"
+            atrs_disc["plates_coord_total"] = "Counts for plate pickup - plate placement"
+            
+            atrs_bins["plates_coord_0_to_1"] = 20
+            atrs_bins["plates_coord_1_to_0"] = 20
+            atrs_bins["plates_coord_total"] = 20
+            
+        
         df_all_sorted= pd.DataFrame()
         
         for atr_label, df_atr in df_atrs.items():
+            
+            hist_dir = f"{save_root}histgrams"
+            if not os.path.exists(hist_dir):
+                os.makedirs(hist_dir)
+            
             df_sorted = df_atr.sort_values(ascending=False)
             df_all_sorted[f"{atr_label}_i"] = df_sorted.index
             df_all_sorted[f"{atr_label}_v"] = df_sorted.values
+            
+            df_atrs_filtered = []
+            for i, exp in enumerate(exps):
+                df_atrs_filtered.append(df_atr.filter(regex=f"^{exp}(\d)+$", axis=0))
+            
+            dump_hist_comp(df_atrs_filtered, exps, bins=atrs_bins[atr_label],
+                          xlabel=atrs_disc[atr_label], ylabel=ylabel,
+                          save_dir=hist_dir, subscript=f"hist_{atr_label}_{key}",
+                          colors=colors)
             
         df_all_sorted.to_csv(f"{save_root}/ranking_all_{key}.csv")
         
@@ -561,7 +631,7 @@ if __name__ == "__main__":
     
     layout = sys.argv[1]
     
-    _collect_gif = False
+    _collect_gif = True
     
     _plot_radar = False
     
@@ -571,11 +641,13 @@ if __name__ == "__main__":
     
     save_root = f"./eval/results/{layout}/analysis/"
     
-    exps = ["hsp","adaptive_hsp_plate","adaptive_hsp_plate_vs_hsp_plate"]
+    #exps = ["hsp","adaptive_hsp_plate","adaptive_hsp_plate_vs_hsp_plate"]
+    #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
+    exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [72, 72, 72]
-    #seed_max = [5, 5, 5]
+    # seed_max = [72, 72, 72]
+    seed_max = [20, 10, 10]
     #exps = [e for e in range(1,4)]
     #ranks = [r for r in range(1)]
     #run = 1
@@ -616,14 +688,14 @@ if __name__ == "__main__":
     df_agent1.to_csv(f"{save_root}/agent_1_behavior_metrics.csv")
     
     if _plot_radar:
-        plot_radar(df_agent0, exps, "agent0", save_root)
-        plot_radar(df_agent1, exps, "agent1", save_root)
+        plot_radar(df_agent0, exps, seed_max,"agent0", save_root)
+        plot_radar(df_agent1, exps, seed_max,"agent1", save_root)
     
     if _plot_hist:
         plot_histgrams(df_all, layout, exps, save_root)
     
     if _plot_pca:
-        plot_pca(df_all, exps, layout, True, save_root)
+        plot_pca(df_all, exps, layout, False, save_root)
     
     
     

@@ -2,6 +2,7 @@ import os
 import pickle
 import pprint
 import time
+import json
 from collections import defaultdict
 
 import gym
@@ -1206,8 +1207,12 @@ class Overcooked(gym.Env):
     def _store_trajectory(self):
         if not os.path.exists(f"{self.run_dir}/trajs_store/{self.layout_name}/"):
             os.makedirs(f"{self.run_dir}/trajs_store/{self.layout_name}/", exist_ok=True)
-        save_dir = f"{self.run_dir}/trajs_store/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
-        pickle.dump(self.traj_to_store, open(save_dir, "wb"))
+        save_dir = f"{self.run_dir}/trajs_store/{self.layout_name}/traj_{self.rank}_{self.traj_num}.json"
+        # save_dir = f"{self.run_dir}/trajs_store/{self.layout_name}/traj_{self.rank}_{self.traj_num}.pkl"
+        with open(save_dir, "w") as f:
+            json.dump(self.traj_to_store, f)           
+        # pickle.dump(self.traj_to_store, open(save_dir, "wb"))
+        
         
         #if not os.path.exists(f"{self.run_dir}/trajs/{self.layout_name}/"):
         #    os.makedirs(f"{self.run_dir}/trajs/{self.layout_name}/", exist_ok=True)
