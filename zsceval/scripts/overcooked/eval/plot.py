@@ -4,6 +4,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import seaborn as sns
+import math
+import time
 
 from adjustText import adjust_text
 
@@ -16,11 +18,48 @@ import shutil
 from pathlib import Path
 import re
 
+from multiprocessing import Pool
+
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 
+from loguru import logger
 
+LABELS_NEW_CORE =[
+    
+    "put_onion_on_X",
+    "put_tomato_on_X",
+    "put_dish_on_X",
+    "put_soup_on_X",
+    "pickup_onion_from_X",
+    "pickup_onion_from_O",
+    "pickup_tomato_from_X",
+    "pickup_tomato_from_T",
+    "pickup_dish_from_X",
+    "pickup_dish_from_D",
+    "pickup_soup_from_X",
+    "USEFUL_DISH_PICKUP", 
+    "SOUP_PICKUP", 
+    "PLACEMENT_IN_POT",
+    "viable_placement",
+    "optimal_placement",
+    "catastrophic_placement",
+    "useless_placement", 
+    "potting_onion",
+    "potting_tomato",
+    "cook",
+    "delivery",
+    "deliver_size_two_order",
+    "deliver_size_three_order",
+    "deliver_useless_order",
+    "STAY",
+    "MOVEMENT",
+    "IDLE_MOVEMENT",
+    "IDLE_INTERACT",
+    "sparse_r",
+    "shaped_r",
+]
 
 LABELS_NEW = [
     "put_onion_on_X_by_agent0",
@@ -149,7 +188,7 @@ def summon_gif(save_path, layout, exp, index):
     gifs =  glob.glob(str(data_dir) + "/**/*.gif" , recursive=True)
     
     if(len(gifs)==0):
-        print(f"No gif for {exp}{str(index)}")
+        logger.debug(f"No gif for {exp}{str(index)}")
         return
     
     reward = re.findall(r'\d+', gifs[0])
@@ -158,12 +197,99 @@ def summon_gif(save_path, layout, exp, index):
         os.makedirs(f"{save_path}/gifs")
     
     shutil.copy(gifs[0], f"{save_path}/gifs/{exp}_{str(index)}-reward_{reward[-1]}.gif")
-    print(f"gif saved at {save_path}/gifs/{exp}_{str(index)}-reward_{reward[-1]}.gif")  
-
-def load_behavior(layout, exp, seed_max, use_new, save_root, collect_gif):
+    logger.debug(f"gif saved at {save_path}/gifs/{exp}_{str(index)}-reward_{reward[-1]}.gif")  
+        
+        
+def render_traj(joint_actions, save_dir, layout_name, traj_label):
     
-    json_values = []
-    index = []
+    from zsceval.envs.overcooked_new.src.overcooked_ai_py.visualization.state_visualizer import StateVisualizer
+    from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.actions import Action
+    import imageio
+    
+    try:
+        translated_joint_actions = []
+        for joint_action in joint_actions:
+            trans = []
+            for player_action in joint_action:
+                if player_action =="interact":
+                    trans.append(player_action)
+                else:
+                    trans.append((player_action[0], player_action[1]))
+            translated_joint_actions.append(trans)
+            
+        filename = f"{traj_label}.gif".replace(":", "_")
+        os.makedirs(save_dir, exist_ok=True)
+        temp_dir = os.path.normpath(os.path.join(save_dir, f"temp_{traj_label}"))
+        
+        StateVisualizer().render_from_actions(translated_joint_actions, layout_name, img_directory_path=temp_dir)
+        
+        for img_path in os.listdir(temp_dir):
+            img_path = temp_dir + "/" + img_path
+        imgs = []
+        imgs_dir = os.listdir(temp_dir)
+        imgs_dir = sorted(imgs_dir, key=lambda x: int(x.split(".")[0]))
+        for img_path in imgs_dir:
+            img_path = temp_dir + "/" + img_path
+            imgs.append(imageio.imread(img_path))
+        save_path = save_dir + f'/{filename}'
+        imageio.mimsave(
+            save_path,
+            imgs,
+            duration=0.05,
+        )
+        logger.info(f"saved gif in {save_path}")
+        
+        # delete pngs
+        imgs_dir = os.listdir(temp_dir)
+        for img_path in imgs_dir:
+            img_path = temp_dir + "/" + img_path
+            if "png" in img_path:
+                os.remove(img_path)
+        shutil.rmtree(temp_dir)
+        logger.info(f"deleted temp dir : {temp_dir}")
+        
+    except Exception as e:
+        logger.exception(e)
+         
+    return 
+
+def render_traj_wrapper(args):
+    return render_traj(*args)
+
+def render_gif_from_traj(exp_save_dir, layout, exp, index, threads=4):
+    
+    save_dir = f"{exp_save_dir}/gifs"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    else:
+        shutil.rmtree(save_dir)
+        os.makedirs(save_dir)
+    
+    data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval_cp-" + exp + "-" + str(index))
+    logger.debug(data_dir)
+    traj_jsons =  glob.glob(str(data_dir) + "/**/*.json" , recursive=True)
+    
+    args = []
+    label_log = []
+    for i, json_path in enumerate(sorted(traj_jsons)):
+        #logger.debug(json_path)
+        traj_label = re.findall(r'.*_(\d+)_\d+.json', json_path)
+        
+        if(len(traj_label)==0):
+            logger.info(f"Can't find traj json in {json_path}")
+            continue
+        # only sample one gifs per eval settings
+        if traj_label[0] not in label_log:
+            json_open = open(json_path, 'r')
+            json_load = json.load(json_open)
+            args.append([json_load["ep_action"], save_dir, layout, f"{exp}_{index}_{traj_label}"])
+            label_log.append(traj_label)
+    
+    p = Pool(threads)
+    p.map(render_traj_wrapper, args)
+    
+    
+def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif, gif_from_traj):
     
     def atoi(text):
         return int(text) if text.isdigit() else text
@@ -171,43 +297,63 @@ def load_behavior(layout, exp, seed_max, use_new, save_root, collect_gif):
     def natural_keys(text):
         return [ atoi(c) for c in re.split(r'(\d+)', text) ]
     
+    
+    LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
+    
+    
+    #for label in LABELS:
+    #    for match_up in match_ups:
+    #        keys.append(f"{match_up}-eval_ep_{label}")
+    
     files = glob.glob(f"eval/results/{layout}/{exp}/*.json")
     sorted_files = sorted(files, key=natural_keys)
-    print(sorted_files)
+    # logger.debug(sorted_files)
     
-    for i in range(0,seed_max):
+    keys = None
+    with open(sorted_files[0], mode="rt", encoding="utf-8") as f:
+        json_dict = json.load(f)
+        keys = json_dict.keys()
+    
+    #logger.debug(match_ups)
+    shaped_dict = {}
+    for label in sorted(LABELS):
+        for match_up in match_ups:
+            for i in range(len(match_up)):
+                shaped_dict[f"{match_up[i]}_{label}"] = []
+            
+    index = []
+    for i in range(seeds):
         #if(i is 25 or i is 26):
         #    continue
         file = sorted_files[i]
         index.append(f"{exp}_{i+1}")
         with open(file, mode="rt", encoding="utf-8") as f:
             json_dict = json.load(f)
-            orderedNames = sorted(list(json_dict.keys()))
-            values = []
-            for name in orderedNames:
-                #print(name)
-                if not "either" in name:
-                   values.append(json_dict[name])
-            json_values.append(values)
-        #print(save_root + exp)
+            json_dict = {k: v for k, v in json_dict.items() if "either" not in k}
+            logger.debug(len(json_dict))
+            logger.debug(len(shaped_dict.keys()))
+            ordered_json_keys = sorted(list(json_dict.keys()))
+            #logger.debug(shaped_dict.keys())
+            #logger.debug(ordered_json)
+            assert(len(json_dict)==len(shaped_dict.keys()))
+            
+            for j, (key_s, key_o) in enumerate(zip(shaped_dict.keys(), ordered_json_keys)):
+                shaped_dict[key_s].append(json_dict[key_o])
+                
         if collect_gif:
-            summon_gif(save_root + exp, layout, exp, i+1)
+            if gif_from_traj:
+                render_gif_from_traj(save_root + exp, layout, exp, i+1)
+            else:
+                summon_gif(save_root + exp, layout, exp, i+1)
+            
+
     
-    LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
-    
-    #print(len(LABELS))
-    #print(f"{len(json_values)}, {len(json_values[0])}")
-    
-    shaped_dict = {}
-    for label in LABELS:
-        shaped_dict[label] = []
-    for values in json_values:
-        for j, v in enumerate(values):
-            if(j >= len(LABELS)):
-                break
-            shaped_dict[LABELS[j]].append(v)
-                        
+    #logger.debug(len(LABELS))
+    #logger.debug(f"{len(json_values)}, {len(json_values[0])}")
+
     df = pd.DataFrame(data=shaped_dict, index=index)
+    #logger.debug(df)
+    
     #df = df.rename(index=index)
     
     return df
@@ -226,7 +372,7 @@ def load_human_ai():
             orderedNames = sorted(list(json_dict.keys()))
             values = []
             for name in orderedNames:
-                #print(name)
+                #logger.debug(name)
                 if not "either" in name:
                    values.append(json_dict[name])
             json_values.append(values)
@@ -235,8 +381,8 @@ def load_human_ai():
     
     LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
     
-    print(len(LABELS))
-    print(f"{len(json_values)}, {len(json_values[0])}")
+    logger.debug(len(LABELS))
+    logger.debug(f"{len(json_values)}, {len(json_values[0])}")
     
     shaped_dict = {}
     for label in LABELS:
@@ -261,7 +407,7 @@ def load_trajectory(layout_name, alg, exps, ranks, run, traj_num, use_new):
             with open(f"{run_dir}/trajs_store/{layout_name}/traj_{rank}_{traj_num}.pkl",'rb') as f:
                 traj = pickle.load(f)
             
-            print(len(traj))
+            logger.debug(len(traj))
     
 def plot_pca(df_all, exps, layout, plot_label, save_root):
     
@@ -272,14 +418,14 @@ def plot_pca(df_all, exps, layout, plot_label, save_root):
     
     df_std = pd.DataFrame(df_std, index=df_all.index, columns=df_all.columns)
     
-    #print(df_std)
+    #logger.debug(df_std)
     
     pca = PCA()
     pca.fit(df_std)
     
     score = pd.DataFrame(pca.transform(df_std))
 
-    #print(score)
+    #logger.debug(score)
     
     num = len(score)  # 可視化するデータ数を指定
     
@@ -319,8 +465,8 @@ def plot_pca(df_all, exps, layout, plot_label, save_root):
     plt.xlabel("1st principal component")
     plt.xlabel("2nd principal component")
     plt.grid()
-    plt.savefig(f"{save_root}/pca.png", dpi=300, bbox_inches='tight')
-    print(f"saved pca plot at {save_root}/pca.png")
+    plt.savefig(f"{save_root}/pca.jpg", dpi=300, bbox_inches='tight')
+    logger.debug(f"saved pca plot at {save_root}/pca.jpg")
     plt.close()
     
     
@@ -332,7 +478,7 @@ def compute_cos_similarity(df_all):
     df_1 = pd.DataFrame(std_scaler.transform(df_all), index=df_all.index, columns=df_all.columns)
     df_2 = pd.DataFrame(std_scaler.transform(df_all), index=df_all.index, columns=df_all.columns)
     
-    #print(df_1)
+    #logger.debug(df_1)
     
     # 行列ベクトルの片方を転置して積を求める
     df_dot = df_1.dot(df_2.T)
@@ -358,12 +504,12 @@ def plot_radar(df, exps, seed_max, subscript, save_root):
     index_list = df_no_zero.index
     
     scaler = MinMaxScaler()
-    #print(scaler.fit_transform(df_no_zero))
+    #logger.debug(scaler.fit_transform(df_no_zero))
     df_scaler = pd.DataFrame(scaler.fit_transform(df_no_zero), columns=label_list)
     
     df_scaler.to_csv(f"{save_root}/min_max_scale.csv")
     
-    print("plotting radars...")
+    logger.debug("plotting radars...")
     
     exp_index = 0
     for i, series in df_scaler.iterrows():
@@ -381,7 +527,7 @@ def plot_radar(df, exps, seed_max, subscript, save_root):
         ax.fill(angle_list, value_list, 'blue', alpha=0.1)
         ax.set_ylim(ymin=0, ymax=1.0)
         
-        print(index_list[i])
+        logger.debug(index_list[i])
 
         rows = i
         for j, seeds in enumerate(seed_max):
@@ -391,18 +537,17 @@ def plot_radar(df, exps, seed_max, subscript, save_root):
         if not os.path.exists(f"{save_root}/{exps[exp_index]}/radars"):
             os.makedirs(f"{save_root}/{exps[exp_index]}/radars")
         
-        plt.savefig(f"{save_root}/{exps[exp_index]}/radars/radar_{index_list[i]}_{subscript}.png")
+        plt.savefig(f"{save_root}/{exps[exp_index]}/radars/radar_{index_list[i]}_{subscript}.jpg")
         plt.close()
         
-
     
     
 def dump_hist(df, df_atr, bins, xlabel, ylabel, save_dir, subscript, color):
     plt.rcParams["font.size"] = 20
     
-    if(np.isnan(df_atr.min()) or np.isnan(df_atr.max()) or df_atr.min() >= df_atr.max()):
-        return
-            
+    #if(np.isnan(df_atr.min()) or np.isnan(df_atr.max()) or df_atr.min() >= df_atr.max()):
+    #   return
+    
     plt.hist(df_atr, bins=bins, range=(df_atr.min(), df_atr.max()), color=color)
     
     plt.ylim(0, len(df_atr))
@@ -411,211 +556,304 @@ def dump_hist(df, df_atr, bins, xlabel, ylabel, save_dir, subscript, color):
     
     #plt.xticks(fontsize=10)
     plt.tight_layout()
-    plt.savefig(f"{save_dir}/{subscript}.png", dpi=300)
+    plt.savefig(f"{save_dir}/{subscript}.jpg", dpi=300)
     plt.close() 
 
-def dump_hist_comp(df_atrs, exps, bins, xlabel, ylabel, save_dir, subscript, colors):
-    fig = plt.figure(figsize=(20,10))
-    fig.suptitle("")
-    
-    x_max = -10000000000
-    x_min = 10000000000
-    for df_atr in df_atrs:
-        if df_atr.min() < x_min:
-            x_min = df_atr.min()
-        if df_atr.max() > x_max:
-            x_max = df_atr.max()
+def dump_hist_comp(df_atr, exps, bins, xlabel, ylabel, save_dir, subscript, colors):
             
-    if(not np.isnan(x_min) or not np.isnan(x_max) or x_min >= x_max):
-        return
-    
-    for i, df_atr in enumerate(df_atrs):
-        ax = fig.add_subplot(2, 2, i+1)
-        ax.hist(df_atr, bins=bins, range=(x_min, x_max), color=colors[i])
-        ax.set_title(exps[i])
-        ax.set_ylim(0, len(df_atr))
-        ax.set_xlabel(xlabel=xlabel)
-        ax.set_ylabel(ylabel=ylabel)
+    #if(not np.isnan(x_min) or not np.isnan(x_max) or x_min >= x_max):
+    #    return
+    # logger.debug(df_atr.columns)
+    for df_match_up_atr_key in df_atr.columns:
+        fig = plt.figure(figsize=(20,10))
+        fig.suptitle("")
         
-    plt.tight_layout()
-    plt.savefig(f"{save_dir}/{subscript}.png", dpi=300)
-    plt.close() 
+        df_match_up_atr = df_atr[df_match_up_atr_key]
+        logger.debug(exps)
+        for i, exp in enumerate(exps):
+            df_exp_atr = df_match_up_atr.filter(regex=f"^{exp}_(\d)+$", axis=0)
+            print(df_exp_atr)
+            logger.debug(df_exp_atr.min())
+            logger.debug(df_exp_atr.max())
+            ax = fig.add_subplot(2, 2, i+1)
+            ax.hist(df_exp_atr, bins=bins, range=(df_exp_atr.min(), df_exp_atr.max()), color=colors[i])
+            ax.set_title(exp)
+            ax.set_ylim(0, len(df_exp_atr))
+            ax.set_xlabel(xlabel=xlabel)
+            ax.set_ylabel(ylabel=ylabel)
+            
+        plt.tight_layout()
+        plt.savefig(f"{save_dir}/{subscript}_{df_match_up_atr_key}.jpg", dpi=300)
+        plt.close() 
+    
+    
+def get_atr_params(key, value, filter):
+    
+    logger.debug(key)
+    logger.debug(filter)
+    
+    df_dish_remain = value.filter(like=f"{filter}put_dish_on_X_by_{key}",axis=1).subtract(value.filter(like=f"{filter}pickup_dish_from_X_by_{key}",axis=1).values, axis=0)
+    df_soup_remain = value.filter(like=f"{filter}put_soup_on_X_by_{key}",axis=1).subtract(value.filter(like=f"{filter}pickup_soup_from_X_by_{key}",axis=1).values, axis=0)
+    df_plate_remain = df_dish_remain.add(df_soup_remain.values, axis=0)
+    df_stay = value.filter(like=f"{filter}STAY_by_{key}",axis=1)
+    df_movement = value.filter(like=f"{filter}MOVEMENT_by_{key}",axis=1)
+    df_onion = value.filter(like=f"{filter}potting_onion_by_{key}",axis=1)
+    df_tomato = value.filter(like=f"{filter}potting_tomato_by_{key}",axis=1)
+    df_size_2 = value.filter(like=f"{filter}deliver_size_two_order_by_{key}",axis=1)
+    df_size_3 = value.filter(like=f"{filter}deliver_size_three_order_by_{key}",axis=1)
+    df_reward = value.filter(like=f"{filter}sparse_r_by_{key}",axis=1)
+    
+    df_put_onion_on_X = value.filter(like=f"{filter}put_onion_on_X_by_{key}",axis=1)
+    df_put_tomato_on_X = value.filter(like=f"{filter}put_tomato_on_X_by_{key}",axis=1)
+    df_put_dish_on_X = value.filter(like=f"{filter}put_dish_on_X_by_{key}",axis=1)
+    df_put_soup_on_X = value.filter(like=f"{filter}put_soup_on_X_by_{key}",axis=1)
+    
+    df_pickup_onion_from_X = value.filter(like=f"{filter}pickup_onion_from_X_by_{key}",axis=1)
+    df_pickup_tomato_from_X = value.filter(like=f"{filter}pickup_tomato_from_X_by_{key}",axis=1)
+    df_pickup_dish_from_X = value.filter(like=f"{filter}pickup_dish_from_X_by_{key}",axis=1)
+    df_pickup_soup_from_X = value.filter(like=f"{filter}pickup_soup_from_X_by_{key}",axis=1)
+    
+    df_pickup_onion_from_O = value.filter(like=f"{filter}pickup_onion_from_O_by_{key}",axis=1)
+    df_pickup_tomato_from_T = value.filter(like=f"{filter}pickup_tomato_from_T_by_{key}",axis=1)
+    df_pickup_dish_from_D = value.filter(like=f"{filter}pickup_dish_from_D_by_{key}",axis=1)
+    df_SOUP_PICKUP = value.filter(like=f"{filter}SOUP_PICKUP_by_{key}",axis=1)
+    
+    #pd.set_option('display.max_rows', None)
+    
+    
+    df_atrs = {"dish_remain" : df_dish_remain, "soup_remain" : df_soup_remain,
+                "plate_remain" : df_plate_remain, "movement" : df_movement, "onion" : df_onion,
+                "tomato" : df_tomato,  "size_2" : df_size_2,
+                "size_3" : df_size_3, "reward" : df_reward, "stay" : df_stay,
+                "put_onion_on_X" : df_put_onion_on_X, "put_tomato_on_X" : df_put_tomato_on_X,
+                "put_dish_on_X" : df_put_dish_on_X, "put_soup_on_X" : df_put_soup_on_X,
+                "pickup_onion_from_X" : df_pickup_onion_from_X, "pickup_tomato_from_X"  : df_pickup_tomato_from_X,
+                "pickup_dish_from_X" : df_pickup_dish_from_X, "pickup_soup_from_X" : df_pickup_soup_from_X,
+                "pickup_onion_from_O" : df_pickup_onion_from_O, "pickup_tomato_from_T"  : df_pickup_tomato_from_T,
+                "pickup_dish_from_D" : df_pickup_dish_from_D, "pickup_soup_from_P" : df_SOUP_PICKUP,
+            }
+    atrs_min = {atr_label : atr_value.min() for atr_label, atr_value in df_atrs.items()}
+    atrs_max = {atr_label : atr_value.max() for atr_label, atr_value in df_atrs.items()}
+    atrs_disc = {"dish_remain" : "Counts for dish remaining",
+                "soup_remain" : "Counts for soup remaining",
+                "plate_remain" : "Counts for plate (placement - pickup)",
+                "movement" : "Counts for movement", 
+                "onion" : "Counts for cooking onions",
+                "tomato" : "Counts for cooking tomatos",
+                "size_2" : "Counts for delivering size 2 recipe",
+                "size_3" : "Counts for delivering size 3 recipe",
+                "reward" : "Final scores",
+                "stay" : "Counts for Staying",
+                "put_onion_on_X" : "Counts for putting a onion on the counter",
+                "put_tomato_on_X" : "Counts for putting a tomato on the counter",
+                "put_dish_on_X" : "Counts for putting a plate on the counter",
+                "put_soup_on_X" : "Counts for putting a plate of soup on the counter",
+                
+                "pickup_onion_from_X" : "Counts for picking up a onion from the counter",
+                "pickup_tomato_from_X" : "Counts for picking up a tomato from the counter",
+                "pickup_dish_from_X" : "Counts for picking up a plate from the counter",
+                "pickup_soup_from_X" : "Counts for picking up a plate of soup from the counter",
+                
+                "pickup_onion_from_O" : "Counts for picking up a onion from the source",
+                "pickup_tomato_from_T" : "Counts for picking up a tomato from the source",
+                "pickup_dish_from_D" : "Counts for picking up a plate from the source",
+                "pickup_soup_from_P" : "Counts for picking up a plate of soup from the pot",
+            }
+    
+    atrs_bins = {"dish_remain" : 20, "soup_remain" : 20,
+                "plate_remain" : 20, "movement" : 20, "onion" : 20,
+                "tomato" : 20, "size_2" : 20,
+                "size_3" : 20, "reward" : 20, "stay" : 20,
+                "put_onion_on_X" : 20, "put_tomato_on_X" :20,  "put_dish_on_X" :20, "put_soup_on_X" :20,
+                "pickup_onion_from_X" : 20, "pickup_tomato_from_X" : 20, "pickup_dish_from_X" : 20,
+                "pickup_soup_from_X" : 20, "pickup_onion_from_O" : 20, "pickup_tomato_from_T" : 20,
+                "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20}
+        
+    ylabel = "Number of AIs"
+    
+    if key == "all_agents":
+                
+        #plates_remain_agent0 = df_agent0.filter(like=f"put_dish_on_X_by_agent0",axis=1) - df_agent0.filter(like=f"pickup_dish_from_X_by_agent0",axis=1)
+        #plates_remain_agent1 = df_agent1.filter(like=f"put_dish_on_X_by_agent1",axis=1) - df_agent1.filter(like=f"pickup_dish_from_X_by_agent1",axis=1)
+        
+        plates_pickup_agent0 = df_agent0.filter(like=f"pickup_dish_from_X_by_agent0",axis=1).subtract(df_agent0.filter(like=f"put_dish_on_X_by_agent0",axis=1).values, axis=0)
+        plates_pickup_agent1 = df_agent1.filter(like=f"pickup_dish_from_X_by_agent1",axis=1).subtract(df_agent1.filter(like=f"put_dish_on_X_by_agent1",axis=1).values, axis=0)
+        
+        df_atrs["plates_coord_0_to_1"] = plates_pickup_agent1
+        df_atrs["plates_coord_1_to_0"] = plates_pickup_agent0
+        df_atrs["plates_coord_total"] = df_atrs["plates_coord_0_to_1"].add(df_atrs["plates_coord_1_to_0"].values, axis=0)
+        
+        atrs_disc["plates_coord_0_to_1"] = "Counts for plate pickup - plate placement"
+        atrs_disc["plates_coord_1_to_0"] = "Counts for plate pickup - plate placement"
+        atrs_disc["plates_coord_total"] = "Counts for plate pickup - plate placement"
+        
+        atrs_bins["plates_coord_0_to_1"] = 20
+        atrs_bins["plates_coord_1_to_0"] = 20
+        atrs_bins["plates_coord_total"] = 20  
+    
+    return df_atrs, atrs_min, atrs_max, atrs_disc, atrs_bins, ylabel
     
 
-def plot_histgrams(df, layout, exps, save_root):
-        
+
+
+
+
+def plot_histgrams(df, layout, exps, exp_match_ups, save_root, use_new=True):
+    
     df_agent0 = df.filter(like="agent0", axis=1)
     df_agent1 = df.filter(like="agent1", axis=1)
     
+    df_all_agents = pd.DataFrame()
     for j, column in enumerate(df_agent0.columns):
-        df_all[column.replace("agent0", "all")] = df_agent0.iloc[:,j] + df_agent1.iloc[:,j] 
+        df_all_agents[column.replace("agent0", "all_agents")] = (df_agent0.iloc[:,j].add(df_agent1.iloc[:,j].values, axis=0)) / 2
+
+    # df_agents = {"all_agents":df_all_agents,"agent0":df_agent0, "agent1":df_agent1}
+    df_agents = {}
         
-    dfs = {"all":df_all,"agent0":df_agent0, "agent1":df_agent1}
+    cmap = plt.get_cmap("tab20")
+    colors = []
+    for j in range(10):
+        # no orange
+        if j == 1:
+            continue
+        if j % 2 == 1:
+            colors.append(cmap(2*j))
+        else:
+            colors.append(cmap(2*j))
     
-    for key, value in dfs.items():
-        cmap = plt.get_cmap("tab20")
-        colors = []
-        for i in range(10):
-            # no orange
-            if i == 1:
-                continue
-            if i % 2 == 1:
-                colors.append(cmap(2*i))
-            else:
-                colors.append(cmap(2*i))
+    # define atrs in a match_up division
+    for i, (exp, match_ups) in enumerate(zip(exps, exp_match_ups)):
         
-        df_dish_remain = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"]
-        df_soup_remain = value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
-        df_plate_remain = value[f"put_dish_on_X_by_{key}"] - value[f"pickup_dish_from_X_by_{key}"] + value[f"put_soup_on_X_by_{key}"] - value[f"pickup_soup_from_X_by_{key}"]
-        df_stay = value[f"STAY_by_{key}"]
-        df_movement = value[f"MOVEMENT_by_{key}"]
-        df_onion = value[f"potting_onion_by_{key}"]
-        df_tomato = value[f"potting_tomato_by_{key}"]
-        df_size_2 = value[f"deliver_size_two_order_by_{key}"]
-        df_size_3 = value[f"deliver_size_three_order_by_{key}"]
-        df_reward = value[f"sparse_r_by_{key}"]
+        logger.debug(match_ups)
+        logger.debug(df_agent0.shape)
+        logger.debug(len(match_ups))
+        df_match_up_agent0_sum = pd.DataFrame(np.zeros((df_agent0.shape[0],int(df_agent0.shape[1]/(len(match_ups))))), index=df_agent0.index)
+        df_match_up_agent1_sum = pd.DataFrame(np.zeros((df_agent1.shape[0],int(df_agent1.shape[1]/(len(match_ups))))), index=df_agent1.index)
+        df_all_match_up_sum = pd.DataFrame(np.zeros((df_all_agents.shape[0],int(df_all_agents.shape[1]/(len(match_ups))))), index=df_all_agents.index)
         
-        df_put_onion_on_X = value[f"put_onion_on_X_by_{key}"]
-        df_put_tomato_on_X = value[f"put_tomato_on_X_by_{key}"]
-        df_put_dish_on_X = value[f"put_dish_on_X_by_{key}"]
-        df_put_soup_on_X = value[f"put_soup_on_X_by_{key}"]
-        
-        df_pickup_onion_from_X = value[f"pickup_onion_from_X_by_{key}"]
-        df_pickup_tomato_from_X = value[f"pickup_tomato_from_X_by_{key}"]
-        df_pickup_dish_from_X = value[f"pickup_dish_from_X_by_{key}"]
-        df_pickup_soup_from_X = value[f"pickup_soup_from_X_by_{key}"]
-        
-        df_pickup_onion_from_O = value[f"pickup_onion_from_O_by_{key}"]
-        df_pickup_tomato_from_T = value[f"pickup_tomato_from_T_by_{key}"]
-        df_pickup_dish_from_D = value[f"pickup_dish_from_D_by_{key}"]
-        df_SOUP_PICKUP = value[f"SOUP_PICKUP_by_{key}"]
-        
-        
-        pd.set_option('display.max_rows', None)
-        print(df_reward)
-        
-        df_atrs = {"dish_remain" : df_dish_remain, "soup_remain" : df_soup_remain,
-                   "plate_remain" : df_plate_remain, "movement" : df_movement, "onion" : df_onion,
-                   "tomato" : df_tomato,  "size_2" : df_size_2,
-                   "size_3" : df_size_3, "reward" : df_reward, "stay" : df_stay,
-                   "put_onion_on_X" : df_put_onion_on_X, "put_tomato_on_X" : df_put_tomato_on_X,
-                   "put_dish_on_X" : df_put_dish_on_X, "put_soup_on_X" : df_put_soup_on_X,
-                   "pickup_onion_from_X" : df_pickup_onion_from_X, "pickup_tomato_from_X"  : df_pickup_tomato_from_X,
-                   "pickup_dish_from_X" : df_pickup_dish_from_X, "pickup_soup_from_X" : df_pickup_soup_from_X,
-                   "pickup_onion_from_O" : df_pickup_onion_from_O, "pickup_tomato_from_T"  : df_pickup_tomato_from_T,
-                   "pickup_dish_from_D" : df_pickup_dish_from_D, "pickup_soup_from_P" : df_SOUP_PICKUP,
-                   }
-        atrs_min = {atr_label : atr_value.min() for atr_label, atr_value in df_atrs.items()}
-        atrs_max = {atr_label : atr_value.max() for atr_label, atr_value in df_atrs.items()}
-        atrs_disc = {"dish_remain" : "Counts for dish remaining",
-                    "soup_remain" : "Counts for soup remaining",
-                   "plate_remain" : "Counts for plate (placement - pickup)",
-                   "movement" : "Counts for movement", 
-                   "onion" : "Counts for cooking onions",
-                   "tomato" : "Counts for cooking tomatos",
-                   "size_2" : "Counts for delivering size 2 recipe",
-                   "size_3" : "Counts for delivering size 3 recipe",
-                   "reward" : "Final scores",
-                   "stay" : "Counts for Staying",
-                   "put_onion_on_X" : "Counts for putting a onion on the counter",
-                   "put_tomato_on_X" : "Counts for putting a tomato on the counter",
-                   "put_dish_on_X" : "Counts for putting a plate on the counter",
-                   "put_soup_on_X" : "Counts for putting a plate of soup on the counter",
-                   
-                   "pickup_onion_from_X" : "Counts for picking up a onion from the counter",
-                   "pickup_tomato_from_X" : "Counts for picking up a tomato from the counter",
-                   "pickup_dish_from_X" : "Counts for picking up a plate from the counter",
-                   "pickup_soup_from_X" : "Counts for picking up a plate of soup from the counter",
-                   
-                   "pickup_onion_from_O" : "Counts for picking up a onion from the source",
-                   "pickup_tomato_from_T" : "Counts for picking up a tomato from the source",
-                   "pickup_dish_from_D" : "Counts for picking up a plate from the source",
-                   "pickup_soup_from_P" : "Counts for picking up a plate of soup from the pot",
-                   }
-        
-        atrs_bins = {"dish_remain" : 20, "soup_remain" : 20,
-                   "plate_remain" : 20, "movement" : 20, "onion" : 20,
-                   "tomato" : 20, "size_2" : 20,
-                   "size_3" : 20, "reward" : 20, "stay" : 20,
-                   "put_onion_on_X" : 20, "put_tomato_on_X" :20,  "put_dish_on_X" :20, "put_soup_on_X" :20,
-                   "pickup_onion_from_X" : 20, "pickup_tomato_from_X" : 20, "pickup_dish_from_X" : 20,
-                   "pickup_soup_from_X" : 20, "pickup_onion_from_O" : 20, "pickup_tomato_from_T" : 20,
-                   "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20}
-        ylabel = "Number of AIs"
-        
-        
-        if key == "all":
+        for i, match_up in enumerate(match_ups):
+            key = f"{match_up}"
+            # logger.debug(key)
             
-            plates_remain_agent0 = df_agent0[f"put_dish_on_X_by_agent0"] - df_agent0[f"pickup_dish_from_X_by_agent0"]
-            plates_remain_agent1 = df_agent1[f"put_dish_on_X_by_agent1"] - df_agent1[f"pickup_dish_from_X_by_agent1"]
+            df_match_up_agent0 = df_agent0.filter(regex=fr'^{key}_.*', axis=1)
+            df_match_up_agent1 = df_agent1.filter(regex=fr'^{key}_.*', axis=1)
+            df_match_up_all_agents = df_all_agents.filter(regex=fr'^{key}_.*', axis=1)
             
-            plates_pickup_agent0 = df_agent0[f"pickup_dish_from_X_by_agent0"] - df_agent0[f"put_dish_on_X_by_agent0"]
-            plates_pickup_agent1 = df_agent1[f"pickup_dish_from_X_by_agent1"] - df_agent1[f"put_dish_on_X_by_agent1"]
+            df_agents[f"{key}:agent0"] = df_match_up_agent0
+            df_agents[f"{key}:agent1"] = df_match_up_agent1
+            df_agents[f"{key}:all_agents"] = df_match_up_all_agents
             
-            df_atrs["plates_coord_0_to_1"] = plates_pickup_agent1
-            df_atrs["plates_coord_1_to_0"] = plates_pickup_agent0
-            df_atrs["plates_coord_total"] = df_atrs["plates_coord_0_to_1"] + df_atrs["plates_coord_1_to_0"]
+            # logger.debug(df_match_up_agent0.columns)
             
-            atrs_disc["plates_coord_0_to_1"] = "Counts for plate pickup - plate placement"
-            atrs_disc["plates_coord_1_to_0"] = "Counts for plate pickup - plate placement"
-            atrs_disc["plates_coord_total"] = "Counts for plate pickup - plate placement"
+            df_match_up_agent0_sum = df_match_up_agent0_sum.add(df_match_up_agent0.values, axis=0)
+            df_match_up_agent1_sum = df_match_up_agent1_sum.add(df_match_up_agent1.values, axis=0)
+            df_all_match_up_sum = df_all_match_up_sum.add(df_match_up_all_agents.values, axis=0)
             
-            atrs_bins["plates_coord_0_to_1"] = 20
-            atrs_bins["plates_coord_1_to_0"] = 20
-            atrs_bins["plates_coord_total"] = 20
-            
+        df_match_up_agent0_sum = df_match_up_agent0_sum / (len(match_ups))
+        df_match_up_agent1_sum = df_match_up_agent1_sum / (len(match_ups))
+        df_all_match_up_sum = df_all_match_up_sum / (len(match_ups))
         
+        LABELS = sorted(LABELS_NEW) if use_new else sorted(LABELS_OLD)
+        agent0_columns = []
+        agent1_columns = []
+        all_agents_columns = []
+        for label in [l for l in LABELS if "agent0" in l]:
+            agent0_columns.append(label + "_all_match_ups_average")
+        for label in [l for l in LABELS if "agent1" in l]:
+            agent1_columns.append(label + "_all_match_ups_average")
+        for label in [l for l in LABELS if "agent0" in l]:
+            label = label.replace("agent0","all_agents")
+            all_agents_columns.append(label + "_all_match_ups_average")
+            
+        df_match_up_agent0_sum.columns = agent0_columns
+        df_match_up_agent1_sum.columns = agent1_columns
+        df_all_match_up_sum.columns = all_agents_columns
+        
+        df_agents[f"all_match_ups:agent0"] = df_match_up_agent0_sum
+        df_agents[f"all_match_ups:agent1"] = df_match_up_agent1_sum
+        df_agents[f"all_match_ups:all_agents"] = df_all_match_up_sum
+        
+        
+    # dump for each dfs
+    for key, value in df_agents.items():
+        
+        logger.debug(key)
+        logger.debug(value)
+        
+        if len(key.split(":")) == 1:
+            match_up_filter = ""
+            agent_type = key
+        else:
+            match_up_filter = key.split(":")[0]+"_"
+            agent_type = key.split(":")[1]
+            
+        df_atrs, atrs_min, atrs_max, atrs_disc, atrs_bins, ylabel = get_atr_params(agent_type, value, match_up_filter)
+        
+        
+        ranking_all_dir = f"{save_root}/rankings"
+        if not os.path.exists(ranking_all_dir):
+            os.makedirs(ranking_all_dir)
+            
+        hist_dir = f"{save_root}histgrams"
+        if not os.path.exists(hist_dir):
+            os.makedirs(hist_dir)
+
         df_all_sorted= pd.DataFrame()
         
         for atr_label, df_atr in df_atrs.items():
             
-            hist_dir = f"{save_root}histgrams"
-            if not os.path.exists(hist_dir):
-                os.makedirs(hist_dir)
+            for df_match_up_atr_key in df_atr.columns:
+                
+                df_match_up_atr = df_atr[df_match_up_atr_key]
+                
+                df_sorted = df_match_up_atr.sort_values(ascending=False)
+                df_all_sorted[f"{atr_label}_{df_match_up_atr_key}_i"] = df_sorted.index
+                df_all_sorted[f"{atr_label}_{df_match_up_atr_key}_v"] = df_sorted.values
+
+            dump_hist_comp(df_atr, exps, bins=atrs_bins[atr_label],
+                        xlabel=atrs_disc[atr_label], ylabel=ylabel,
+                        save_dir=hist_dir, subscript=f"hist_{atr_label}_{key}",
+                        colors=colors)
             
-            df_sorted = df_atr.sort_values(ascending=False)
-            df_all_sorted[f"{atr_label}_i"] = df_sorted.index
-            df_all_sorted[f"{atr_label}_v"] = df_sorted.values
-            
-            df_atrs_filtered = []
-            for i, exp in enumerate(exps):
-                df_atrs_filtered.append(df_atr.filter(regex=f"^{exp}(\d)+$", axis=0))
-            
-            dump_hist_comp(df_atrs_filtered, exps, bins=atrs_bins[atr_label],
-                          xlabel=atrs_disc[atr_label], ylabel=ylabel,
-                          save_dir=hist_dir, subscript=f"hist_{atr_label}_{key}",
-                          colors=colors)
-            
-        df_all_sorted.to_csv(f"{save_root}/ranking_all_{key}.csv")
+        df_all_sorted.to_csv(f"{ranking_all_dir}/ranking_all-exp_{key}.csv")
+
+        
         
         for i, exp in enumerate(exps):
             
-            hist_dir = f"{save_root}{exp}/histgrams"
-            ranking_dir = f"{save_root}{exp}/rankings"
-
-            if not os.path.exists(hist_dir):
-                os.makedirs(hist_dir)
-                
-            if not os.path.exists(ranking_dir):
-                os.makedirs(ranking_dir)
-
             df_sorted = pd.DataFrame()
             
-            for atr_label, df_atr in df_atrs.items():
-                # need to filter
-                df_atr_filtered = df_atr.filter(regex=f"^{exp}(\d)+$", axis=0)
-                
-                #print(type(df_exp))
-                
-                dump_hist(value, df_atr_filtered, bins=atrs_bins[atr_label],
-                          xlabel=atrs_disc[atr_label], ylabel=ylabel,
-                          save_dir=hist_dir, subscript=f"hist_{atr_label}_{exp}_{key}",
-                          color=colors[i])
+            hist_dir = f"{save_root}{exp}/histgrams"
+            ranking_dir = f"{save_root}{exp}/rankings"
             
-                df_sorted[f"{atr_label}_i"] = df_atr_filtered.sort_values(ascending=False).index
-                df_sorted[f"{atr_label}_v"] = df_atr_filtered.sort_values(ascending=False).values
+            if not os.path.exists(hist_dir):
+                os.makedirs(hist_dir)
+            if not os.path.exists(ranking_dir):
+                os.makedirs(ranking_dir)
+            
+            for atr_label, df_atr in df_atrs.items():
+                
+                for df_match_up_atr_key in df_atr.columns:
+                    
+                    df_match_up_atr = df_atr[df_match_up_atr_key]
+                    
+                    # need to filter
+                    df_atr_filtered = df_match_up_atr.filter(regex=f"^{exp}_(\d)+$", axis=0)
+                    
+                    logger.debug(df_atr_filtered.shape)
+                    
+                    dump_hist(value, df_atr_filtered, bins=atrs_bins[atr_label],
+                            xlabel=atrs_disc[atr_label], ylabel=ylabel,
+                            save_dir=hist_dir, subscript=f"hist_{atr_label}_{exp}_{key}_{df_match_up_atr_key}",
+                            color=colors[i])
+                
+                    df_sort = df_atr_filtered.sort_values(ascending=False)
+
+                    df_sorted[f"{atr_label}_{df_match_up_atr_key}_i"] = df_sort.index
+                    df_sorted[f"{atr_label}_{df_match_up_atr_key}_v"] = df_sort.values
 
             df_sorted.to_csv(f"{ranking_dir}/ranking_{exp}_{key}.csv")
+        
     
 def init_dir(root_path, exps):
     
@@ -631,7 +869,11 @@ if __name__ == "__main__":
     
     layout = sys.argv[1]
     
+    use_new = True
+    
     _collect_gif = True
+    
+    _gif_from_traj = True
     
     _plot_radar = False
     
@@ -639,42 +881,105 @@ if __name__ == "__main__":
     
     _plot_pca = True
     
+    _plot_label = True
+    
     save_root = f"./eval/results/{layout}/analysis/"
     
-    #exps = ["hsp","adaptive_hsp_plate","adaptive_hsp_plate_vs_hsp_plate"]
+    exps = [
+    #    "hsp","adaptive_hsp_plate","adaptive_hsp_plate_vs_hsp_plate",
+    #    "hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play",
+    #    "hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5",
+    #    "hsp_all_shared", 
+    #    "hsp_plate-S2-s36-adp_cp-s5","adaptive_hsp_plate-S2-s36-adp_cp-s5",
+    #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
+         "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60"
+        ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
-    exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
+    #exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
+    #exps = ["hsp_all_shared"]
+    #exps = ["hsp_plate-S2-s36-adp_cp-s5","adaptive_hsp_plate-S2-s36-adp_cp-s5",
+    #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
+    seed_max = [5, 5]
     # seed_max = [72, 72, 72]
-    seed_max = [20, 10, 10]
+    #seed_max = [20, 10, 10]
+    #seed_max = [1, 1, 1]
     #exps = [e for e in range(1,4)]
     #ranks = [r for r in range(1)]
     #run = 1
     #traj_num = 1
     
-    init_dir(save_root, exps)
+    is_self = [True , True, True]
+    is_self = [False, False]
+    #partner_agents = [30, 30, 30, 30]
+    partner_agents = [30, 30]
+    #self_agent_name = ["hsp_cp", "hsp_cp", "hsp_cp", "hsp_cp"]
+    self_agent_name = ["hsp_cp", "hsp_cp"]
     
+    #partner_agents = [1, 1, 1]
+    #self_agents = ["hsp","hsp_cp","hsp_cp"]
+    
+    init_dir(save_root, exps)
     
     dfs = [] # index : alg
     index = 0
-    for seeds, exp in zip(seed_max, exps):
     
-        df = load_behavior(layout, exp, seeds, True, save_root, _collect_gif)
-        #df = load_trajectory(layout, alg, exps, ranks, run, traj_num, True)
+    all_match_ups = []
+    all_partners = []
+    all_match_up_for_hist = []
+     
+    for seeds, self_play, self_agent, partner_num in zip(seed_max, is_self, self_agent_name, partner_agents):
+        match_ups = []
+        partners = []
+        match_up_for_hist = []
         
+        if self_play:
+            for i in range(seeds):
+                match_ups.append([
+                    f"{self_agent}{i}_final_w0-{self_agent}{i}_final_w1",
+                    f"{self_agent}{i}_final_w1-{self_agent}{i}_final_w0",
+                ])
+                partners.append(["self_w0-self_w1", "self_w1-self_w0"])
+            match_up_for_hist.append("self_w0-self_w1")
+            match_up_for_hist.append("self_w1-self_w0")
+        else:
+            for i in range(seeds):
+                m_per_seed = []
+                p_per_seed = []
+                for j in range(int(partner_num/2)):
+                    m_per_seed.append(f"{self_agent}-{i}-bias{j}_final")
+                    p_per_seed.append(f"self-bias{j}")
+                for j in range(int(partner_num/2), partner_num):
+                    m_per_seed.append(f"bias_final{j}-{self_agent}-{i}")
+                    p_per_seed.append(f"bias{j}-self")
+                match_ups.append(m_per_seed)
+                partners.append(p_per_seed)
+            match_up_for_hist = partners[0].copy()
+            
+        all_match_ups.append(match_ups)
+        all_partners.append(partners)
+        all_match_up_for_hist.append(match_up_for_hist)
+        
+    logger.debug(all_match_up_for_hist)
+    
+    for seeds, exp, match_ups in zip(seed_max, exps, all_partners):
+        
+        df = load_behavior(layout, exp, seeds, match_ups, use_new, save_root, _collect_gif, _gif_from_traj)
+        #df = load_trajectory(layout, alg, exps, ranks, run, traj_num, True)
+        # logger.debug(df)
         dfs.append(df)
         
         index += 1
     
     df_all = pd.concat(dfs, axis=0)
-    df_all.to_csv(f"{save_root}{exp}/preprocess.csv")
+    df_all.to_csv(f"{save_root}/preprocess.csv")
     
-    #print(df_all)
+    logger.debug(df_all)
 
     # df_cs = compute_cos_similarity(df_all)
     
-    # print(df_cs)
+    # logger.debug(df_cs)
     
     # sns.heatmap(df_cs)
     # plt.savefig(f"eval/results/{layout}/cos_similarity.png", dpi=300)
@@ -692,10 +997,10 @@ if __name__ == "__main__":
         plot_radar(df_agent1, exps, seed_max,"agent1", save_root)
     
     if _plot_hist:
-        plot_histgrams(df_all, layout, exps, save_root)
+        plot_histgrams(df_all, layout, exps, all_match_up_for_hist, save_root)
     
     if _plot_pca:
-        plot_pca(df_all, exps, layout, False, save_root)
+        plot_pca(df_all, exps, layout, _plot_label, save_root)
     
     
     
