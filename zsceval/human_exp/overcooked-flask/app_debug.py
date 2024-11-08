@@ -7,6 +7,7 @@ import time
 from collections import defaultdict
 from pprint import pformat
 from typing import Callable, Dict
+import threading
 
 
 import imageio
@@ -254,7 +255,7 @@ def render_traj(joint_actions, save_dir, layout_name, traj_id):
         logger.exception(e)
             
     return 
-    
+
 
 @app.route("/finish_episode", methods=["POST"])
 def finish_episode():
@@ -300,7 +301,8 @@ def finish_episode():
             logger.info(f"saving info: {traj_id} in {save_path}")
             
         if ARGS.gifs_save_path:
-            render_traj(data_json["traj"]["ep_actions"], ARGS.gifs_save_path, layout_name, traj_id)
+            threading.Thread(target=render_traj, args=(data_json["traj"]["ep_actions"], ARGS.gifs_save_path, layout_name, traj_id)).start()
+            #render_traj(data_json["traj"]["ep_actions"], ARGS.gifs_save_path, layout_name, traj_id)
 
         return jsonify({"status": True})
 
