@@ -259,14 +259,9 @@ def render_traj_wrapper(args):
 def render_gif_from_traj(exp_save_dir, layout, exp, index, threads=4):
     
     save_dir = f"{exp_save_dir}/gifs"
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    else:
-        shutil.rmtree(save_dir)
-        os.makedirs(save_dir)
     
     data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval_cp-" + exp + "-" + str(index))
-    logger.debug(data_dir)
+    logger.debug(exp)
     traj_jsons =  glob.glob(str(data_dir) + "/**/*.json" , recursive=True)
     
     args = []
@@ -307,7 +302,7 @@ def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif
     
     files = glob.glob(f"eval/results/{layout}/{exp}/*.json")
     sorted_files = sorted(files, key=natural_keys)
-    # logger.debug(sorted_files)
+    logger.debug(sorted_files)
     
     keys = None
     with open(sorted_files[0], mode="rt", encoding="utf-8") as f:
@@ -320,7 +315,14 @@ def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif
         for match_up in match_ups:
             for i in range(len(match_up)):
                 shaped_dict[f"{match_up[i]}_{label}"] = []
-            
+
+    save_dir = save_root + exp
+    if not os.path.exists(f"{save_dir}/gifs"):
+        os.makedirs(f"{save_dir}/gifs")
+    else:
+        shutil.rmtree(f"{save_dir}/gifs")
+        os.makedirs(f"{save_dir}/gifs")
+
     index = []
     for i in range(seeds):
         #if(i is 25 or i is 26):
@@ -342,7 +344,7 @@ def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif
                 
         if collect_gif:
             if gif_from_traj:
-                render_gif_from_traj(save_root + exp, layout, exp, i+1)
+                render_gif_from_traj(save_dir, layout, exp, i+1)
             else:
                 summon_gif(save_root + exp, layout, exp, i+1)
             
@@ -877,11 +879,11 @@ if __name__ == "__main__":
     
     _plot_radar = False
     
-    _plot_hist = True
+    _plot_hist = False
     
-    _plot_pca = True
+    _plot_pca = False
     
-    _plot_label = True
+    _plot_label = False
     
     save_root = f"./eval/results/{layout}/analysis/"
     
