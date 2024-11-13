@@ -26,4 +26,7 @@ pre-commit
 flask
 markdown
 flask_cors
+# plotting
+scikit-learn
+adjustText
 -e .
