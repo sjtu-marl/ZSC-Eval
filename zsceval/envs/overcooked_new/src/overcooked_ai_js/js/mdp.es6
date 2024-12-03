@@ -31,6 +31,18 @@ const SHAPED_INFOS = [
     "MOVEMENT",
     "IDLE_MOVEMENT",
     "IDLE_INTERACT",
+    "place_onion_on_X",
+    "place_tomato_on_X",
+    "place_dish_on_X",
+    "place_soup_on_X",
+    "recieve_onion_via_X",
+    "recieve_tomato_via_X",
+    "recieve_dish_via_X",
+    "recieve_soup_via_X",
+    "onion_placed_on_X",
+    "tomato_placed_on_X",
+    "dish_placed_on_X",
+    "soup_placed_on_X"
 ];
   
 const BASE_REW_SHAPING_PARAMS = {
@@ -49,21 +61,33 @@ const EVENT_TYPES = [
     "tomato_drop",
     "useful_tomato_drop",
     "potting_tomato",
+    "placing_tomato",
+    "recieve_tomato",
+    "placed_tomatoes",
     // Onion events
     "onion_pickup",
     "useful_onion_pickup",
     "onion_drop",
     "useful_onion_drop",
     "potting_onion",
+    "placing_onion",
+    "recieve_onion",
+    "placed_onions",
     // Dish events
     "dish_pickup",
     "useful_dish_pickup",
     "dish_drop",
     "useful_dish_drop",
+    "placing_dish",
+    "recieve_dish",
+    "placed_dishes",
     // Soup events
     "soup_pickup",
     "soup_delivery",
     "soup_drop",
+    "placing_soup",
+    "recieve_soup",
+    "placed_soups",
     // Potting events
     "optimal_onion_potting",
     "optimal_tomato_potting",
@@ -598,10 +622,12 @@ export class ObjectState {
    * State of an object in OvercookedGridworld.
    * @param {string} name - The name of the object
    * @param {Array} position - Tuple for the current location of the object.
+   *  @param {Array} last_owner
    */
-    constructor(name, position, ...kwargs) {
+    constructor(name, position, last_owner=None, ...kwargs) {
         this.name = name;
-        this._position = position;
+        this._position = position
+        this._last_owner = last_owner
     }
 
     get position() {
@@ -612,16 +638,24 @@ export class ObjectState {
         this._position = new_pos;
     }
 
+    get last_owner() {
+        return this._last_owner;
+    }
+
+    set last_owner(last_owner) {
+        this._last_owner = last_owner;
+    }
+
     is_valid() {
         return ["onion", "tomato", "dish"].includes(this.name);
     }
 
     deepcopy() {
-        return new ObjectState(this.name, this.position);
+        return new ObjectState(this.name, this.position, self.last_owner);
     }
 
     equals(other) {
-        return other instanceof ObjectState && this.name === other.name && this.position === other.position;
+        return other instanceof ObjectState && this.name === other.name && this.position === other.position && this.last_owner == other.last_owner;
     }
 
     hashCode() {
@@ -632,8 +666,12 @@ export class ObjectState {
         return `${this.name}@${this.position}`;
     }
 
+    __repr__() {
+        return `${this.name}@${this.position}, last_owner:${this.last_owner}`
+    }
+
     to_dict() {
-        return { name: this.name, position: this.position };
+        return { name: this.name, position: this.position, last_owner : this.last_owner };
     }
 
     static from_dict(obj_dict) {
@@ -652,8 +690,8 @@ export class SoupState extends ObjectState {
      * @param {number} cooking_tick - How long the soup has been cooking for. -1 means cooking hasn't started yet
      * @param {number} cook_time - How long soup needs to be cooked, used only mostly for getting soup from dict with supplied cook_time, if None self.recipe.time is used
      */
-    constructor(position, ingredients = [], cooking_tick = -1, cook_time = null, ...kwargs) {
-        super("soup", position);
+    constructor(position, last_owner=None,ingredients = [], cooking_tick = -1, cook_time = null, ...kwargs) {
+        super("soup", position, last_owner);
         this._ingredients = ingredients;
         this._cooking_tick = cooking_tick;
         this._recipe = null;
@@ -819,6 +857,7 @@ export class SoupState extends ObjectState {
     deepcopy() {
         return new SoupState(
             this.position,
+            this.last_owner,
             this._ingredients.map(ingredient => ingredient.deepcopy()),
             this._cooking_tick
         );
@@ -1168,6 +1207,11 @@ export class OvercookedState {
         delete this.objects[pos];
         return obj;
     }
+    
+    count_onions_on_X(grid) { return Object.values(this.objects).reduce((sum, obj) => sum + (obj.name === "onion" && grid[obj.position[1]][obj.position[0]] === "X" ? 1 : 0), 0); } 
+    count_tomatoes_on_X(grid) { return Object.values(this.objects).reduce((sum, obj) => sum + (obj.name === "tomato" && grid[obj.position[1]][obj.position[0]] === "X" ? 1 : 0), 0); } 
+    count_dishes_on_X(grid) { return Object.values(this.objects).reduce((sum, obj) => sum + (obj.name === "dish" && grid[obj.position[1]][obj.position[0]] === "X" ? 1 : 0), 0); }
+    count_soups_on_X(grid) { return Object.values(this.objects).reduce((sum, obj) => sum + (obj.name === "soup" && grid[obj.position[1]][obj.position[0]] === "X" ? 1 : 0), 0); }
 
     static from_players_pos_and_or(players_pos_and_or, bonus_orders = [], all_orders = []) {
         return new OvercookedState(
@@ -1703,16 +1747,28 @@ export class OvercookedGridworld {
                     this.log_object_drop(events_infos, new_state, obj_name, pot_states, player_idx);
                     shaped_info[player_idx][`put_${obj_name}_on_X`] += 1;
 
+                    shaped_info[player_idx][`place_${obj_name}_on_X`] += 1;
+                    shaped_info[player_idx][`${obj_name}_placed_on_X`] += 1;
+
                     // Drop object on counter
                     let obj = player.remove_object();
+                    obj.last_owner = player_idx
                     new_state.add_object(obj, i_pos);
+
                 } else if (!player.has_object() && new_state.has_object(i_pos)) {
                     let obj_name = new_state.get_object(i_pos).name;
                     this.log_object_pickup(events_infos, new_state, obj_name, pot_states, player_idx);
                     shaped_info[player_idx][`pickup_${obj_name}_from_X`] += 1;
+                    shaped_info[player_idx][`${obj_name}_placed_on_X`] -= 1;
 
                     // Pick up object from counter
                     let obj = new_state.remove_object(i_pos);
+                    if(obj.last_owner === player_idx){
+                        shaped_info[player_idx][`place_${obj_name}_on_X`] -= 1 
+                    }else{
+                        shaped_info[player_idx][`recieve_${obj_name}_via_X`] += 1 
+                    }
+
                     player.set_object(obj);
                 } else {
                     shaped_info[player_idx]["IDLE_INTERACT"] += 1;

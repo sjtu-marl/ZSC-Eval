@@ -57,6 +57,18 @@ LABELS_NEW_CORE =[
     "MOVEMENT",
     "IDLE_MOVEMENT",
     "IDLE_INTERACT",
+    "place_onion_on_X",
+    "place_tomato_on_X",
+    "place_dish_on_X",
+    "place_soup_on_X",
+    "recieve_onion_via_X",
+    "recieve_tomato_via_X",
+    "recieve_dish_via_X",
+    "recieve_soup_via_X",
+    "onions_placed_on_X",
+    "tomatoes_placed_on_X",
+    "dishes_placed_on_X",
+    "soups_placed_on_X",
     "sparse_r",
     "shaped_r",
 ]
@@ -93,6 +105,18 @@ LABELS_NEW = [
     "IDLE_INTERACT_by_agent0",
     "sparse_r_by_agent0",
     "shaped_r_by_agent0",
+    "place_onion_on_X_by_agent0",
+    "place_tomato_on_X_by_agent0",
+    "place_dish_on_X_by_agent0",
+    "place_soup_on_X_by_agent0",
+    "recieve_onion_via_X_by_agent0",
+    "recieve_tomato_via_X_by_agent0",
+    "recieve_dish_via_X_by_agent0",
+    "recieve_soup_via_X_by_agent0",
+    "onions_placed_on_X_by_agent0",
+    "tomatoes_placed_on_X_by_agent0",
+    "dishes_placed_on_X_by_agent0",
+    "soups_placed_on_X_by_agent0",
     
     "put_onion_on_X_by_agent1",
     "put_tomato_on_X_by_agent1",
@@ -125,6 +149,18 @@ LABELS_NEW = [
     "IDLE_INTERACT_by_agent1",
     "sparse_r_by_agent1",
     "shaped_r_by_agent1",
+    "place_onion_on_X_by_agent1",
+    "place_tomato_on_X_by_agent1",
+    "place_dish_on_X_by_agent1",
+    "place_soup_on_X_by_agent1",
+    "recieve_onion_via_X_by_agent1",
+    "recieve_tomato_via_X_by_agent1",
+    "recieve_dish_via_X_by_agent1",
+    "recieve_soup_via_X_by_agent1",
+    "onions_placed_on_X_by_agent1",
+    "tomatoes_placed_on_X_by_agent1",
+    "dishes_placed_on_X_by_agent1",
+    "soups_placed_on_X_by_agent1",
     
     "sparse_r",
     "shaped_r",
@@ -183,7 +219,7 @@ LABELS_OLD = [
 
 def summon_gif(save_path, layout, exp, index):
     
-    data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval-" + exp + "_" + str(index))
+    data_dir = Path(os.path.expanduser("~") + "/ZSC/results/Overcooked/" + layout + "/population/eval-" + exp + "-" + str(index))
     
     gifs =  glob.glob(str(data_dir) + "/**/*.gif" , recursive=True)
     
@@ -594,16 +630,20 @@ def get_atr_params(key, value, filter):
     logger.debug(key)
     logger.debug(filter)
     
-    df_dish_remain = value.filter(like=f"{filter}put_dish_on_X_by_{key}",axis=1).subtract(value.filter(like=f"{filter}pickup_dish_from_X_by_{key}",axis=1).values, axis=0)
-    df_soup_remain = value.filter(like=f"{filter}put_soup_on_X_by_{key}",axis=1).subtract(value.filter(like=f"{filter}pickup_soup_from_X_by_{key}",axis=1).values, axis=0)
+    df_dish_remain = value.filter(like=f"{filter}dishes_placed_on_X_{key}",axis=1)
+    df_soup_remain = value.filter(like=f"{filter}soups_placed_on_X_{key}",axis=1)
     df_plate_remain = df_dish_remain.add(df_soup_remain.values, axis=0)
+    df_onion_remain = value.filter(like=f"{filter}onions_placed_on_X_{key}",axis=1)
+    df_tomato_remain = value.filter(like=f"{filter}tomatoes_placed_on_X_{key}",axis=1)
+    
     df_stay = value.filter(like=f"{filter}STAY_by_{key}",axis=1)
     df_movement = value.filter(like=f"{filter}MOVEMENT_by_{key}",axis=1)
     df_onion = value.filter(like=f"{filter}potting_onion_by_{key}",axis=1)
     df_tomato = value.filter(like=f"{filter}potting_tomato_by_{key}",axis=1)
     df_size_2 = value.filter(like=f"{filter}deliver_size_two_order_by_{key}",axis=1)
     df_size_3 = value.filter(like=f"{filter}deliver_size_three_order_by_{key}",axis=1)
-    df_reward = value.filter(like=f"{filter}sparse_r_by_{key}",axis=1)
+    df_sparse_reward = value.filter(like=f"{filter}sparse_r_by_{key}",axis=1)
+    
     
     df_put_onion_on_X = value.filter(like=f"{filter}put_onion_on_X_by_{key}",axis=1)
     df_put_tomato_on_X = value.filter(like=f"{filter}put_tomato_on_X_by_{key}",axis=1)
@@ -620,13 +660,20 @@ def get_atr_params(key, value, filter):
     df_pickup_dish_from_D = value.filter(like=f"{filter}pickup_dish_from_D_by_{key}",axis=1)
     df_SOUP_PICKUP = value.filter(like=f"{filter}SOUP_PICKUP_by_{key}",axis=1)
     
+    df_onion_placement = value.filter(like=f"{filter}place_onion_on_X_{key}",axis=1)
+    df_tomato_placement = value.filter(like=f"{filter}place_tomato_on_X_{key}",axis=1)
+    df_dish_placement = value.filter(like=f"{filter}place_dish_on_X_{key}",axis=1)
+    df_soup_placement = value.filter(like=f"{filter}place_soup_on_X_{key}",axis=1)
+    
     #pd.set_option('display.max_rows', None)
     
     
     df_atrs = {"dish_remain" : df_dish_remain, "soup_remain" : df_soup_remain,
-                "plate_remain" : df_plate_remain, "movement" : df_movement, "onion" : df_onion,
-                "tomato" : df_tomato,  "size_2" : df_size_2,
-                "size_3" : df_size_3, "reward" : df_reward, "stay" : df_stay,
+                "plate_remain" : df_plate_remain, "movement" : df_movement, 
+                #"onion" : df_onion,
+                #"tomato" : df_tomato,  "size_2" : df_size_2,
+                "size_3" : df_size_3,
+                "sparse_reward" : df_sparse_reward, "stay" : df_stay,
                 "put_onion_on_X" : df_put_onion_on_X, "put_tomato_on_X" : df_put_tomato_on_X,
                 "put_dish_on_X" : df_put_dish_on_X, "put_soup_on_X" : df_put_soup_on_X,
                 "pickup_onion_from_X" : df_pickup_onion_from_X, "pickup_tomato_from_X"  : df_pickup_tomato_from_X,
@@ -640,11 +687,11 @@ def get_atr_params(key, value, filter):
                 "soup_remain" : "Counts for soup remaining",
                 "plate_remain" : "Counts for plate (placement - pickup)",
                 "movement" : "Counts for movement", 
-                "onion" : "Counts for cooking onions",
-                "tomato" : "Counts for cooking tomatos",
-                "size_2" : "Counts for delivering size 2 recipe",
-                "size_3" : "Counts for delivering size 3 recipe",
-                "reward" : "Final scores",
+                #"onion" : "Counts for cooking onions",
+                #"tomato" : "Counts for cooking tomatos",
+                #"size_2" : "Counts for delivering size 2 recipe",
+                #"size_3" : "Counts for delivering size 3 recipe",
+                "sparse_reward" : "Final scores",
                 "stay" : "Counts for Staying",
                 "put_onion_on_X" : "Counts for putting a onion on the counter",
                 "put_tomato_on_X" : "Counts for putting a tomato on the counter",
@@ -663,13 +710,20 @@ def get_atr_params(key, value, filter):
             }
     
     atrs_bins = {"dish_remain" : 20, "soup_remain" : 20,
-                "plate_remain" : 20, "movement" : 20, "onion" : 20,
-                "tomato" : 20, "size_2" : 20,
-                "size_3" : 20, "reward" : 20, "stay" : 20,
+                "plate_remain" : 20, 
+                "movement" : 20,
+                "onion" : 20,
+                "tomato" : 20, 
+                "size_2" : 20,
+                "size_3" : 20, 
+                "sparse_reward" : 20,
+                "stay" : 20,
                 "put_onion_on_X" : 20, "put_tomato_on_X" :20,  "put_dish_on_X" :20, "put_soup_on_X" :20,
                 "pickup_onion_from_X" : 20, "pickup_tomato_from_X" : 20, "pickup_dish_from_X" : 20,
                 "pickup_soup_from_X" : 20, "pickup_onion_from_O" : 20, "pickup_tomato_from_T" : 20,
-                "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20}
+                "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20,
+                
+                }
         
     ylabel = "Number of AIs"
     
@@ -875,7 +929,7 @@ if __name__ == "__main__":
     
     _collect_gif = True
     
-    _gif_from_traj = True
+    _gif_from_traj = False
     
     _plot_radar = False
     
@@ -894,7 +948,8 @@ if __name__ == "__main__":
     #    "hsp_all_shared", 
     #    "hsp_plate-S2-s36-adp_cp-s5","adaptive_hsp_plate-S2-s36-adp_cp-s5",
     #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
-         "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60"
+    #     "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60",
+         "hsp_plate_placement", "reactive_hsp_placement"
         ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
     #exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
@@ -903,7 +958,7 @@ if __name__ == "__main__":
     #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [5, 5]
+    seed_max = [30]
     # seed_max = [72, 72, 72]
     #seed_max = [20, 10, 10]
     #seed_max = [1, 1, 1]
@@ -913,11 +968,11 @@ if __name__ == "__main__":
     #traj_num = 1
     
     is_self = [True , True, True]
-    is_self = [False, False]
+    # is_self = [False, False]
     #partner_agents = [30, 30, 30, 30]
-    partner_agents = [30, 30]
+    partner_agents = [30]
     #self_agent_name = ["hsp_cp", "hsp_cp", "hsp_cp", "hsp_cp"]
-    self_agent_name = ["hsp_cp", "hsp_cp"]
+    self_agent_name = ["hsp"]
     
     #partner_agents = [1, 1, 1]
     #self_agents = ["hsp","hsp_cp","hsp_cp"]
