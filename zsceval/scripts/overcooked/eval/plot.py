@@ -117,6 +117,7 @@ LABELS_NEW = [
     "tomatoes_placed_on_X_by_agent0",
     "dishes_placed_on_X_by_agent0",
     "soups_placed_on_X_by_agent0",
+    "utility_r_by_agent0",
     
     "put_onion_on_X_by_agent1",
     "put_tomato_on_X_by_agent1",
@@ -161,9 +162,13 @@ LABELS_NEW = [
     "tomatoes_placed_on_X_by_agent1",
     "dishes_placed_on_X_by_agent1",
     "soups_placed_on_X_by_agent1",
+    "utility_r_by_agent1",
     
     "sparse_r",
     "shaped_r",
+    "utility_r"
+
+
 ]
 
 LABELS_OLD = [
@@ -215,6 +220,7 @@ LABELS_OLD = [
     "either_shaped_r_agent0",
     "either_sparse_r_agent1",
     "either_shaped_r_agent1",
+
 ]
 
 def summon_gif(save_path, layout, exp, index):
@@ -322,6 +328,8 @@ def render_gif_from_traj(exp_save_dir, layout, exp, index, threads=4):
     
 def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif, gif_from_traj):
     
+    logger.debug(f"Loading {exp}")
+
     def atoi(text):
         return int(text) if text.isdigit() else text
 
@@ -929,7 +937,7 @@ if __name__ == "__main__":
     
     _collect_gif = True
     
-    _gif_from_traj = False
+    _gif_from_traj = True
     
     _plot_radar = False
     
@@ -949,7 +957,9 @@ if __name__ == "__main__":
     #    "hsp_plate-S2-s36-adp_cp-s5","adaptive_hsp_plate-S2-s36-adp_cp-s5",
     #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
     #     "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60",
-         "hsp_plate_placement", "reactive_hsp_placement"
+         #"hsp_plate_placement", "reactive_hsp_placement",
+         "hsp_plate_placement_shared-S2-s12", 
+         #"reactive_hsp_plate_placement_shared-S3-s12"
         ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
     #exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
@@ -958,7 +968,7 @@ if __name__ == "__main__":
     #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [30]
+    seed_max = [5]
     # seed_max = [72, 72, 72]
     #seed_max = [20, 10, 10]
     #seed_max = [1, 1, 1]
@@ -967,10 +977,10 @@ if __name__ == "__main__":
     #run = 1
     #traj_num = 1
     
-    is_self = [True , True, True]
-    # is_self = [False, False]
+    #is_self = [True , True, True]
+    is_self = [False, False]
     #partner_agents = [30, 30, 30, 30]
-    partner_agents = [30]
+    partner_agents = [10]
     #self_agent_name = ["hsp_cp", "hsp_cp", "hsp_cp", "hsp_cp"]
     self_agent_name = ["hsp"]
     
