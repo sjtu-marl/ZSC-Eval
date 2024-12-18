@@ -624,7 +624,7 @@ export class ObjectState {
    * @param {Array} position - Tuple for the current location of the object.
    *  @param {Array} last_owner
    */
-    constructor(name, position, last_owner=None, ...kwargs) {
+    constructor(name, position, last_owner=null, ...kwargs) {
         this.name = name;
         this._position = position
         this._last_owner = last_owner
