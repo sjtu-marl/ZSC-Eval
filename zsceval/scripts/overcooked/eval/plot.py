@@ -298,7 +298,7 @@ def render_traj(joint_actions, save_dir, layout_name, traj_label):
 def render_traj_wrapper(args):
     return render_traj(*args)
 
-def render_gif_from_traj(exp_save_dir, layout, exp, index, threads=4):
+def render_gif_from_traj(exp_save_dir, layout, exp, index, threads = 4):
     
     save_dir = f"{exp_save_dir}/gifs"
     
@@ -363,9 +363,9 @@ def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif
     save_dir = save_root + exp
     if not os.path.exists(f"{save_dir}/gifs"):
         os.makedirs(f"{save_dir}/gifs")
-    else:
-        shutil.rmtree(f"{save_dir}/gifs")
-        os.makedirs(f"{save_dir}/gifs")
+    #else:
+    #    shutil.rmtree(f"{save_dir}/gifs")
+    #    os.makedirs(f"{save_dir}/gifs")
 
     index = []
     for i in range(seeds):
@@ -613,16 +613,23 @@ def dump_hist_comp(df_atr, exps, bins, xlabel, ylabel, save_dir, subscript, colo
     for df_match_up_atr_key in df_atr.columns:
         fig = plt.figure(figsize=(20,10))
         fig.suptitle("")
-        
         df_match_up_atr = df_atr[df_match_up_atr_key]
+
+        df_min = 100000
+        df_max = -100000
+        for i, exp in enumerate(exps):
+            df_exp_atr = df_match_up_atr.filter(regex=f"^{exp}_(\d)+$", axis=0)
+            if df_min > df_exp_atr.min():
+                df_min = df_exp_atr.min()
+            if df_max < df_exp_atr.max():
+                df_max = df_exp_atr.max()
+
         logger.debug(exps)
         for i, exp in enumerate(exps):
             df_exp_atr = df_match_up_atr.filter(regex=f"^{exp}_(\d)+$", axis=0)
             print(df_exp_atr)
-            logger.debug(df_exp_atr.min())
-            logger.debug(df_exp_atr.max())
             ax = fig.add_subplot(2, 2, i+1)
-            ax.hist(df_exp_atr, bins=bins, range=(df_exp_atr.min(), df_exp_atr.max()), color=colors[i])
+            ax.hist(df_exp_atr, bins=bins, range=(df_min, df_max), color=colors[i])
             ax.set_title(exp)
             ax.set_ylim(0, len(df_exp_atr))
             ax.set_xlabel(xlabel=xlabel)
@@ -638,20 +645,25 @@ def get_atr_params(key, value, filter):
     logger.debug(key)
     logger.debug(filter)
     
-    df_dish_remain = value.filter(like=f"{filter}dishes_placed_on_X_{key}",axis=1)
-    df_soup_remain = value.filter(like=f"{filter}soups_placed_on_X_{key}",axis=1)
-    df_plate_remain = df_dish_remain.add(df_soup_remain.values, axis=0)
-    df_onion_remain = value.filter(like=f"{filter}onions_placed_on_X_{key}",axis=1)
-    df_tomato_remain = value.filter(like=f"{filter}tomatoes_placed_on_X_{key}",axis=1)
-    
+    df_dish_placed = value.filter(like=f"{filter}dishes_placed_on_X_{key}",axis=1)
+    df_place_dish = value.filter(like=f"{filter}place_dish_on_X_{key}",axis=1)
+    df_recieve_dish = value.filter(like=f"{filter}recieve_dish_via_X_{key}",axis=1)
     df_stay = value.filter(like=f"{filter}STAY_by_{key}",axis=1)
+    df_utility_r = value.filter(like=f"{filter}utility_r_by_{key}",axis=1)
+    df_sparse_reward = value.filter(like=f"{filter}sparse_r_by_{key}",axis=1)
     df_movement = value.filter(like=f"{filter}MOVEMENT_by_{key}",axis=1)
+
+    """
+    df_soup_placed = value.filter(like=f"{filter}soups_placed_on_X_{key}",axis=1)
+    df_plate_placed = df_dish_placed.add(df_soup_placed.values, axis=0)
+    df_onion_placed = value.filter(like=f"{filter}onions_placed_on_X_{key}",axis=1)
+    df_tomato_placed = value.filter(like=f"{filter}tomatoes_placed_on_X_{key}",axis=1)
+    
+    
     df_onion = value.filter(like=f"{filter}potting_onion_by_{key}",axis=1)
     df_tomato = value.filter(like=f"{filter}potting_tomato_by_{key}",axis=1)
     df_size_2 = value.filter(like=f"{filter}deliver_size_two_order_by_{key}",axis=1)
     df_size_3 = value.filter(like=f"{filter}deliver_size_three_order_by_{key}",axis=1)
-    df_sparse_reward = value.filter(like=f"{filter}sparse_r_by_{key}",axis=1)
-    
     
     df_put_onion_on_X = value.filter(like=f"{filter}put_onion_on_X_by_{key}",axis=1)
     df_put_tomato_on_X = value.filter(like=f"{filter}put_tomato_on_X_by_{key}",axis=1)
@@ -674,33 +686,53 @@ def get_atr_params(key, value, filter):
     df_soup_placement = value.filter(like=f"{filter}place_soup_on_X_{key}",axis=1)
     
     #pd.set_option('display.max_rows', None)
+    """    
     
-    
-    df_atrs = {"dish_remain" : df_dish_remain, "soup_remain" : df_soup_remain,
-                "plate_remain" : df_plate_remain, "movement" : df_movement, 
-                #"onion" : df_onion,
-                #"tomato" : df_tomato,  "size_2" : df_size_2,
+    df_atrs = {"dish_placed" : df_dish_placed,
+                "place_dish_on_X" : df_place_dish,
+                "recieve_dish" : df_recieve_dish,
+                "stay" : df_stay,
+                "movement" : df_movement, 
+                "utility_r" : df_utility_r,
+                "sparse_reward" : df_sparse_reward,
+    }
+     
+    """    
+                "soup_placed" : df_soup_placed,
+                "plate_placed" : df_plate_placed, 
+                "onion" : df_onion,
+                "tomato" : df_tomato,  "size_2" : df_size_2,
                 "size_3" : df_size_3,
-                "sparse_reward" : df_sparse_reward, "stay" : df_stay,
+                "sparse_reward" : df_sparse_reward, 
                 "put_onion_on_X" : df_put_onion_on_X, "put_tomato_on_X" : df_put_tomato_on_X,
                 "put_dish_on_X" : df_put_dish_on_X, "put_soup_on_X" : df_put_soup_on_X,
                 "pickup_onion_from_X" : df_pickup_onion_from_X, "pickup_tomato_from_X"  : df_pickup_tomato_from_X,
                 "pickup_dish_from_X" : df_pickup_dish_from_X, "pickup_soup_from_X" : df_pickup_soup_from_X,
                 "pickup_onion_from_O" : df_pickup_onion_from_O, "pickup_tomato_from_T"  : df_pickup_tomato_from_T,
                 "pickup_dish_from_D" : df_pickup_dish_from_D, "pickup_soup_from_P" : df_SOUP_PICKUP,
-            }
+    """                
+    
+
     atrs_min = {atr_label : atr_value.min() for atr_label, atr_value in df_atrs.items()}
     atrs_max = {atr_label : atr_value.max() for atr_label, atr_value in df_atrs.items()}
-    atrs_disc = {"dish_remain" : "Counts for dish remaining",
-                "soup_remain" : "Counts for soup remaining",
-                "plate_remain" : "Counts for plate (placement - pickup)",
+    atrs_disc = {"dish_placed" : "Counts for dish remaining",
+                "place_dish_on_X" : "Counts for dish remaining",
+                "recieve_dish" : "Counts for recieving dish",
+                "stay" : "Counts for Staying",
                 "movement" : "Counts for movement", 
+                "utility_r" : "Utility scores",
+                "sparse_reward" : "Final scores",
+    }
+    """               
+                "soup_placed" : "Counts for soup remaining",
+                "plate_placed" : "Counts for plates remaining",
+                
                 #"onion" : "Counts for cooking onions",
                 #"tomato" : "Counts for cooking tomatos",
                 #"size_2" : "Counts for delivering size 2 recipe",
                 #"size_3" : "Counts for delivering size 3 recipe",
-                "sparse_reward" : "Final scores",
-                "stay" : "Counts for Staying",
+                
+                
                 "put_onion_on_X" : "Counts for putting a onion on the counter",
                 "put_tomato_on_X" : "Counts for putting a tomato on the counter",
                 "put_dish_on_X" : "Counts for putting a plate on the counter",
@@ -710,13 +742,14 @@ def get_atr_params(key, value, filter):
                 "pickup_tomato_from_X" : "Counts for picking up a tomato from the counter",
                 "pickup_dish_from_X" : "Counts for picking up a plate from the counter",
                 "pickup_soup_from_X" : "Counts for picking up a plate of soup from the counter",
-                
+                   
                 "pickup_onion_from_O" : "Counts for picking up a onion from the source",
                 "pickup_tomato_from_T" : "Counts for picking up a tomato from the source",
                 "pickup_dish_from_D" : "Counts for picking up a plate from the source",
                 "pickup_soup_from_P" : "Counts for picking up a plate of soup from the pot",
-            }
-    
+    """ 
+    atrs_bins = {k : 20 for k in df_atrs}
+    """    
     atrs_bins = {"dish_remain" : 20, "soup_remain" : 20,
                 "plate_remain" : 20, 
                 "movement" : 20,
@@ -732,9 +765,10 @@ def get_atr_params(key, value, filter):
                 "pickup_dish_from_D" : 20, "pickup_soup_from_P" : 20,
                 
                 }
-        
+    """        
     ylabel = "Number of AIs"
-    
+
+    """    
     if key == "all_agents":
                 
         #plates_remain_agent0 = df_agent0.filter(like=f"put_dish_on_X_by_agent0",axis=1) - df_agent0.filter(like=f"pickup_dish_from_X_by_agent0",axis=1)
@@ -754,10 +788,9 @@ def get_atr_params(key, value, filter):
         atrs_bins["plates_coord_0_to_1"] = 20
         atrs_bins["plates_coord_1_to_0"] = 20
         atrs_bins["plates_coord_total"] = 20  
-    
+    """
     return df_atrs, atrs_min, atrs_max, atrs_disc, atrs_bins, ylabel
     
-
 
 
 
@@ -935,15 +968,15 @@ if __name__ == "__main__":
     
     use_new = True
     
-    _collect_gif = True
+    _collect_gif = False
     
     _gif_from_traj = True
     
     _plot_radar = False
     
-    _plot_hist = False
+    _plot_hist = True
     
-    _plot_pca = False
+    _plot_pca = True
     
     _plot_label = False
     
@@ -958,7 +991,10 @@ if __name__ == "__main__":
     #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
     #     "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60",
          #"hsp_plate_placement", "reactive_hsp_placement",
-         "hsp_plate_placement_shared-S2-s12", 
+         "hsp_plate_placement_shared-S2-s12",
+         #"reactive_hsp_plate_placement_shared-S3-s12",
+         #"reactive-hsp_plate_placement_shared-S2-s12",
+         "reactive-reactive_hsp_plate_placement_shared-S3-s12",
          #"reactive_hsp_plate_placement_shared-S3-s12"
         ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
@@ -968,7 +1004,7 @@ if __name__ == "__main__":
     #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [5]
+    seed_max = [5, 5, 5, 5]
     # seed_max = [72, 72, 72]
     #seed_max = [20, 10, 10]
     #seed_max = [1, 1, 1]
@@ -978,11 +1014,11 @@ if __name__ == "__main__":
     #traj_num = 1
     
     #is_self = [True , True, True]
-    is_self = [False, False]
+    is_self = [False, False, False, False]
     #partner_agents = [30, 30, 30, 30]
-    partner_agents = [10]
+    partner_agents = [10, 10, 10, 10]
     #self_agent_name = ["hsp_cp", "hsp_cp", "hsp_cp", "hsp_cp"]
-    self_agent_name = ["hsp"]
+    self_agent_name = ["hsp", "hsp", "hsp", "hsp"]
     
     #partner_agents = [1, 1, 1]
     #self_agents = ["hsp","hsp_cp","hsp_cp"]
@@ -1014,10 +1050,10 @@ if __name__ == "__main__":
             for i in range(seeds):
                 m_per_seed = []
                 p_per_seed = []
-                for j in range(int(partner_num/2)):
+                for j in range(int(partner_num)):
                     m_per_seed.append(f"{self_agent}-{i}-bias{j}_final")
                     p_per_seed.append(f"self-bias{j}")
-                for j in range(int(partner_num/2), partner_num):
+                for j in range(int(partner_num)):
                     m_per_seed.append(f"bias_final{j}-{self_agent}-{i}")
                     p_per_seed.append(f"bias{j}-self")
                 match_ups.append(m_per_seed)
