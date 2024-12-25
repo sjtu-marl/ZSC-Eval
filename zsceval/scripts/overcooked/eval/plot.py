@@ -26,6 +26,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from loguru import logger
 
+from zsceval.envs.overcooked_new.src.overcooked_ai_py.mdp.overcooked_mdp import SHAPED_INFOS
 LABELS_NEW_CORE =[
     
     "put_onion_on_X",
@@ -73,103 +74,10 @@ LABELS_NEW_CORE =[
     "shaped_r",
 ]
 
-LABELS_NEW = [
-    "put_onion_on_X_by_agent0",
-    "put_tomato_on_X_by_agent0",
-    "put_dish_on_X_by_agent0",
-    "put_soup_on_X_by_agent0",
-    "pickup_onion_from_X_by_agent0",
-    "pickup_onion_from_O_by_agent0",
-    "pickup_tomato_from_X_by_agent0",
-    "pickup_tomato_from_T_by_agent0",
-    "pickup_dish_from_X_by_agent0",
-    "pickup_dish_from_D_by_agent0",
-    "pickup_soup_from_X_by_agent0",
-    "USEFUL_DISH_PICKUP_by_agent0", 
-    "SOUP_PICKUP_by_agent0", 
-    "PLACEMENT_IN_POT_by_agent0",
-    "viable_placement_by_agent0",
-    "optimal_placement_by_agent0",
-    "catastrophic_placement_by_agent0",
-    "useless_placement_by_agent0", 
-    "potting_onion_by_agent0",
-    "potting_tomato_by_agent0",
-    "cook_by_agent0",
-    "delivery_by_agent0",
-    "deliver_size_two_order_by_agent0",
-    "deliver_size_three_order_by_agent0",
-    "deliver_useless_order_by_agent0",
-    "STAY_by_agent0",
-    "MOVEMENT_by_agent0",
-    "IDLE_MOVEMENT_by_agent0",
-    "IDLE_INTERACT_by_agent0",
-    "sparse_r_by_agent0",
-    "shaped_r_by_agent0",
-    "place_onion_on_X_by_agent0",
-    "place_tomato_on_X_by_agent0",
-    "place_dish_on_X_by_agent0",
-    "place_soup_on_X_by_agent0",
-    "recieve_onion_via_X_by_agent0",
-    "recieve_tomato_via_X_by_agent0",
-    "recieve_dish_via_X_by_agent0",
-    "recieve_soup_via_X_by_agent0",
-    "onions_placed_on_X_by_agent0",
-    "tomatoes_placed_on_X_by_agent0",
-    "dishes_placed_on_X_by_agent0",
-    "soups_placed_on_X_by_agent0",
-    "utility_r_by_agent0",
-    
-    "put_onion_on_X_by_agent1",
-    "put_tomato_on_X_by_agent1",
-    "put_dish_on_X_by_agent1",
-    "put_soup_on_X_by_agent1",
-    "pickup_onion_from_X_by_agent1",
-    "pickup_onion_from_O_by_agent1",
-    "pickup_tomato_from_X_by_agent1",
-    "pickup_tomato_from_T_by_agent1",
-    "pickup_dish_from_X_by_agent1",
-    "pickup_dish_from_D_by_agent1",
-    "pickup_soup_from_X_by_agent1",
-    "USEFUL_DISH_PICKUP_by_agent1", 
-    "SOUP_PICKUP_by_agent1", 
-    "PLACEMENT_IN_POT_by_agent1",
-    "viable_placement_by_agent1",
-    "optimal_placement_by_agent1",
-    "catastrophic_placement_by_agent1",
-    "useless_placement_by_agent1", 
-    "potting_onion_by_agent1",
-    "potting_tomato_by_agent1",
-    "cook_by_agent1",
-    "delivery_by_agent1",
-    "deliver_size_two_order_by_agent1",
-    "deliver_size_three_order_by_agent1",
-    "deliver_useless_order_by_agent1",
-    "STAY_by_agent1",
-    "MOVEMENT_by_agent1",
-    "IDLE_MOVEMENT_by_agent1",
-    "IDLE_INTERACT_by_agent1",
-    "sparse_r_by_agent1",
-    "shaped_r_by_agent1",
-    "place_onion_on_X_by_agent1",
-    "place_tomato_on_X_by_agent1",
-    "place_dish_on_X_by_agent1",
-    "place_soup_on_X_by_agent1",
-    "recieve_onion_via_X_by_agent1",
-    "recieve_tomato_via_X_by_agent1",
-    "recieve_dish_via_X_by_agent1",
-    "recieve_soup_via_X_by_agent1",
-    "onions_placed_on_X_by_agent1",
-    "tomatoes_placed_on_X_by_agent1",
-    "dishes_placed_on_X_by_agent1",
-    "soups_placed_on_X_by_agent1",
-    "utility_r_by_agent1",
-    
-    "sparse_r",
-    "shaped_r",
-    "utility_r"
+LABELS_NEW_CORE = SHAPED_INFOS + ["sparse_r", "shaped_r", "utility_r"]
 
-
-]
+LABELS_NEW = [f"{label}_by_agent{i}" for label in LABELS_NEW_CORE for i in range(2)]
+LABELS_NEW += ["sparse_r", "shaped_r", "utility_r"]
 
 LABELS_OLD = [
     "put_onion_on_X_by_agent0",
@@ -298,7 +206,7 @@ def render_traj(joint_actions, save_dir, layout_name, traj_label):
 def render_traj_wrapper(args):
     return render_traj(*args)
 
-def render_gif_from_traj(exp_save_dir, layout, exp, index, threads = 4):
+def render_gif_from_traj(exp_save_dir, layout, exp, index, partner_num, threads = 4):
     
     save_dir = f"{exp_save_dir}/gifs"
     
@@ -316,17 +224,18 @@ def render_gif_from_traj(exp_save_dir, layout, exp, index, threads = 4):
             logger.info(f"Can't find traj json in {json_path}")
             continue
         # only sample one gifs per eval settings
-        if traj_label[0] not in label_log:
+
+        if traj_label[0] not in label_log and int(traj_label[0]) < partner_num:
             json_open = open(json_path, 'r')
             json_load = json.load(json_open)
-            args.append([json_load["ep_action"], save_dir, layout, f"{exp}_{index}_{traj_label}"])
-            label_log.append(traj_label)
+            args.append([json_load["ep_action"], save_dir, layout, f"{exp}_{index}_{traj_label[0]}"])
+            label_log.append(traj_label[0])
     
     p = Pool(threads)
     p.map(render_traj_wrapper, args)
     
     
-def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif, gif_from_traj):
+def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, partner_num, collect_gif, gif_from_traj):
     
     logger.debug(f"Loading {exp}")
 
@@ -388,7 +297,7 @@ def load_behavior(layout, exp, seeds, match_ups, use_new, save_root, collect_gif
                 
         if collect_gif:
             if gif_from_traj:
-                render_gif_from_traj(save_dir, layout, exp, i+1)
+                render_gif_from_traj(save_dir, layout, exp, i+1, partner_num)
             else:
                 summon_gif(save_root + exp, layout, exp, i+1)
             
@@ -968,7 +877,7 @@ if __name__ == "__main__":
     
     use_new = True
     
-    _collect_gif = False
+    _collect_gif = True
     
     _gif_from_traj = True
     
@@ -976,7 +885,7 @@ if __name__ == "__main__":
     
     _plot_hist = True
     
-    _plot_pca = True
+    _plot_pca = False
     
     _plot_label = False
     
@@ -991,10 +900,10 @@ if __name__ == "__main__":
     #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
     #     "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60",
          #"hsp_plate_placement", "reactive_hsp_placement",
-         "hsp_plate_placement_shared-S2-s12",
+         "hsp_plate_placement_shared-S2-s10",
          #"reactive_hsp_plate_placement_shared-S3-s12",
          #"reactive-hsp_plate_placement_shared-S2-s12",
-         "reactive-reactive_hsp_plate_placement_shared-S3-s12",
+         #"reactive-reactive_hsp_plate_placement_shared-S3-s12",
          #"reactive_hsp_plate_placement_shared-S3-s12"
         ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
@@ -1004,7 +913,7 @@ if __name__ == "__main__":
     #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [5, 5, 5, 5]
+    seed_max = [1, 5, 5, 5]
     # seed_max = [72, 72, 72]
     #seed_max = [20, 10, 10]
     #seed_max = [1, 1, 1]
@@ -1066,9 +975,9 @@ if __name__ == "__main__":
         
     logger.debug(all_match_up_for_hist)
     
-    for seeds, exp, match_ups in zip(seed_max, exps, all_partners):
+    for seeds, exp, match_ups, partner_num in zip(seed_max, exps, all_partners, partner_agents):
         
-        df = load_behavior(layout, exp, seeds, match_ups, use_new, save_root, _collect_gif, _gif_from_traj)
+        df = load_behavior(layout, exp, seeds, match_ups, use_new, save_root, partner_num, _collect_gif, _gif_from_traj)
         #df = load_trajectory(layout, alg, exps, ranks, run, traj_num, True)
         # logger.debug(df)
         dfs.append(df)
