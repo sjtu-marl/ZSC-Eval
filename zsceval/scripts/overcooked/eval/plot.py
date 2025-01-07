@@ -70,7 +70,12 @@ LABELS_NEW_CORE =[
     "tomatoes_placed_on_X",
     "dishes_placed_on_X",
     "soups_placed_on_X",
+    "deliver_onion_order",
+    "deliver_tomato_order",
+    "onion_order_delivered",
+    "tomato_order_delivered",
     "sparse_r",
+    "shaped_r",
     "shaped_r",
 ]
 
@@ -883,7 +888,7 @@ if __name__ == "__main__":
     
     _plot_radar = False
     
-    _plot_hist = True
+    _plot_hist = False
     
     _plot_pca = False
     
@@ -900,11 +905,15 @@ if __name__ == "__main__":
     #    "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"
     #     "adaptive_hsp_plate_shared-pop_cp-s60", "hsp_plate_shared-pop_cp-s60",
          #"hsp_plate_placement", "reactive_hsp_placement",
-         "hsp_plate_placement_shared-S2-s10",
+         #"hsp_plate_placement_shared-S2-s10",
          #"reactive_hsp_plate_placement_shared-S3-s12",
          #"reactive-hsp_plate_placement_shared-S2-s12",
          #"reactive-reactive_hsp_plate_placement_shared-S3-s12",
          #"reactive_hsp_plate_placement_shared-S3-s12"
+         #"hsp_tomato_delivery_shared-S2-s10",
+         #"reactive_hsp_tomato_delivery_shared-S3-s10",
+         #"reactive-hsp_tomato_delivery_shared-S2-s10",
+         "reactive-reactive_hsp_tomato_delivery_shared-S3-s10",
         ]
     #exps = ["hsp_plate_shared", "hsp_plate_shared-pop_cross_play", "adaptive_hsp_plate_shared-pop_cross_play"]
     #exps = ["hsp_plate_shared-pop_cross_play", "hsp_plate-S2-s36-adp_cp-s5" , "adaptive_hsp_plate-S2-s36-adp_cp-s5"]
@@ -913,7 +922,7 @@ if __name__ == "__main__":
     #        "mep-S2-s36-adp_cp-s5", "adaptive_mep-S2-s36-adp_cp-s5"]
     #algs = ["bias"]
     #exps = ["hsp"]
-    seed_max = [1, 5, 5, 5]
+    seed_max = [1, 1, 5, 5]
     # seed_max = [72, 72, 72]
     #seed_max = [20, 10, 10]
     #seed_max = [1, 1, 1]
