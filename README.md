@@ -472,12 +472,12 @@ Overall ZSC-Eval benchmark results in GRF.
 
 ## Citation
 ```
-@misc{wang2024zsceval,
-      title={ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
-      author={Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
-      year={2024},
-      eprint={2310.05208},
-      archivePrefix={arXiv}
+@inproceedings{wang2024zsc,
+  title={Zsc-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
+  author={Wang*, Xihuai and Zhang*, Shao and Zhang, Wenhao and Dong, Wentao and Chen, Jingxiao and Wen, Ying and Zhang, Weinan},
+  booktitle={The Thirty-eight Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
+  year={2024}
+}
 ```
 
 ## Acknowledgements
