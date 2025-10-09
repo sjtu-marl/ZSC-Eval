@@ -42,7 +42,7 @@ class OvercookedRunner(Runner):
         episodes = int(self.num_env_steps) // self.episode_length // self.n_rollout_threads
         total_num_steps = 0
 
-        for episode in range(episodes):
+        for episode in tqdm(range(episodes), desc="Training_episodes"):
             s_time = time.time()
             if self.use_linear_lr_decay:
                 self.trainer.policy.lr_decay(episode, episodes)
@@ -290,18 +290,21 @@ class OvercookedRunner(Runner):
                 policy_model.state_dict(),
                 str(self.save_dir) + f"/model_periodic_{step}.pt",
             )
+            wandb.save(str(self.save_dir) + f"/model_periodic_{step}.pt")
         else:
             policy_actor = self.trainer.policy.actor
             torch.save(
                 policy_actor.state_dict(),
                 str(self.save_dir) + f"/actor_periodic_{step}.pt",
             )
+            wandb.save(str(self.save_dir) + f"/actor_periodic_{step}.pt")
             if save_critic:
                 policy_critic = self.trainer.policy.critic
                 torch.save(
                     policy_critic.state_dict(),
                     str(self.save_dir) + f"/critic_periodic_{step}.pt",
                 )
+                wandb.save(str(self.save_dir) + f"/critic_periodic_{step}.pt")
 
     @torch.no_grad()
     def eval(self, total_num_steps):

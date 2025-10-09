@@ -5,8 +5,9 @@ import sys
 import numpy as np
 import wandb
 from loguru import logger
+import json
 
-wandb_name = "your wandb name"
+wandb_name = "overcooked_ai"
 POLICY_POOL_PATH = "../policy_pool"
 
 
@@ -40,11 +41,12 @@ def extract_sp_S1_models(layout, exp, env):
             steps = history["_step"].to_numpy().astype(int)
             ep_sparse_r = history["ep_sparse_r"].to_numpy()
             final_ep_sparse_r = np.mean(ep_sparse_r[-5:])
-            if run.config["seed"] in seeds:
+            config = json.loads(run.config)
+            if config["seed"]["value"] in seeds:
                 continue
-            i = run.config["seed"]
-            logger.info(f"sp{i} Run: {run_id} Seed: {run.config['seed']} Return {final_ep_sparse_r}")
-            seeds.add(run.config["seed"])
+            i = config["seed"]["value"]
+            logger.info(f"sp{i} Run: {run_id} Seed: {config['seed']['value']} Return {final_ep_sparse_r}")
+            seeds.add(config["seed"]["value"])
             files = run.files()
             actor_pts = [f for f in files if f.name.startswith("actor_periodic")]
             actor_versions = [eval(f.name.split("_")[-1].split(".pt")[0]) for f in actor_pts]
@@ -125,6 +127,7 @@ if __name__ == "__main__":
     hostname = socket.gethostname()
     exp_names = {
         "random3_m": "sp",
+        "random3": "sp",
     }
 
     logger.info(f"hostname: {hostname}")
