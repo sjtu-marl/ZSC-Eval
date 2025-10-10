@@ -154,9 +154,9 @@ class R_MAPPOPolicy:
 
     def load_checkpoint(self, ckpt_path):
         if "actor" in ckpt_path:
-            self.actor.load_state_dict(torch.load(ckpt_path["actor"], map_location=self.device))
+            self.actor.load_state_dict(torch.load(ckpt_path["actor"], map_location=self.device, weights_only=True))
         if "critic" in ckpt_path:
-            self.critic.load_state_dict(torch.load(ckpt_path["critic"], map_location=self.device))
+            self.critic.load_state_dict(torch.load(ckpt_path["critic"], map_location=self.device, weights_only=True))
 
     def to(self, device):
         self.actor.to(device)

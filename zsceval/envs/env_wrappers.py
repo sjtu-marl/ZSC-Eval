@@ -528,7 +528,8 @@ class ShareSubprocDummyBatchVecEnv(ShareVecEnv):
         nenvs = len(env_fns)
         assert nenvs % dummy_batch_size == 0
         nbatchs = nenvs // dummy_batch_size
-        self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nbatchs)])
+        self._mp_ctx = mp.get_context("forkserver")
+        self.remotes, self.work_remotes = zip(*[self._mp_ctx.Pipe(duplex=True) for _ in range(nbatchs)])
         self.dummy_batch_size = dummy_batch_size
         self.nbatchs = nbatchs
 
@@ -541,7 +542,7 @@ class ShareSubprocDummyBatchVecEnv(ShareVecEnv):
         least_used_cpus = [x[0] for x in least_used_cpus]
 
         self.ps = [
-            Process(
+            self._mp_ctx.Process(
                 target=dummyvecenvworker,
                 args=(
                     work_remote,

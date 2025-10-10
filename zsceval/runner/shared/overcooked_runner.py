@@ -610,7 +610,7 @@ class OvercookedRunner(Runner):
         self.eval_info = dict()
         self.env_info = dict()
 
-        for episode in range(0, episodes):
+        for episode in tqdm(range(0, episodes), desc="train"):
             self.total_num_steps = total_num_steps
             if self.use_linear_lr_decay:
                 self.trainer.lr_decay(episode, episodes)

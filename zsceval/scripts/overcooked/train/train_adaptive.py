@@ -207,6 +207,9 @@ def main(args):
         project_name = all_args.env_name
     # wandb
     if all_args.use_wandb:
+        with open("/app/private.yaml") as f:
+            private_info = yaml.load(f, Loader=yaml.FullLoader)
+        wandb.login(key=private_info["wandb_key"])
         run = wandb.init(
             config=all_args,
             project=project_name,
@@ -279,7 +282,7 @@ def main(args):
     runner = Runner(config)
 
     # load population
-    # print("population_yaml_path: ", all_args.population_yaml_path)
+    print("population_yaml_path: ", all_args.population_yaml_path)
     logger.info("population_yaml_path: ", all_args.population_yaml_path)
 
     #  override policy config
