@@ -47,8 +47,8 @@ def extract_sp_S1_models(layout, exp, env):
             i = config["seed"]["value"]
             logger.info(f"sp{i} Run: {run_id} Seed: {config['seed']['value']} Return {final_ep_sparse_r}")
             seeds.add(config["seed"]["value"])
-            files = run.files()
-            actor_pts = [f for f in files if f.name.startswith("actor_periodic")]
+            files = list(run.files())
+            actor_pts = [f for f in files if f.name.startswith("files/actor_periodic_")]
             actor_versions = [eval(f.name.split("_")[-1].split(".pt")[0]) for f in actor_pts]
             actor_pts = {v: p for v, p in zip(actor_versions, actor_pts)}
             actor_versions = sorted(actor_versions)
@@ -90,7 +90,7 @@ def extract_sp_S1_models(layout, exp, env):
                 os.makedirs(f"{fcp_s1_dir}/{exp}", exist_ok=True)
                 sp_s1_path = f"{fcp_s1_dir}/{exp}/sp{i}_{tag}_actor.pt"
                 logger.info(f"pt store in {sp_s1_path}")
-                os.system(f"mv {tmp_dir}/actor_periodic_{version}.pt {sp_s1_path}")
+                os.system(f"mv {tmp_dir}/files/actor_periodic_{version}.pt {sp_s1_path}")
 
 
 if __name__ == "__main__":
