@@ -48,18 +48,20 @@ exp="fcp-S2-s${population_size}"
 
 stage="S2"
 seed_begin=1
-seed_max=5
+seed_max=1
 
 path=../../policy_pool
 export POLICY_POOL=${path}
 
-n_training_threads=100
+n_training_threads=2
+gpu=1
 
 ulimit -n 65536 || ulimit -n 4096
 
 echo "env is ${env}, layout is ${layout}, algo is ${algo}, pop is ${pop}, exp is ${exp}, seed from ${seed_begin} to ${seed_max}, stage is ${stage}"
 for seed in $(seq ${seed_begin} ${seed_max});
 do
+    CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=${gpu} \
     python train/train_adaptive.py --env_name ${env} --algorithm_name ${algo} --experiment_name "${exp}" --layout_name ${layout} --num_agents ${num_agents} \
     --seed ${seed} --n_training_threads 1 --num_mini_batch 1 --episode_length 400 --num_env_steps ${num_env_steps} --reward_shaping_horizon ${reward_shaping_horizon} \
     --overcooked_version ${version} \
