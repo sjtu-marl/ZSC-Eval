@@ -16,7 +16,6 @@ from zsceval.config import get_config
 from zsceval.envs.env_wrappers import (
     ChooseSubprocVecEnv,
     ShareDummyVecEnv,
-    ShareSubprocVecEnv,
     ShareSubprocDummyBatchVecEnv,
 )
 from zsceval.envs.overcooked.Overcooked_Env import Overcooked
@@ -45,13 +44,13 @@ def make_train_env(all_args, run_dir):
     if all_args.n_rollout_threads == 1:
         return ShareDummyVecEnv([get_env_fn(0)])
     else:
-        return ShareSubprocVecEnv(
-            [get_env_fn(i) for i in range(all_args.n_rollout_threads)]
-        )
-        # return ShareSubprocDummyBatchVecEnv(
-        #     [get_env_fn(i) for i in range(all_args.n_rollout_threads)],
-        #     all_args.dummy_batch_size,
+        # return ShareSubprocVecEnv(
+        #     [get_env_fn(i) for i in range(all_args.n_rollout_threads)]
         # )
+        return ShareSubprocDummyBatchVecEnv(
+            [get_env_fn(i) for i in range(all_args.n_rollout_threads)],
+            all_args.dummy_batch_size,
+        )
 
 
 def make_eval_env(all_args, run_dir):

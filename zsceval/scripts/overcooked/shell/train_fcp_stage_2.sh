@@ -53,7 +53,7 @@ seed_max=1
 path=../../policy_pool
 export POLICY_POOL=${path}
 
-n_training_threads=2
+n_training_threads=100
 gpu=1
 
 ulimit -n 65536 || ulimit -n 4096

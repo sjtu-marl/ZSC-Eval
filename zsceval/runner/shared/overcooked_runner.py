@@ -634,10 +634,7 @@ class OvercookedRunner(Runner):
                     self.envs.load_policy(load_policy_cfg)
 
             # init env
-            print("reset env")
             obs, share_obs, available_actions = self.envs.reset()
-            print("reset env done")
-            
             # replay buffer
             if self.use_centralized_V:
                 share_obs = share_obs
@@ -647,7 +644,7 @@ class OvercookedRunner(Runner):
             s_time = time.time()
             self.trainer.init_first_step(share_obs, obs, available_actions)
 
-            for step in tqdm(range(self.episode_length), desc="step"):
+            for step in range(self.episode_length):
                 # Sample actions
                 actions = self.trainer.step(step)
 
@@ -744,7 +741,6 @@ class OvercookedRunner(Runner):
             train_infos = self.trainer.train(sp_size=getattr(self, "n_repeats", 0) * self.num_agents)
             e_time = time.time()
             logger.trace(f"Update models time: {e_time - s_time:.3f}s")
-            print(f"Update models time: {e_time - s_time:.3f}s")
 
             s_time = time.time()
             if self.all_args.stage == 2:
@@ -840,7 +836,6 @@ class OvercookedRunner(Runner):
 
             e_time = time.time()
             logger.trace(f"Post update models time: {e_time - s_time:.3f}s")
-            print(f"Post update models time: {e_time - s_time:.3f}s")
 
     def train_fcp(self):
         raise NotImplementedError

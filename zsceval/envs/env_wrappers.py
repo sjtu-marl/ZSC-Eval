@@ -13,7 +13,6 @@ import psutil
 
 from zsceval.utils.util import tile_images
 
-
 class CloudpickleWrapper:
     """
     Uses cloudpickle to serialize contents (otherwise multiprocessing tries to use pickle)
@@ -324,8 +323,8 @@ class SubprocVecEnv(ShareVecEnv):
 def shareworker(remote, parent_remote, env_fn_wrapper, worker_id: int = None):
     parent_remote.close()
     env = env_fn_wrapper.x()
-    # if worker_id is not None:
-    #     psutil.Process().cpu_affinity([worker_id])
+    if worker_id is not None:
+        psutil.Process().cpu_affinity([worker_id])
     while True:
         cmd, data = remote.recv()
         if cmd == "step":
@@ -377,29 +376,26 @@ class ShareSubprocVecEnv(ShareVecEnv):
         self.waiting = False
         self.closed = False
         nenvs = len(env_fns)
-        # self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nenvs)])
-        # least_used_cpus = sorted(
-        #     [(c_i, c_percent) for c_i, c_percent in enumerate(psutil.cpu_percent(10, percpu=True))],
-        #     key=lambda x: x[1],
-        # )
-        # least_used_cpus = [x[0] for x in least_used_cpus]
-
-        # self.ps = [
-        #     Process(
-        #         target=shareworker,
-        #         args=(
-        #             work_remote,
-        #             remote,
-        #             CloudpickleWrapper(env_fn),
-        #             least_used_cpus[work_id % psutil.cpu_count()],
-        #         ),
-        #     )
-        #     for work_id, (work_remote, remote, env_fn) in enumerate(zip(self.work_remotes, self.remotes, env_fns))
-        # ]
         self._mp_ctx = mp.get_context("forkserver") 
         self.remotes, self.work_remotes = zip(*[self._mp_ctx.Pipe() for _ in range(nenvs)])
-        self.ps = [self._mp_ctx.Process(target=shareworker, args=(work_remote, remote, CloudpickleWrapper(env_fn)))
-                   for (work_remote, remote, env_fn) in zip(self.work_remotes, self.remotes, env_fns)]
+        least_used_cpus = sorted(
+            [(c_i, c_percent) for c_i, c_percent in enumerate(psutil.cpu_percent(0, percpu=True))],
+            key=lambda x: x[1],
+        )
+        least_used_cpus = [x[0] for x in least_used_cpus]
+
+        self.ps = [
+            self._mp_ctx.Process(
+                target=shareworker,
+                args=(
+                    work_remote,
+                    remote,
+                    CloudpickleWrapper(env_fn),
+                    least_used_cpus[work_id % psutil.cpu_count()],
+                ),
+            )
+            for work_id, (work_remote, remote, env_fn) in enumerate(zip(self.work_remotes, self.remotes, env_fns))
+        ]
 
         for p in self.ps:
             p.daemon = True  # if the main process crashes, we should not cause things to hang
@@ -433,27 +429,9 @@ class ShareSubprocVecEnv(ShareVecEnv):
         )
 
     def reset(self):
-        TIMEOUT = 60.0
-
         for remote in self.remotes:
             remote.send(("reset", None))        
-        # results = [remote.recv() for remote in self.remotes]
-
-        results = []
-        for i, remote in enumerate(self.remotes):
-            if remote.poll(TIMEOUT):
-                try:
-                    results.append(remote.recv())
-                except EOFError:
-                    raise RuntimeError(f"Subprocess {i} died during reset.")
-            else:
-                p_status = self.ps[i].is_alive()
-                logger.error(f"Environment reset timed out after {TIMEOUT}s on process {i}. Is alive: {p_status}")
-                if p_status:
-                    self.ps[i].terminate()
-                    self.ps[i].join(timeout=1.0)
-                raise TimeoutError(f"Subprocess {i} failed to respond to 'reset' command within {TIMEOUT} seconds.")
-
+        results = [remote.recv() for remote in self.remotes]
         obs, share_obs, available_actions = zip(*results)
         return obs, np.stack(share_obs), np.stack(available_actions)
 
@@ -553,9 +531,6 @@ class ShareSubprocDummyBatchVecEnv(ShareVecEnv):
         nbatchs = nenvs // dummy_batch_size
         self._mp_ctx = mp.get_context("forkserver")
         self.remotes, self.work_remotes = zip(*[self._mp_ctx.Pipe() for _ in range(nbatchs)])
-                
-        # self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nbatchs)])
-
         self.dummy_batch_size = dummy_batch_size
         self.nbatchs = nbatchs
 
@@ -581,9 +556,6 @@ class ShareSubprocDummyBatchVecEnv(ShareVecEnv):
                 zip(self.work_remotes, self.remotes, env_fn_batchs)
             )
         ]
-
-        # self.ps = [self._mp_ctx.Process(target=dummyvecenvworker, args=(work_remote, remote, CloudpickleWrapper(env_fn_batch)))
-        #            for (work_remote, remote, env_fn_batch) in zip(self.work_remotes, self.remotes, env_fn_batchs)]
 
         for p_i, p in enumerate(self.ps):
             p.daemon = True  # if the main process crashes, we should not cause things to hang
