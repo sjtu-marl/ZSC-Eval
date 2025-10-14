@@ -13,6 +13,7 @@ from zsceval.algorithms.population.utils import _t2n
 from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 from zsceval.utils.shared_buffer import SharedReplayBuffer
 
+import wandb
 
 class TrainerPool:
     """TrainerPool maintains a pool of trainers, each trainer corresponding to one policy, both have the same name.

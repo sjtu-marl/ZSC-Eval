@@ -5,7 +5,7 @@ import socket
 import numpy as np
 import wandb
 
-wandb_name = "your wandb name"
+wandb_name = "overcooked_ai"
 POLICY_POOL_PATH = "../policy_pool"
 
 from loguru import logger
@@ -141,8 +141,9 @@ if __name__ == "__main__":
     assert all([algo in ["traj", "mep", "fcp", "cole", "hsp"] for algo in algorithms])
     ALG_EXPS = {
         "fcp": [
-            "fcp-S2-s24",
-            "fcp-S2-s36",
+            "fcp-S2-s12",
+            # "fcp-S2-s24",
+            # "fcp-S2-s36",
         ],
         "mep": [
             "mep-S2-s24",
