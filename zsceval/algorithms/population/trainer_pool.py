@@ -378,17 +378,21 @@ class TrainerPool:
                             policy_model.state_dict(),
                             str(save_dir) + f"/{trainer_name}/model_best_r.pt",
                         )
+                        wandb.save(str(save_dir) + f"/{trainer_name}/model_best_r.pt")
                     else:
                         policy_actor = trainer.policy.actor
                         torch.save(
                             policy_actor.state_dict(),
                             str(save_dir) + f"/{trainer_name}/actor_best_r.pt",
                         )
+                        wandb.save(str(save_dir) + f"/{trainer_name}/actor_best_r.pt")
+
                         policy_critic = trainer.policy.critic
                         torch.save(
                             policy_critic.state_dict(),
                             str(save_dir) + f"/{trainer_name}/critic_best_r.pt",
                         )
+                        wandb.save(str(save_dir) + f"/{trainer_name}/critic_best_r.pt")
 
     def save(self, step, save_dir, save_critic: bool = False):
         trainer_steps = self.save_steps()
@@ -412,18 +416,21 @@ class TrainerPool:
                         get_new_state_dict(policy_model.state_dict()),
                         str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt",
                     )
+                    wandb.save(str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt")
                 else:
                     policy_actor = trainer.policy.actor
                     torch.save(
                         get_new_state_dict(policy_actor.state_dict()),
                         str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt",
                     )
+                    wandb.save(str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt")
                     if save_critic:
                         policy_critic = trainer.policy.critic
                         torch.save(
                             get_new_state_dict(policy_critic.state_dict()),
                             str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt",
                         )
+                        wandb.save(str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt")
             else:
                 if self.policy_config(trainer_name)[0].use_single_network:
                     policy_model = trainer.policy.model
@@ -431,15 +438,18 @@ class TrainerPool:
                         policy_model.state_dict(),
                         str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt",
                     )
+                    wandb.save(str(save_dir) + f"/{trainer_name}/model_periodic_{trainer_step}.pt")
                 else:
                     policy_actor = trainer.policy.actor
                     torch.save(
                         policy_actor.state_dict(),
                         str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt",
                     )
+                    wandb.save(str(save_dir) + f"/{trainer_name}/actor_periodic_{trainer_step}.pt")
                     if save_critic:
                         policy_critic = trainer.policy.critic
                         torch.save(
                             policy_critic.state_dict(),
                             str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt",
                         )
+                        wandb.save(str(save_dir) + f"/{trainer_name}/critic_periodic_{trainer_step}.pt")
