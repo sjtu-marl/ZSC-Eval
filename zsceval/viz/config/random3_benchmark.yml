@@ -1,0 +1,18 @@
+fcp1:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/1.pt
+fcp2:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/2.pt
+fcp3:
+    policy_config_path: random3/policy_config/rnn_policy_config.pkl
+    featurize_type: ppo
+    algo: FCP
+    model_path:
+        actor: random3/fcp/s2/fcp-S2-s24/3.pt
