@@ -6,13 +6,18 @@ import pygame
 import random
 from zsceval.config import get_config
 from zsceval.overcooked_config import get_overcooked_args, OLD_LAYOUTS
-# 환경변수 설정
+
+from zsceval.envs.overcooked.Overcooked_Env import Overcooked
+import yaml
+import pickle
+import torch
 path = "../policy_pool"
 os.environ["POLICY_POOL"] = path
 
-from zsceval.envs.overcooked.Overcooked_Env import Overcooked
-from zsceval.envs.overcooked_new.Overcooked_Env import Overcooked as Overcooked_new
-from zsceval.human_exp.agent_pool import ZSCEvalAgentPool
+from zsceval.algorithms.population.policy_pool import add_path_prefix
+from zsceval.runner.shared.base_runner import make_trainer_policy_cls
+
+
 
 def parse_args(args, parser):
     parser = get_overcooked_args(parser)
@@ -37,13 +42,60 @@ def parse_args(args, parser):
     return all_args
 
 
+class EvalPolicy_Play:
+
+    def __init__(self, population_yaml_path, layout_name, test_policy_name, deterministic=True, epsilon=0.5):
+        self.population_yaml_path = population_yaml_path
+        self.layout_name = layout_name
+        self.test_policy_name = test_policy_name
+        self.deterministic = deterministic
+        self.epsilon = epsilon
+        self.population_config = yaml.load(open(self.population_yaml_path, encoding="utf-8"), yaml.Loader)
+
+        policy_config_path = os.path.join("../policy_pool",
+                                          self.population_config[self.test_policy_name]["policy_config_path"])
+        policy_config = list(pickle.load(open(policy_config_path, "rb")))
+        self.policy_args = policy_config[0]
+        _, policy_cls = make_trainer_policy_cls(self.policy_args.algorithm_name)  # ex) rmappo
+        model_path = add_path_prefix("../policy_pool", self.population_config[self.test_policy_name]["model_path"])
+        self.policy = policy_cls(*policy_config, device=torch.device("cpu"))
+        self.policy.load_checkpoint(model_path)
+
+    def init_mask_rnn_state(self):
+        masks = np.ones((1, 1), dtype=np.float32)
+        rnn_states = np.zeros((self.policy_args.recurrent_N, self.policy_args.hidden_size), dtype=np.float32)
+
+        return masks, rnn_states
+
+    def step(self, obs, masks, rnn_states, available_actions, deterministic=False):
+        action, rnn_states = self.policy.act(obs, rnn_states, masks, available_actions=available_actions,
+                                             deterministic=deterministic)
+        return action, rnn_states
+
+    @torch.no_grad()
+    def get_action(self, obs, available_actions, masks, rnn_states):
+        self.policy.prep_rollout()
+        epsilon = random.random()
+        if not self.deterministic or epsilon < self.epsilon:
+            return self.step(obs, masks,
+                             rnn_states,
+                             available_actions,
+                             deterministic=False)
+        else:
+            return self.step(obs, masks,
+                             rnn_states,
+                             available_actions,
+                             deterministic=True)
+
+
 def main(args):
     parser = get_config()
     all_args = parse_args(args, parser)
     env = Overcooked(all_args, run_dir=None)
 
-    pool = ZSCEvalAgentPool(all_args.population_yaml_path, all_args.layout_name, deterministic=all_args.deterministic, epsilon=all_args.epsilon)
-    agent0 = pool.get_agent(all_args.algo)
+    agent0_play = EvalPolicy_Play(all_args.population_yaml_path, all_args.layout_name, test_policy_name="fcp1")
+    masks, rnn_states = agent0_play.init_mask_rnn_state()
+
     both_agents_ob, share_obs, available_actions = env.reset()
 
     clock = pygame.time.Clock()
@@ -56,8 +108,10 @@ def main(args):
 
         while not epi_done:
             clock.tick(6.67)
-            # a0 = int(agent0(env.base_env.state.to_dict(), 0))
-            a0 = random.randint(0, 5)
+
+            a0, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
+                                                    available_actions, masks,
+                                                    rnn_states)
             a1 = random.randint(0, 5)
             joint_action = np.array([[a0], [a1]])
 
@@ -71,6 +125,7 @@ def main(args):
 
     finally:
         pygame.quit()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
