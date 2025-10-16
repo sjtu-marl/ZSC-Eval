@@ -17,6 +17,8 @@ os.environ["POLICY_POOL"] = path
 from zsceval.algorithms.population.policy_pool import add_path_prefix
 from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 
+from zsceval.viz.gradcam import GradCAM
+import cv2
 
 def parse_args(args, parser):
     parser = get_overcooked_args(parser)
@@ -32,6 +34,7 @@ def parse_args(args, parser):
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--epsilon", type=float, default=0.0, help="stochastic eval epsilon")
     parser.add_argument("--deterministic", action="store_true")
+    parser.add_argument("--is_cam", action="store_true")
 
     all_args = parser.parse_args(args)
     if all_args.layout_name in OLD_LAYOUTS:
@@ -86,6 +89,11 @@ class EvalPolicy_Play:
                              available_actions,
                              deterministic=True)
 
+    def init_cam(self):
+        target_layer = self.policy.actor.base.cnn[4]
+        cam = GradCAM(model=self.policy.actor, target_layer=target_layer)
+        return cam
+
 
 def main(args):
     parser = get_config()
@@ -94,6 +102,9 @@ def main(args):
 
     agent0_play = EvalPolicy_Play(all_args.population_yaml_path, all_args.layout_name, test_policy_name="fcp1")
     masks, rnn_states = agent0_play.init_mask_rnn_state()
+    
+    if all_args.is_cam:
+        cam = agent0_play.init_cam()
 
     both_agents_ob, share_obs, available_actions = env.reset()
 
@@ -114,11 +125,22 @@ def main(args):
             a1 = random.randint(0, 5)
             joint_action = np.array([[int(a0)], [int(a1)]])
 
+            if all_args.is_cam:
+                cam_heatmap = cam(np.expand_dims(both_agents_ob[0], axis=0),
+                                  available_actions, rnn_states, masks, target_action=int(a0))
+
             both_agents_ob, share_obs, reward, done, info, available_actions = env.step(joint_action)
             epi_done = done[0]
 
             # render
             image = env.play_render()
+            if all_args.is_cam:
+                cam_resized = cv2.resize(cam_heatmap, (image.shape[1], image.shape[0]))        # float[0..1]
+                heat = (cam_resized * 255).astype(np.uint8)
+                heatmap_color = cv2.applyColorMap(heat, cv2.COLORMAP_JET)[:, :, ::-1]
+                image = cv2.addWeighted(image, 0.6, heatmap_color, 0.5, 0)
+
+            display_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             screen.blit(pygame.surfarray.make_surface(np.rot90(np.flip(image[..., ::-1], 1))), (0, 0))
             pygame.display.flip()
 
