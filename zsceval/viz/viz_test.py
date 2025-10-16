@@ -18,7 +18,6 @@ from zsceval.algorithms.population.policy_pool import add_path_prefix
 from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 
 
-
 def parse_args(args, parser):
     parser = get_overcooked_args(parser)
     parser.add_argument(
@@ -113,7 +112,7 @@ def main(args):
                                                     available_actions, masks,
                                                     rnn_states)
             a1 = random.randint(0, 5)
-            joint_action = np.array([[a0], [a1]])
+            joint_action = np.array([[int(a0)], [int(a1)]])
 
             both_agents_ob, share_obs, reward, done, info, available_actions = env.step(joint_action)
             epi_done = done[0]
