@@ -18,6 +18,7 @@ from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 
 from zsceval.viz.gradcam import GradCAM
 import cv2
+import torch.nn as nn
 
 
 def parse_args(args, parser):
@@ -36,6 +37,7 @@ def parse_args(args, parser):
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--is_cam", action="store_true")
     parser.add_argument("--cam_alpha", type=float, default=0.8)
+    parser.add_argument("--cam_layers", type=str, default="2", help="'0,1,2' or 'all'")
 
     all_args = parser.parse_args(args)
     if all_args.layout_name in OLD_LAYOUTS:
@@ -90,9 +92,21 @@ class EvalPolicy_Play:
                              available_actions,
                              deterministic=True)
 
-    def init_cam(self):
-        target_layer = self.policy.actor.base.cnn[4]
-        cam = GradCAM(model=self.policy.actor, target_layer=target_layer)
+    def init_cam(self, cam_layers: str):
+
+        all_conv_layers = [module for module in self.policy.actor.base.cnn if isinstance(module, nn.Conv2d)]
+
+        target_layers = []
+        if cam_layers.lower() == "all":
+            target_layers = all_conv_layers
+        else:
+            indices = [int(x.strip()) for x in cam_layers.split(",") if x.strip() != ""]
+            for idx in indices:
+                if 0 <= idx < len(all_conv_layers):
+                    target_layers.append(all_conv_layers[idx])
+
+        cam = GradCAM(model=self.policy.actor, target_layer=target_layers)
+
         return cam
 
 
@@ -105,7 +119,7 @@ def main(args):
     masks, rnn_states = agent0_play.init_mask_rnn_state()
     
     if all_args.is_cam:
-        cam = agent0_play.init_cam()
+        cam = agent0_play.init_cam(all_args.cam_layers)
 
     both_agents_ob, share_obs, available_actions = env.reset()
 
@@ -118,7 +132,7 @@ def main(args):
         pygame.display.flip()
 
         while not epi_done:
-            clock.tick(6.67)
+            # clock.tick(6.67)
 
             a0, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
                                                     available_actions, masks,
@@ -159,6 +173,7 @@ def main(args):
             pygame.display.flip()
 
     finally:
+        cam.remove_hooks()
         pygame.quit()
 
 
