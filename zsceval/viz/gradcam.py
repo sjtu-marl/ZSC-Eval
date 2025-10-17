@@ -65,10 +65,6 @@ class GradCAM:
                     max(target_size[1], cam.shape[-1]),
                 )
 
-        if not cams:
-            # Fallback: return zeros if hooks did not capture anything
-            return torch.zeros((1, 1)).squeeze(0).detach().cpu().numpy()
-
         # Upsample cams to a common size and average
         cams_up = []
         for c in cams:

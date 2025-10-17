@@ -19,6 +19,8 @@ from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 from zsceval.viz.gradcam import GradCAM
 import cv2
 import torch.nn as nn
+from zsceval.envs.overcooked.overcooked_ai_py.mdp.actions import Action, Direction
+from collections import deque
 
 
 def parse_args(args, parser):
@@ -37,7 +39,7 @@ def parse_args(args, parser):
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--is_cam", action="store_true")
     parser.add_argument("--cam_alpha", type=float, default=0.8)
-    parser.add_argument("--cam_layers", type=str, default="2", help="'0,1,2' or 'all'")
+    parser.add_argument("--cam_layers", type=str, default="2", help="'0, 1 ,2' or 'all'")
 
     all_args = parser.parse_args(args)
     if all_args.layout_name in OLD_LAYOUTS:
@@ -125,6 +127,7 @@ def main(args):
 
     clock = pygame.time.Clock()
     epi_done = False
+    human_action_queue = deque(maxlen=32)
     try:
         image = env.play_render()
         screen = pygame.display.set_mode((image.shape[1], image.shape[0]))
@@ -132,12 +135,29 @@ def main(args):
         pygame.display.flip()
 
         while not epi_done:
-            # clock.tick(6.67)
+            clock.tick(6.67)
+
+            # enqueue keydown events
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        human_action_queue.append(Direction.NORTH)
+                    elif event.key == pygame.K_DOWN:
+                        human_action_queue.append(Direction.SOUTH)
+                    elif event.key == pygame.K_LEFT:
+                        human_action_queue.append(Direction.WEST)
+                    elif event.key == pygame.K_RIGHT:
+                        human_action_queue.append(Direction.EAST)
+                    elif event.key == pygame.K_SPACE:
+                        human_action_queue.append(Action.INTERACT)
 
             a0, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
                                                     available_actions, masks,
                                                     rnn_states)
-            a1 = random.randint(0, 5)
+
+            a1_action = human_action_queue.popleft() if human_action_queue else Action.STAY
+            a1 = Action.ACTION_TO_INDEX[a1_action]
+
             joint_action = np.array([[int(a0)], [int(a1)]])
 
             if all_args.is_cam:
