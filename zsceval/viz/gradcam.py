@@ -19,20 +19,16 @@ class GradCAM:
         self.gradients = grad_output[0]
     
     def __call__(self, obs, available_actions, rnn_states, masks, target_action=None):
-        # Forward pass
         actions, action_log_probs, rnn_states = self.model.forward(obs, rnn_states, masks, available_actions)
-        
-        # Backward pass
+
         self.model.zero_grad()        
         score = action_log_probs.sum()
         score.backward()
-        
-        # GradCAM 계산
+
         weights = self.gradients.mean(dim=[2, 3], keepdim=True)  # (B, C, 1, 1)
         cam = (weights * self.activations).sum(dim=1)  # (B, H, W)
         cam = F.relu(cam)  # ReLU
-        
-        # Normalize
+
         cam = cam - cam.min()
         cam = cam / (cam.max() + 1e-8)
         

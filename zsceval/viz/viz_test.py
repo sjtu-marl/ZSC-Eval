@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 import numpy as np
 import pygame
 import random
@@ -20,6 +19,7 @@ from zsceval.runner.shared.base_runner import make_trainer_policy_cls
 from zsceval.viz.gradcam import GradCAM
 import cv2
 
+
 def parse_args(args, parser):
     parser = get_overcooked_args(parser)
     parser.add_argument(
@@ -35,6 +35,7 @@ def parse_args(args, parser):
     parser.add_argument("--epsilon", type=float, default=0.0, help="stochastic eval epsilon")
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--is_cam", action="store_true")
+    parser.add_argument("--cam_alpha", type=float, default=0.8)
 
     all_args = parser.parse_args(args)
     if all_args.layout_name in OLD_LAYOUTS:
@@ -135,12 +136,25 @@ def main(args):
             # render
             image = env.play_render()
             if all_args.is_cam:
-                cam_resized = cv2.resize(cam_heatmap, (image.shape[1], image.shape[0]))        # float[0..1]
-                heat = (cam_resized * 255).astype(np.uint8)
-                heatmap_color = cv2.applyColorMap(heat, cv2.COLORMAP_JET)[:, :, ::-1]
-                image = cv2.addWeighted(image, 0.6, heatmap_color, 0.5, 0)
+                # filter max heatmap
+                max_idx = np.argmax(cam_heatmap)
+                max_row, max_col = np.unravel_index(max_idx, cam_heatmap.shape)
+                cam_filtered = np.zeros_like(cam_heatmap)
+                cam_filtered[max_row, max_col] = cam_heatmap[max_row, max_col]
 
-            display_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                cam_resized = cv2.resize(cam_filtered, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
+                heat_u8 = (cam_resized * 255).astype(np.uint8)
+                heatmap_color = cv2.applyColorMap(heat_u8, cv2.COLORMAP_JET)[:, :, ::-1].astype(np.float32)
+
+                # smoothing
+                cam_soft = cv2.GaussianBlur(cam_resized.astype(np.float32), (0, 0), sigmaX=3, sigmaY=3)
+                cam_soft = np.power(np.clip(cam_soft, 0.0, 1.0), 0.8)
+                alpha = (cam_soft * all_args.cam_alpha)[..., None]  # (H, W, 1)
+
+                img_f = image.astype(np.float32)
+                blended = img_f * (1.0 - alpha) + heatmap_color * alpha
+                image = blended.clip(0, 255).astype(np.uint8)
+
             screen.blit(pygame.surfarray.make_surface(np.rot90(np.flip(image[..., ::-1], 1))), (0, 0))
             pygame.display.flip()
 
