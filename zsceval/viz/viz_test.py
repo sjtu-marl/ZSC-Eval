@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pygame
 import random
+import time
 from zsceval.config import get_config
 from zsceval.overcooked_config import get_overcooked_args, OLD_LAYOUTS
 
@@ -125,6 +126,7 @@ def main(args):
 
     both_agents_ob, share_obs, available_actions = env.reset()
 
+    start_time = time.time()
     clock = pygame.time.Clock()
     epi_done = False
     human_action_queue = deque(maxlen=32)
@@ -188,9 +190,13 @@ def main(args):
                 img_f = image.astype(np.float32)
                 blended = img_f * (1.0 - alpha) + heatmap_color * alpha
                 image = blended.clip(0, 255).astype(np.uint8)
-
             screen.blit(pygame.surfarray.make_surface(np.rot90(np.flip(image[..., ::-1], 1))), (0, 0))
             pygame.display.flip()
+
+            end_time = time.time()
+            game_time = end_time - start_time
+
+        print('finish_time : ', game_time)
 
     finally:
         cam.remove_hooks()
