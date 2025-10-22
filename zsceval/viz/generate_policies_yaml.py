@@ -49,22 +49,15 @@ def make_yaml_for_prefix(prefix: str) -> str:
 
 def save_benchmarks(
     maps: List[str],
-    output_dir: str = "config",
-    make_m_variant: bool = True,
-):
+    output_dir: str = "config"):
     cfg_dir = Path(output_dir)
     cfg_dir.mkdir(parents=True, exist_ok=True)
 
     for m in maps:
         txt = make_yaml_for_prefix(m)
-        (cfg_dir / f"{m}_benchmark.yaml").write_text(txt, encoding="utf-8")
-
-        if make_m_variant:
-            txt_m = make_yaml_for_prefix(f"{m}_m")
-            (cfg_dir / f"{m}_m_benchmark.yaml").write_text(txt_m, encoding="utf-8")
-
+        (cfg_dir / f"{m}_benchmark.yml").write_text(txt, encoding="utf-8")
 
 if __name__ == "__main__":
-    maps = ["random0_medium", "random1", "random3", "small_corridor", "unident_s", "random1_m", "random3_m"]
-    save_benchmarks(maps, output_dir="config", make_m_variant=True)
-    print("Saved to ./config/<map>_benchmark.yaml and <map>_m_benchmark.yaml")
+    maps = ["random0", "random0_medium", "random1", "random3", "small_corridor", "unident_s", "random0_m", "random1_m", "random3_m"]
+    save_benchmarks(maps, output_dir="config")
+    print("Saved to ./config/<map>_benchmark.yaml and <map>_m_benchmark.yml")
