@@ -1211,3 +1211,23 @@ class Overcooked(gym.Env):
     def seed(self, seed):
         setup_seed(seed)
         super().seed(seed)
+
+    def play_render(self):
+        import cv2, pygame, copy
+        image = StateVisualizer().render_state(state=self.base_env.state,
+                                               grid=self.base_env.mdp.terrain_mtx,
+                                               hud_data=StateVisualizer().default_hud_data(self.base_env.state))
+        buffer = pygame.surfarray.array3d(image)
+        image = copy.deepcopy(buffer)
+        image = np.flip(np.rot90(image, 3), 1)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        screen_w, screen_h = pygame.display.get_desktop_sizes()[0]
+        frac = 2/3
+        target_w, target_h = int(screen_w * frac), int(screen_h * frac)
+
+        h, w = image.shape[:2]
+        scale = min(target_w / w, target_h / h)
+        image = cv2.resize(image, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+
+        return image

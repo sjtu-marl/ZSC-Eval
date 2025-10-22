@@ -8,6 +8,7 @@ from zsceval.config import get_config
 from zsceval.overcooked_config import get_overcooked_args, OLD_LAYOUTS
 
 from zsceval.envs.overcooked.Overcooked_Env import Overcooked
+from zsceval.envs.overcooked_new.Overcooked_Env import Overcooked as Overcooked_new
 import yaml
 import pickle
 import torch
@@ -33,8 +34,9 @@ def parse_args(args, parser):
         help="While existing other agent like planning or human model, use an index to fix the main RL-policy agent.",
     )
 
-    parser.add_argument("--population_yaml_path", default="./config/random3_benchmark.yml", type=str)
-    parser.add_argument("--algo", type=str, default="FCP", choices=["FCP", "SP"], help="algo key in population yaml")
+    parser.add_argument("--test_policy_name", type=str, default="fcp", choices=["fcp", "mep", "traj", "hsp", "sp",
+                                                                                "e3t", "cole"])
+    parser.add_argument("--model_seed", type=int, default=1, choices=[1, 2, 3])
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--epsilon", type=float, default=0.0, help="stochastic eval epsilon")
     parser.add_argument("--deterministic", action="store_true")
@@ -128,9 +130,15 @@ class EvalPolicy_Play:
 def main(args):
     parser = get_config()
     all_args = parse_args(args, parser)
-    env = Overcooked(all_args, run_dir=None)
 
-    agent0_play = EvalPolicy_Play(all_args.population_yaml_path, all_args.layout_name, test_policy_name="fcp1")
+    if all_args.layout_name in ["random0", "random0_medium", "random1", "random3", "small_corridor", "unident_s"]:
+        env = Overcooked(all_args, run_dir=None)
+    else:
+        env = Overcooked_new(all_args, run_dir=None)
+
+    population_yaml_path = os.path.join("./config", all_args.layout_name + "_benchmark.yml")
+    test_policy_name = all_args.test_policy_name + str(all_args.model_seed)
+    agent0_play = EvalPolicy_Play(population_yaml_path, all_args.layout_name, test_policy_name=test_policy_name)
     masks, rnn_states = agent0_play.init_mask_rnn_state()
     
     if all_args.is_cam:
@@ -149,8 +157,7 @@ def main(args):
         pygame.display.flip()
 
         while not epi_done:
-            clock.tick(12)
-            # clock.tick(6.67)
+            clock.tick(6.67)
 
             # enqueue keydown events
             for event in pygame.event.get():
