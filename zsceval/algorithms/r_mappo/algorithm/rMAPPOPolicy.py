@@ -129,8 +129,12 @@ class R_MAPPOPolicy:
         deterministic=False,
         **kwargs,
     ):
-        actions, _, rnn_states_actor = self.actor(obs, rnn_states_actor, masks, available_actions, deterministic)
-        return actions, rnn_states_actor
+        if kwargs.get("action_probs"):
+            actions, actions_prob, _, rnn_states_actor = self.actor(obs, rnn_states_actor, masks, available_actions, deterministic, action_probs=True)
+            return actions, actions_prob, rnn_states_actor
+        else:
+            actions, _, rnn_states_actor = self.actor(obs, rnn_states_actor, masks, available_actions, deterministic)
+            return actions, rnn_states_actor
 
     def get_probs(self, obs, rnn_states_actor, masks, available_actions=None):
         action_probs, rnn_states_actor = self.actor.get_probs(

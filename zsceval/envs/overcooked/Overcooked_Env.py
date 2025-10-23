@@ -1015,11 +1015,12 @@ class Overcooked(gym.Env):
         setup_seed(seed)
         super().seed(seed)
 
-    def play_render(self):
+    def play_render(self, action_probs=None):
         import cv2, pygame, copy
         image = StateVisualizer().render_state(state=self.base_env.state,
                                                grid=self.base_env.mdp.terrain_mtx,
-                                               hud_data=StateVisualizer().default_hud_data(self.base_env.state, score=self.score))
+                                               hud_data=StateVisualizer().default_hud_data(self.base_env.state, score=self.score),
+                                               action_probs=action_probs)
         buffer = pygame.surfarray.array3d(image)
         image = copy.deepcopy(buffer)
         image = np.flip(np.rot90(image, 3), 1)
