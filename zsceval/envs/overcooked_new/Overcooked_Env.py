@@ -798,6 +798,8 @@ class Overcooked(gym.Env):
         else:
             self.script_agent = [None, None]
 
+        self.score = 0
+
     def reset_featurize_type(self, featurize_type=("ppo", "ppo")):
         assert len(featurize_type) == 2
         self.featurize_type = featurize_type
@@ -1096,6 +1098,8 @@ class Overcooked(gym.Env):
         if self.agent_idx == 1:
             available_actions = np.stack([available_actions[1], available_actions[0]])
 
+        self.score += sparse_reward
+
         return both_agents_ob, share_obs, reward, done, info, available_actions
 
     def anneal_reward_shaping_factor(self, timesteps):
@@ -1214,9 +1218,10 @@ class Overcooked(gym.Env):
 
     def play_render(self):
         import cv2, pygame, copy
-        image = StateVisualizer().render_state(state=self.base_env.state,
-                                               grid=self.base_env.mdp.terrain_mtx,
-                                               hud_data=StateVisualizer().default_hud_data(self.base_env.state))
+        viz = StateVisualizer(is_rendering_hud=True, is_rendering_cooking_timer=True, is_rendering_action_probs=True)
+        image = viz.render_state(state=self.base_env.state,
+                                 grid=self.base_env.mdp.terrain_mtx,
+                                 hud_data=viz.default_hud_data(self.base_env.state, score=self.score)) #action_probs=
         buffer = pygame.surfarray.array3d(image)
         image = copy.deepcopy(buffer)
         image = np.flip(np.rot90(image, 3), 1)
