@@ -190,7 +190,7 @@ def main(args):
             epi_done = done[0]
 
             # render
-            image = env.play_render()
+            image = env.play_render(action_probs=a0_prob)
             if all_args.is_cam == "ArgMax":
                 # filter max heatmap
                 max_idx = np.argmax(cam_heatmap)
