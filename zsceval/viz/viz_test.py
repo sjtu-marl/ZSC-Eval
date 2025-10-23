@@ -10,7 +10,7 @@ from zsceval.overcooked_config import get_overcooked_args, OLD_LAYOUTS
 from zsceval.envs.overcooked.Overcooked_Env import Overcooked
 from zsceval.envs.overcooked_new.Overcooked_Env import Overcooked as Overcooked_new
 import yaml
-import pickle
+import pickle, pathlib
 import torch
 path = "../policy_pool"
 os.environ["POLICY_POOL"] = path
@@ -43,6 +43,10 @@ def parse_args(args, parser):
     parser.add_argument("--is_cam", type=str, default="False", choices=["ArgMax", "Whole", "False"], help="Whether to use CAM")
     parser.add_argument("--cam_alpha", type=float, default=0.8)
     parser.add_argument("--cam_layers", type=str, default="2", help="'0, 1 ,2' or 'all'")
+    # parse_args 안
+    parser.add_argument("--win_path_fix", action="store_true",
+                        help="Windows에서 PosixPath 들어간 pickle을 안전하게 로드")
+
 
     all_args = parser.parse_args(args)
     if all_args.layout_name in OLD_LAYOUTS:
@@ -63,10 +67,21 @@ class WorkMemory:
     def __len__(self):
         return len(self.memory)
 
+class _PathFixUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        # 윈도우에서 리눅스/맥의 PosixPath를 WindowsPath로 매핑
+        if sys.platform.startswith("win") and module == "pathlib" and name == "PosixPath":
+            return pathlib.WindowsPath
+        return super().find_class(module, name)
+
+def load_pickle_with_path_fix(path):
+    with open(path, "rb") as f:
+        return _PathFixUnpickler(f).load()
+
 
 class EvalPolicy_Play:
 
-    def __init__(self, population_yaml_path, layout_name, test_policy_name, deterministic=True, epsilon=0.5):
+    def __init__(self, population_yaml_path, layout_name, test_policy_name, deterministic=True, epsilon=0.5, win_path_fix=False):
         self.population_yaml_path = population_yaml_path
         self.layout_name = layout_name
         self.test_policy_name = test_policy_name
@@ -76,7 +91,18 @@ class EvalPolicy_Play:
 
         policy_config_path = os.path.join("../policy_pool",
                                           self.population_config[self.test_policy_name]["policy_config_path"])
-        policy_config = list(pickle.load(open(policy_config_path, "rb")))
+        # policy_config = list(pickle.load(open(policy_config_path, "rb")))
+        try:
+            if win_path_fix and sys.platform.startswith("win"):
+                policy_config = list(load_pickle_with_path_fix(policy_config_path))
+            else:
+                with open(policy_config_path, "rb") as f:
+                    policy_config = list(pickle.load(f))
+        except NotImplementedError:
+            # 윈도우에서 PosixPath로 터질 때 자동 폴백
+            policy_config = list(load_pickle_with_path_fix(policy_config_path))
+        
+        
         self.policy_args = policy_config[0]
         _, policy_cls = make_trainer_policy_cls(self.policy_args.algorithm_name)  # ex) rmappo
         model_path = add_path_prefix("../policy_pool", self.population_config[self.test_policy_name]["model_path"])
@@ -138,7 +164,7 @@ def main(args):
 
     population_yaml_path = os.path.join("./config", all_args.layout_name + "_benchmark.yml")
     test_policy_name = all_args.test_policy_name + str(all_args.model_seed)
-    agent0_play = EvalPolicy_Play(population_yaml_path, all_args.layout_name, test_policy_name=test_policy_name)
+    agent0_play = EvalPolicy_Play(population_yaml_path, all_args.layout_name, test_policy_name=test_policy_name, win_path_fix=all_args.win_path_fix)
     masks, rnn_states = agent0_play.init_mask_rnn_state()
     
     if all_args.is_cam:
