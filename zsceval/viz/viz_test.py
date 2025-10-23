@@ -116,9 +116,9 @@ class EvalPolicy_Play:
         return masks, rnn_states
 
     def step(self, obs, masks, rnn_states, available_actions, deterministic=False):
-        action, rnn_states = self.policy.act(obs, rnn_states, masks, available_actions=available_actions,
-                                             deterministic=deterministic)
-        return action, rnn_states
+        action, actions_prob, rnn_states = self.policy.act(obs, rnn_states, masks, available_actions=available_actions,
+                                                           deterministic=deterministic, action_probs=True)
+        return action, actions_prob, rnn_states
 
     @torch.no_grad()
     def get_action(self, obs, available_actions, masks, rnn_states):
@@ -199,7 +199,7 @@ def main(args):
                     elif event.key == pygame.K_SPACE:
                         human_action_queue.append(Action.INTERACT)
 
-            a0, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
+            a0, a0_prob, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
                                                     available_actions, masks,
                                                     rnn_states)
 
@@ -216,7 +216,7 @@ def main(args):
             epi_done = done[0]
 
             # render
-            image = env.play_render()
+            image = env.play_render(action_probs=a0_prob)
             if all_args.is_cam == "ArgMax":
                 # filter max heatmap
                 max_idx = np.argmax(cam_heatmap)

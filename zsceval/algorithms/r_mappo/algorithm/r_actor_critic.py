@@ -98,7 +98,7 @@ class R_Actor(nn.Module):
 
         self.to(device)
 
-    def forward(self, obs, rnn_states, masks, available_actions=None, deterministic=False):
+    def forward(self, obs, rnn_states, masks, available_actions=None, deterministic=False, **kwargs):
         if self._mixed_obs:
             for key in obs.keys():
                 obs[key] = check(obs[key]).to(**self.tpdv)
@@ -122,9 +122,12 @@ class R_Actor(nn.Module):
             mlp_obs = self.mlp(obs)
             actor_features = torch.cat([actor_features, mlp_obs], dim=1)
 
-        actions, action_log_probs = self.act(actor_features, available_actions, deterministic)
-
-        return actions, action_log_probs, rnn_states
+        if kwargs.get("action_probs"):
+            actions, actions_prob, action_log_probs = self.act.act_play(actor_features, available_actions, deterministic)
+            return actions, actions_prob, action_log_probs, rnn_states
+        else:
+            actions, action_log_probs = self.act(actor_features, available_actions, deterministic)
+            return actions, action_log_probs, rnn_states
 
     def evaluate_transitions(self, obs, rnn_states, action, masks, available_actions=None, active_masks=None):
         # ! only work for rnn model
@@ -234,7 +237,6 @@ class R_Actor(nn.Module):
                 obs[key] = check(obs[key]).to(**self.tpdv)
         else:
             obs = check(obs).to(**self.tpdv)
-
         rnn_states = check(rnn_states).to(**self.tpdv)
         masks = check(masks).to(**self.tpdv)
 
@@ -245,11 +247,13 @@ class R_Actor(nn.Module):
 
         if self._use_naive_recurrent_policy or self._use_recurrent_policy:
             actor_features, rnn_states = self.rnn(actor_features, rnn_states, masks)
+
+        if self._layer_after_N > 0:
+            actor_features = self.mlp_after(actor_features)
+
         if self._use_influence_policy:
             mlp_obs = self.mlp(obs)
             actor_features = torch.cat([actor_features, mlp_obs], dim=1)
-        if self._layer_after_N > 0:
-            actor_features = self.mlp_after(actor_features)
 
         action_probs = self.act.get_probs(actor_features, available_actions)
 
