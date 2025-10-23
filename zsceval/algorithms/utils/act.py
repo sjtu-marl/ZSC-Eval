@@ -149,3 +149,51 @@ class ACTLayer(nn.Module):
                 dist_entropy = action_logits.entropy().mean()
 
         return action_log_probs, dist_entropy
+
+
+    def act_play(self, x, available_actions=None, deterministic=False):
+        if self.mixed_action:
+            actions = []
+            action_probs = []
+            action_log_probs = []
+            for action_out in self.action_outs:
+                action_logit = action_out(x)
+                action_prob = action_logit.probs
+                action_probs.append(action_prob)
+                action = action_logit.mode() if deterministic else action_logit.sample()
+                action_log_prob = action_logit.log_probs(action)
+                actions.append(action.float())
+                action_log_probs.append(action_log_prob)
+
+            actions = torch.cat(actions, -1)
+            action_log_probs = torch.sum(torch.cat(action_log_probs, -1), -1, keepdim=True)
+
+        elif self.multidiscrete_action:
+            actions = []
+            action_probs = []
+            action_log_probs = []
+            for action_out in self.action_outs:
+                action_logit = action_out(x)
+                action_prob = action_logit.probs
+                action_probs.append(action_prob)
+                action = action_logit.mode() if deterministic else action_logit.sample()
+                action_log_prob = action_logit.log_probs(action)
+                actions.append(action)
+                action_log_probs.append(action_log_prob)
+
+            actions = torch.cat(actions, -1)
+            action_log_probs = torch.cat(action_log_probs, -1)
+
+        elif self.continuous_action:
+            action_logits = self.action_out(x)
+            action_probs = action_logits.probs
+            actions = action_logits.mode() if deterministic else action_logits.sample()
+            action_log_probs = action_logits.log_probs(actions)
+
+        else:
+            action_logits = self.action_out(x, available_actions)
+            action_probs = action_logits.probs
+            actions = action_logits.mode() if deterministic else action_logits.sample()
+            action_log_probs = action_logits.log_probs(actions)
+
+        return actions, action_probs, action_log_probs
