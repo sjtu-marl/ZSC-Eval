@@ -307,7 +307,7 @@ def main(args):
                 # # 3) 트레일 색상으로 수동 블렌딩 (RGB)
                 # imagef = image.astype(np.float32)
                 # imagef = imagef * (1.0 - trail_mask[..., None]) + np.array([255, 200, 80], dtype=np.float32) * trail_mask[..., None]
-                # image = imagef.clip(0, 255).astype(np.uint8)
+                # image = imagef.clip(0, 255).astype(np.uint8)s
                 
                 
             elif all_args.is_cam == "Whole":
