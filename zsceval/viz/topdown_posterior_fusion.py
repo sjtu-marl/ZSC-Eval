@@ -203,7 +203,7 @@ class AttentionFuser:
         return float(np.clip(eta, self.eta_min, self.eta_max))
 
     # --------- Main step ---------
-    def step(self, A_post_hat: np.ndarray, hit: float = None, use_adaptive_eta=True):
+    def step(self, A_post_hat: np.ndarray, hit: float = None, use_adaptive_eta=False):
         """Fuse current posterior (already observed) with predicted prior and STM; update fixation & state.
 
         Args:
@@ -232,6 +232,8 @@ class AttentionFuser:
         # Short-term memory boost
         B_t = self._stm_boost()  # multiplicative map >= 1
 
+        A_post_hat = normalize(np.clip(A_post_hat, 0, None) ** 0.85)
+        
         # Fuse
         eta_used = self.adapt_eta(A_post_hat) if use_adaptive_eta else self.eta
         if self.fusion == "log":

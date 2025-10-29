@@ -66,6 +66,19 @@ class WorkMemory:
         
     def __len__(self):
         return len(self.memory)
+    
+    
+def nextPosition(position, action: int):
+    if action == 0:  # North
+        return (position[0] - 1, position[1])
+    elif action == 1:  # South
+        return (position[0] + 1, position[1])
+    elif action == 2:  # East
+        return (position[0], position[1] + 1)
+    elif action == 3:  # West
+        return (position[0], position[1] - 1)
+    else:  # Stay
+        return position
 
 class _PathFixUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
@@ -181,13 +194,13 @@ def main(args):
     agent_attention_fuser = fuser = AttentionFuser(
         shape=(8,5),          # 들어오는 맵 크기와 일치
         fusion="log",         # 또는 "dirichlet"
-        sigma=1.0,            # prior 확산(0.7~1.5 튜닝)
+        sigma=1.8,            # prior 확산(0.7~1.5 튜닝)
         ior_sigma=1.0,        # IOR 범위
-        ior_strength=0.12,    # IOR 강도(0.05~0.15)
-        ior_k=3,              # 최근 K개 fixation만 IOR
+        ior_strength=0.05,    # IOR 강도(0.05~0.15)
+        ior_k=2,              # 최근 K개 fixation만 IOR
         momentum=True,        # 시선 관성 사용
         momentum_scale=1,     # 1칸 드리프트
-        eta_min=0.1, eta_max=0.8,  # prior 가중치 범위
+        eta_min=0.35, eta_max=0.75,  # prior 가중치 범위
         # --- VSTM(단기기억) ---
         stm_capacity=4,       # 3~4 권장
         stm_tau=5.0,          # 3~8 프레임 감쇠
@@ -197,11 +210,15 @@ def main(args):
     
     try:
         image = env.play_render()
-        screen = pygame.display.set_mode((image.shape[1], image.shape[0]))
+        # screen = pygame.display.set_mode((image.shape[1], image.shape[0]))
+        # pygame.key.set_repeat(0)
+        
+        screen = pygame.display.set_mode((image.shape[1], image.shape[0]), pygame.DOUBLEBUF, vsync=1)
         screen.blit(pygame.surfarray.make_surface(np.rot90(np.flip(image[..., ::-1], 1))), (0, 0))
         pygame.display.flip()
 
         while not epi_done:
+            
             clock.tick(6.67)
 
             # enqueue keydown events
@@ -217,11 +234,12 @@ def main(args):
                         human_action_queue.append(Direction.EAST)
                     elif event.key == pygame.K_SPACE:
                         human_action_queue.append(Action.INTERACT)
+                    
 
             a0, a0_prob, rnn_states = agent0_play.get_action(np.expand_dims(both_agents_ob[0], axis=0),
                                                     available_actions, masks,
                                                     rnn_states)
-
+            
             a1_action = human_action_queue.popleft() if human_action_queue else Action.STAY
             a1 = Action.ACTION_TO_INDEX[a1_action]
 
@@ -232,15 +250,17 @@ def main(args):
                                   available_actions, rnn_states, masks, target_action=int(a0))
                 
                 A_t, fix_rc, prior_pi, eta_used = agent_attention_fuser.step(cam_heatmap, hit=None, use_adaptive_eta=True)
-
             both_agents_ob, share_obs, reward, done, info, available_actions = env.step(joint_action)
+            agent_position = env.base_env.state.players[0].position
+            next_pos = nextPosition(agent_position, a0)
+
             epi_done = done[0]
 
             # render
             image = env.play_render(action_probs=a0_prob)
             if all_args.is_cam == "ArgMax":
                 # filter max heatmap
-                max_idx = np.argmax(A_t)
+                max_idx = np.argmax(cam_heatmap)
                 max_row, max_col = np.unravel_index(max_idx, cam_heatmap.shape)
                 cam_filtered = np.zeros_like(cam_heatmap)
                 cam_filtered[max_row, max_col] = cam_heatmap[max_row, max_col]
@@ -258,27 +278,70 @@ def main(args):
                 blended = img_f * (1.0 - alpha) + heatmap_color * alpha
                 image = blended.clip(0, 255).astype(np.uint8)
                 
+                # Hh, Wh = cam_heatmap.shape[:2]          # 예: 8x5
+                # Hi, Wi = image.shape[:2]                # 원본 이미지 크기
+                # r, c = next_pos
+                # cx = int((c + 0.5) * Wi / Wh)           # x
+                # cy = int((r + 0.5) * Hi / Hh)           # y
+
+                # trail.append((cx, cy))
+                # trail_mask = np.zeros((Hi, Wi), dtype=np.float32)
+                
+                # # (A) 연속 선 + 가우시안 블러 (연속감↑)
+                # if len(trail) >= 2:
+                #     pts = np.array(trail, dtype=np.int32).reshape(-1, 1, 2)
+                #     # 먼저 얇은 폴리라인으로 1.0 intensity를 그린 뒤
+                #     cv2.polylines(trail_mask, [pts], isClosed=False, color=1.0,
+                #                 thickness=2, lineType=cv2.LINE_AA)
+                #     # 부드럽게 퍼지게 블러
+                #     trail_mask = cv2.GaussianBlur(trail_mask, (0, 0), sigmaX=2, sigmaY=2)
+
+                # # (B) 페이딩 점(원) 추가 (최근 점은 진하게, 오래된 점은 옅게)
+                # for i, (tx, ty) in enumerate(reversed(trail)):
+                #     a = 0.35 * (0.88 ** i)
+                #     if a < 0.02:
+                #         break
+                #     r = max(2, int(2 * 0.9))  # 점 반지름
+                #     cv2.circle(trail_mask, (tx, ty), 50, a, thickness=-1, lineType=cv2.LINE_AA)
+
+                # # 3) 트레일 색상으로 수동 블렌딩 (RGB)
+                # imagef = image.astype(np.float32)
+                # imagef = imagef * (1.0 - trail_mask[..., None]) + np.array([255, 200, 80], dtype=np.float32) * trail_mask[..., None]
+                # image = imagef.clip(0, 255).astype(np.uint8)
+                
+                
             elif all_args.is_cam == "Whole":
                 # filter max heatmap
-                cam_resized = cv2.resize(cam_heatmap, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
+                
+                map_size = (1212, 758)
+                cam_resized = cv2.resize(A_t, (1212, 758), interpolation=cv2.INTER_LINEAR)
+                
+                target_H = 960
+                pad_top = target_H - cam_resized.shape[0]
+
+                cam_resized = np.pad(cam_resized, ((pad_top, 0), (0, 0)), mode='constant', constant_values=0)
+
+                # cam_resized = cv2.resize(A_t, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
                 heat_u8 = (cam_resized * 255).astype(np.uint8)
                 heatmap_color = cv2.applyColorMap(heat_u8, cv2.COLORMAP_JET)[:, :, ::-1].astype(np.float32)
 
                 # smoothing
-                # cam_soft = cv2.GaussianBlur(cam_resized.astype(np.float32), (0, 0), sigmaX=3, sigmaY=3)
-                # cam_soft = np.power(np.clip(cam_soft, 0.0, 1.0), 0.8)
-                # alpha = (cam_soft * all_args.cam_alpha)[..., None]  # (H, W, 1)
+                cam_soft = cv2.GaussianBlur(cam_resized.astype(np.float32), (0, 0), sigmaX=3, sigmaY=3)
+                cam_soft = np.power(np.clip(cam_soft, 0.0, 1.0), 0.8)
+                alpha = (cam_soft * all_args.cam_alpha)[..., None]  # (H, W, 1)
 
-                # img_f = image.astype(np.float32)
-                # blended = img_f * (1.0 - alpha) + heatmap_color * alpha
-                # image = blended.clip(0, 255).astype(np.uint8)
+                img_f = image.astype(np.float32)
+                blended = img_f * (1.0 - alpha) + heatmap_color * alpha
+                image = blended.clip(0, 255).astype(np.uint8)
                 
                 Hh, Wh = cam_heatmap.shape[:2]          # 예: 8x5
-                Hi, Wi = image.shape[:2]                # 원본 이미지 크기
-                r, c = fix_rc
-                cx = int((c + 0.5) * Wi / Wh)           # x
-                cy = int((r + 0.5) * Hi / Hh)           # y
-
+                Hi, Wi = image.shape[:2]               # 원본 이미지 크기
+                c, r = fix_rc
+                # c, r = next_pos
+            
+                cx = int(c*151.5) + 76         
+                cy = int(r*151.5)+pad_top + 76               
+                
                 trail.append((cx, cy))
                 trail_mask = np.zeros((Hi, Wi), dtype=np.float32)
                 
