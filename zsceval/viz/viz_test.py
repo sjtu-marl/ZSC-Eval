@@ -208,19 +208,19 @@ def main(args):
         eta_stm=0.2           # STM 부스트 비중(0.1~0.3)
     )
     
+    map_size = (1212, 758)
+    target_H = 960
+    pad_top = target_H - 758
+    
     try:
         image = env.play_render()
-        # screen = pygame.display.set_mode((image.shape[1], image.shape[0]))
-        # pygame.key.set_repeat(0)
-        
-        screen = pygame.display.set_mode((image.shape[1], image.shape[0]), pygame.DOUBLEBUF, vsync=1)
+        screen = pygame.display.set_mode((image.shape[1], image.shape[0]))
         screen.blit(pygame.surfarray.make_surface(np.rot90(np.flip(image[..., ::-1], 1))), (0, 0))
         pygame.display.flip()
 
         while not epi_done:
             
             clock.tick(6.67)
-
             # enqueue keydown events
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -260,15 +260,18 @@ def main(args):
             image = env.play_render(action_probs=a0_prob)
             if all_args.is_cam == "ArgMax":
                 # filter max heatmap
+                
                 max_idx = np.argmax(cam_heatmap)
                 max_row, max_col = np.unravel_index(max_idx, cam_heatmap.shape)
                 cam_filtered = np.zeros_like(cam_heatmap)
                 cam_filtered[max_row, max_col] = cam_heatmap[max_row, max_col]
 
-                cam_resized = cv2.resize(cam_filtered, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
+                cam_resized = cv2.resize(cam_filtered, (1212, 758), interpolation=cv2.INTER_LINEAR)
+                cam_resized = np.pad(cam_resized, ((pad_top, 0), (0, 0)), mode='constant', constant_values=0)
+                
                 heat_u8 = (cam_resized * 255).astype(np.uint8)
                 heatmap_color = cv2.applyColorMap(heat_u8, cv2.COLORMAP_JET)[:, :, ::-1].astype(np.float32)
-
+                
                 # smoothing
                 cam_soft = cv2.GaussianBlur(cam_resized.astype(np.float32), (0, 0), sigmaX=3, sigmaY=3)
                 cam_soft = np.power(np.clip(cam_soft, 0.0, 1.0), 0.8)
@@ -278,47 +281,44 @@ def main(args):
                 blended = img_f * (1.0 - alpha) + heatmap_color * alpha
                 image = blended.clip(0, 255).astype(np.uint8)
                 
-                # Hh, Wh = cam_heatmap.shape[:2]          # 예: 8x5
-                # Hi, Wi = image.shape[:2]                # 원본 이미지 크기
-                # r, c = next_pos
-                # cx = int((c + 0.5) * Wi / Wh)           # x
-                # cy = int((r + 0.5) * Hi / Hh)           # y
-
-                # trail.append((cx, cy))
-                # trail_mask = np.zeros((Hi, Wi), dtype=np.float32)
+                Hh, Wh = cam_heatmap.shape[:2]          # 예: 8x5
+                Hi, Wi = image.shape[:2]               # 원본 이미지 크기
                 
-                # # (A) 연속 선 + 가우시안 블러 (연속감↑)
-                # if len(trail) >= 2:
-                #     pts = np.array(trail, dtype=np.int32).reshape(-1, 1, 2)
-                #     # 먼저 얇은 폴리라인으로 1.0 intensity를 그린 뒤
-                #     cv2.polylines(trail_mask, [pts], isClosed=False, color=1.0,
-                #                 thickness=2, lineType=cv2.LINE_AA)
-                #     # 부드럽게 퍼지게 블러
-                #     trail_mask = cv2.GaussianBlur(trail_mask, (0, 0), sigmaX=2, sigmaY=2)
+                c, r = next_pos
 
-                # # (B) 페이딩 점(원) 추가 (최근 점은 진하게, 오래된 점은 옅게)
-                # for i, (tx, ty) in enumerate(reversed(trail)):
-                #     a = 0.35 * (0.88 ** i)
-                #     if a < 0.02:
-                #         break
-                #     r = max(2, int(2 * 0.9))  # 점 반지름
-                #     cv2.circle(trail_mask, (tx, ty), 50, a, thickness=-1, lineType=cv2.LINE_AA)
+                cx = int(c*151.5) + 76         
+                cy = int(r*151.5)+pad_top + 76               
+                
+                trail.append((cx, cy))
+                trail_mask = np.zeros((Hi, Wi), dtype=np.float32)
+                
+                # (A) 연속 선 + 가우시안 블러 (연속감↑)
+                if len(trail) >= 2:
+                    pts = np.array(trail, dtype=np.int32).reshape(-1, 1, 2)
+                    # 먼저 얇은 폴리라인으로 1.0 intensity를 그린 뒤
+                    cv2.polylines(trail_mask, [pts], isClosed=False, color=1.0,
+                                thickness=2, lineType=cv2.LINE_AA)
+                    # 부드럽게 퍼지게 블러
+                    trail_mask = cv2.GaussianBlur(trail_mask, (0, 0), sigmaX=2, sigmaY=2)
 
-                # # 3) 트레일 색상으로 수동 블렌딩 (RGB)
-                # imagef = image.astype(np.float32)
-                # imagef = imagef * (1.0 - trail_mask[..., None]) + np.array([255, 200, 80], dtype=np.float32) * trail_mask[..., None]
-                # image = imagef.clip(0, 255).astype(np.uint8)s
+                # (B) 페이딩 점(원) 추가 (최근 점은 진하게, 오래된 점은 옅게)
+                for i, (tx, ty) in enumerate(reversed(trail)):
+                    a = 0.35 * (0.88 ** i)
+                    if a < 0.02:
+                        break
+                    r = max(2, int(2 * 0.9))  # 점 반지름
+                    cv2.circle(trail_mask, (tx, ty), 50, a, thickness=-1, lineType=cv2.LINE_AA)
+
+                # 3) 트레일 색상으로 수동 블렌딩 (RGB)
+                imagef = image.astype(np.float32)
+                imagef = imagef * (1.0 - trail_mask[..., None]) + np.array([255, 200, 80], dtype=np.float32) * trail_mask[..., None]
+                image = imagef.clip(0, 255).astype(np.uint8)
                 
                 
             elif all_args.is_cam == "Whole":
                 # filter max heatmap
                 
-                map_size = (1212, 758)
                 cam_resized = cv2.resize(A_t, (1212, 758), interpolation=cv2.INTER_LINEAR)
-                
-                target_H = 960
-                pad_top = target_H - cam_resized.shape[0]
-
                 cam_resized = np.pad(cam_resized, ((pad_top, 0), (0, 0)), mode='constant', constant_values=0)
 
                 # cam_resized = cv2.resize(A_t, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
