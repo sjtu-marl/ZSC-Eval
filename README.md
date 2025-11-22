@@ -1,5 +1,7 @@
 # NeurIPS 2024 D&B Track - ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sjtu-marl/ZSC-Eval)
+
 ## Overview
 <div align=center>
 <img src="assets/ZSC-Eval.png" width="800px">
