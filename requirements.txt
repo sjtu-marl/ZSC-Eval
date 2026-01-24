@@ -6,7 +6,6 @@ seaborn
 tensorboardX
 slackweb
 psutil
-slackweb
 pyastar2d
 einops
 absl-py
